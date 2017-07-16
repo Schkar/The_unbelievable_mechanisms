@@ -1,0 +1,8 @@
+.menuWrapper{
+    .time{
+        @include testMixin;
+    }
+    .resetButton{
+        text-transform: uppercase;
+    }
+}

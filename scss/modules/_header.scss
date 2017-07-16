@@ -1,0 +1,10 @@
+.headerWrapper{
+    text-align: center;
+    @include testMixin;
+    .headerTitle{
+        @include testMixin;
+    }
+    .headerText{
+        @include testMixin;
+    }
+}

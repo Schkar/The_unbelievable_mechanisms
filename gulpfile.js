@@ -3,10 +3,12 @@ var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
 var autoprefixer = require('gulp-autoprefixer');
 var browserSync = require('browser-sync').create();
+var wait = require('gulp-wait')
 
 
 gulp.task('scss', function() {
-    return gulp.src('scss/main.scss')
+	return gulp.src('scss/main.scss')
+		.pipe(wait(500))
         .pipe(sourcemaps.init())
         .pipe(sass ({
             errLogConsole: true,

@@ -1,12 +1,26 @@
 .menuWrapper{
+    margin-top: 5px;
     text-align: center;
     .timer{
         display: inline-block;
         @include testMixin;
-        font-family: "orbitronmedium";
+        font-family: "orbitron";
+        font-size: 2em;
+        background-color: white;
     }
     .resetButton{
         display: inline-block;
+        border: 2px solid black;
+        box-shadow: 0 0 0 2px black;
+        margin-left: 30px;
+        font-size: 2em;
+        font-family: "lato";
+        padding: 0 30px;
         text-transform: uppercase;
+        &:active{
+            border: 2px solid lighten(black,5%);
+            background-color: lightgrey;
+            box-shadow: 0 0 0 2px grey;
+        }
     }
 }

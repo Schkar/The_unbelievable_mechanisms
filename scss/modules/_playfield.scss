@@ -1,11 +1,10 @@
 .playfieldWrapper{
+    margin-top: 5px;
     @include testMixin;
     text-align: center;
     .playfield{
        @include testMixin;
        background: white;
-       border: 20px solid;
-       border-image: url("../images/Red_Silhouette_-_Gears.svg");
-       border-image-repeat: round;
+       border: 2px solid black;
     }
 }

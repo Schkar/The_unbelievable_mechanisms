@@ -1,0 +1,39 @@
+.resetConfirmWrapper{
+    display: none;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.7);
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    .resetConfirmText{
+        position: relative;
+        top: 30vh;
+        color: white;
+        font-size: 2em;
+        text-align: center;
+    }
+    .resetButtonsWrapper{
+        position: relative;
+        top: 30vh;
+        text-align: center;
+        .resetConfirmButton, .resetDeclineButton{
+            margin: 10px 30px;
+            padding: 5px 40px;
+            color: black;
+            font-size: 2em;
+            text-align: center;
+            border-radius: 40px;
+            &:active{
+                color: lighten(black,20%);
+                box-shadow: 0 0 5px 5px grey;
+            }
+        }
+        .resetConfirmButton{
+            background-color: lightgreen;
+        }
+        .resetDeclineButton{
+            background-color: lighten(red,30%);
+        }
+    }
+}

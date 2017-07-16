@@ -74,15 +74,37 @@
 
 
 document.addEventListener('DOMContentLoaded', function () {
+    //Variables section
+    //Buttons variables
     var resetButton = document.querySelector(".resetButton");
+    var resetConfirmButton = document.querySelector(".resetConfirmButton");
+    var resetDeclineButton = document.querySelector(".resetDeclineButton");
+
+    //Reset screen variable
+
+    var resetConfirmScreen = document.querySelector(".resetConfirmWrapper");
+
+    //Timer variable
     var timer = document.querySelector(".timer");
 
     //Reset button functionality
     resetButton.addEventListener("click", function (e) {
         e.preventDefault();
+        resetConfirmScreen.style.display = "block";
     });
 
-    //Time function
+    //Time functionality
+
+    //Reset screen functionality
+    resetConfirmButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        //TODO: Reset whole canvas to beggining. Must be an variable to hold initial state? Or just start function - this might be better
+    });
+
+    resetDeclineButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        resetConfirmScreen.style.display = "none";
+    });
 });
 
 /***/ }),

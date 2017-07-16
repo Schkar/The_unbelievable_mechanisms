@@ -10,19 +10,27 @@
     </head>
     <body>
         <video class="videoBackground" autoplay loop muted poster="images/factory.png">
-            <source src="images/factory.mp4" type="video/mp4">
+            <source src="video/factory.mp4" type="video/mp4">
         </video>
         <header class="headerWrapper">
-            <h1 class="headerTitle">The Fantastic Mechanisms</h1>
+            <h1 class="headerTitle">The Unbelievable Mechanisms</h1>
             <p class="headerText">The final project for Coder's Lab Front-end course</p>
         </header>
         <main class="mainWrapper">
             <section class="menuWrapper">
                 <div class="timer">12345:233:233123</div>
-                <button class="resetButton">reset</button>
+                <button class="resetButton">reset  &#8634</button>
             </section>
             <section class="playfieldWrapper">
                 <canvas class="playfield" width="840px" height="480px"></canvas>
+            </section>
+            <section class="resetConfirmWrapper">
+                <p class="resetConfirmText">Are you sure?<br> Your current progress will be reset, <br> but time taken to resolve the puzzle will not change </p>
+                <div class="resetButtonsWrapper">
+                    <button class="resetConfirmButton">Yes</button>
+                    <button class="resetDeclineButton">No</button>
+                </div>
+                
             </section>
         </main>
         <footer class="footerWrapper">

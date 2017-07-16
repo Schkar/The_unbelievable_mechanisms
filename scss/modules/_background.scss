@@ -1,0 +1,12 @@
+.videoBackground{
+    margin: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    min-width: 120vw;
+    min-height: 120vh;
+    z-index: -100;
+    opacity: 0.4;
+
+    //TODO: mobile no video
+}

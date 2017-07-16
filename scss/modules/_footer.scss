@@ -1,0 +1,10 @@
+.footerWrapper{
+    text-align: center;
+    @include testMixin;
+    .footerText{
+        @include testMixin;
+    }
+    .footerLink{
+        @include testMixin;
+    }
+}

@@ -3,25 +3,31 @@
     <head>
         <title>The fantastic mechanisms</title>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=1280">
         <link rel="icon" href="images/Red_Silhouette_-_Gears.svg" type="image/svg"/>
         <link href="css/main.css" rel="stylesheet">
         <script type='text/JavaScript' src='js/out.js'></script>
     </head>
     <body>
+        <video class="videoBackground" autoplay loop muted poster="images/factory.png">
+            <source src="images/factory.mp4" type="video/mp4">
+        </video>
         <header class="headerWrapper">
-            <h1 class="headerTitle">The Fantastic Mechanism</h1>
+            <h1 class="headerTitle">The Fantastic Mechanisms</h1>
             <p class="headerText">The final project for Coder's Lab Front-end course</p>
         </header>
         <main class="mainWrapper">
             <section class="menuWrapper">
-                <div class="timer"></div>
+                <div class="timer">12345:233:233123</div>
                 <button class="resetButton">reset</button>
             </section>
             <section class="playfieldWrapper">
                 <canvas class="playfield" width="840px" height="480px"></canvas>
             </section>
         </main>
-        
+        <footer class="footerWrapper">
+            <p class="footerText">Created by Karol Schweitzer; 2017 </p>
+            <a class="footerLink" href="https://github.com/Schkar"> Github Link</a>
+        </footer>
     </body>
 </html>

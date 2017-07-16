@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     //Time function
-    timer.innerHTML = Time();
 });
 
 /***/ }),

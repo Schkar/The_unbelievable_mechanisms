@@ -1,8 +1,12 @@
 .menuWrapper{
-    .time{
+    text-align: center;
+    .timer{
+        display: inline-block;
         @include testMixin;
+        font-family: "orbitronmedium";
     }
     .resetButton{
+        display: inline-block;
         text-transform: uppercase;
     }
 }

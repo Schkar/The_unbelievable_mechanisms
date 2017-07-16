@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
 var autoprefixer = require('gulp-autoprefixer');
+var browserSync = require('browser-sync').create();
 
 
 gulp.task('scss', function() {
@@ -25,9 +26,24 @@ gulp.task('scss', function() {
 			}))
 		.pipe(sourcemaps.write())
 		.pipe(gulp.dest('css'))
+		.pipe(browserSync.reload({
+      		stream: true
+    	}));
 })
 
 
-gulp.task('default', ['scss'], function() {
-    gulp.watch('scss/main.scss', ['scss'])
+gulp.task('default', ['browserSync','scss'], function() {
+    gulp.watch('scss/*/*.scss', ['scss'])
+});
+
+// gulp.task("watch",['browserSync','sass'], function () {
+//   gulp.watch("scss/**/*.scss", ["sass"]);
+// });
+
+gulp.task('browserSync', function() {
+  browserSync.init({
+    server: {
+      baseDir: './'
+    },
+  });
 });

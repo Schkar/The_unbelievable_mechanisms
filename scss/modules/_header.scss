@@ -3,8 +3,10 @@
     @include testMixin;
     .headerTitle{
         @include testMixin;
+        margin-bottom: 0;
     }
     .headerText{
+        margin-top: 0;
         @include testMixin;
     }
 }

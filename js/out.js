@@ -68,101 +68,10 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
 "use strict";
-
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-document.addEventListener('DOMContentLoaded', function () {
-    //Variables section
-    //Buttons variables
-    var resetButton = document.querySelector(".resetButton");
-    var resetConfirmButton = document.querySelector(".resetConfirmButton");
-    var resetDeclineButton = document.querySelector(".resetDeclineButton");
-
-    //Reset screen variable
-
-    var resetConfirmScreen = document.querySelector(".resetConfirmWrapper");
-
-    //Timer variable
-    var timer = document.querySelector(".timer");
-
-    //Canvas variables
-
-    var playfield = document.querySelector(".playfield");
-    var playfieldContext = playfield.getContext("2d");
-    var playfieldWidth = playfield.width;
-    var playfieldHeight = playfield.height;
-
-    //Playfield objects constant values
-
-    var CanvasObject = function CanvasObject(x, y, width, height, fill) {
-        _classCallCheck(this, CanvasObject);
-
-        x = this.x;
-        y = this.y;
-        width = this.width;
-        height = this.height;
-        fill = this.fill;
-    };
-
-    var ItemRepository = function (_CanvasObject) {
-        _inherits(ItemRepository, _CanvasObject);
-
-        function ItemRepository(x, y, width, height, fill) {
-            _classCallCheck(this, ItemRepository);
-
-            return _possibleConstructorReturn(this, (ItemRepository.__proto__ || Object.getPrototypeOf(ItemRepository)).call(this, x, y, width, height, fill));
-        }
-
-        return ItemRepository;
-    }(CanvasObject);
-
-    playfieldContext.fillStyle = "darkgrey";
-    playfieldContext.fillRect(0, 0, 200, playfieldHeight);
-    playfieldContext.fillStyle = "#00ff00";
-    playfieldContext.fillRect(300, 0, 100, 200);
-    var y = 0;
-
-    function whatever() {
-        playfieldContext.clearRect(300, 0, 1000, 600);
-        playfieldContext.fillRect(300, y, 100, 200);
-
-        if (y === playfieldHeight - 200) {
-            y = playfieldHeight - 200;
-            return;
-        }
-        y++;
-    }
-
-    setInterval(whatever, 50);
-    //Reset button functionality
-    resetButton.addEventListener("click", function (e) {
-        e.preventDefault();
-        resetConfirmScreen.style.display = "block";
-    });
-
-    //Time functionality
-    //TODO: create function to show time in timer
-
-    //Reset screen functionality
-    resetConfirmButton.addEventListener("click", function (e) {
-        e.preventDefault();
-        resetConfirmScreen.style.display = "none";
-        //TODO: Reset whole canvas to beggining. Must be an variable to hold initial state? Or just start function - this might be better
-    });
-
-    resetDeclineButton.addEventListener("click", function (e) {
-        e.preventDefault();
-        resetConfirmScreen.style.display = "none";
-    });
-});
+throw new Error("Module build failed: SyntaxError: D:/Misio/Coders Lab/Repozytoria/The_unbelievable_mechanisms/js/main.js: Unexpected token, expected { (110:8)\n\n\u001b[0m \u001b[90m 108 | \u001b[39m            \u001b[90m//FIXME: Check how init works...\u001b[39m\n \u001b[90m 109 | \u001b[39m            init()\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 110 | \u001b[39m        }\n \u001b[90m     | \u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 111 | \u001b[39m\n \u001b[90m 112 | \u001b[39m        \u001b[36mclass\u001b[39m \u001b[33mCanvasStaticObject\u001b[39m \u001b[36mextends\u001b[39m \u001b[33mCanvasObject\u001b[39m {\n \u001b[90m 113 | \u001b[39m            constructor(x\u001b[33m,\u001b[39my\u001b[33m,\u001b[39mwidth\u001b[33m,\u001b[39mheight\u001b[33m,\u001b[39mfill) {\u001b[0m\n");
 
 /***/ }),
 /* 1 */

@@ -2,4 +2,14 @@ body{
     font-family: "lato";
     margin: 0;
     padding: 0;
+    .temporaryGodlyCreationButton{
+        background-color: red;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        font-size: 1.5em;
+    }   
 }

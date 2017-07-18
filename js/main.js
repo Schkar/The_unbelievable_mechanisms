@@ -57,6 +57,12 @@ document.addEventListener('DOMContentLoaded',function(){
             const playfieldWidth = playfield.width;
             const playfieldHeight = playfield.height;
 
+        //Canvas functions
+            
+            playfield.addEventListener("click",(e) => {
+                
+            })
+
     //Playfield objects classes
         class Playfield {
             constructor(level){
@@ -70,16 +76,22 @@ document.addEventListener('DOMContentLoaded',function(){
                 this.currentLevelObjects["inventory"] = inventory;
                 objects["level"+this.currentLevel].forEach( (e) => {
                     if (e.type === "static") {
-                        let tempObject = new CanvasStaticObject(e.x,e.y,e.width,e.height,e.fill);
+                        let tempObject = new CanvasStaticObject(e.x,e.y,e.width,e.height,e.fill,e.name);
                         tempObject.createCanvasObject()
                         this.currentLevelObjects[e.name] = tempObject;
                         return;
                     }
-                    let tempObject = new CanvasMovingObject(e.x,e.y,e.width,e.height,e.fill);
+                    let tempObject = new CanvasMovingObject(e.x,e.y,e.width,e.height,e.fill,e.name);
                     tempObject.createCanvasObject()
                     this.currentLevelObjects[e.name] = tempObject;
                 }); 
                 
+            }
+
+            getClickCoords = (e) => {
+                let xCoord = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2)*10)/10; //Formula for canvas click coords - works well
+                let yCoord = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
+                console.log(xCoord,yCoord);
             }
 
             logCurrentLevelObjects = () => {
@@ -92,12 +104,13 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         class CanvasObject {
-            constructor(x,y,width,height,fill) {
+            constructor(x,y,width,height,fill,name) {
                 this.x = x;
                 this.y = y;
                 this.width = width;
                 this.height = height;
                 this.fill = fill;
+                this.name = name;
             }
 
             createCanvasObject = () =>{

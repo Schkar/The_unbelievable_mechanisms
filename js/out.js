@@ -135,6 +135,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var playfieldWidth = playfield.width;
     var playfieldHeight = playfield.height;
 
+    //Canvas functions
+
+    playfield.addEventListener("click", function (e) {});
+
     //Playfield objects classes
 
     var Playfield = function Playfield(level) {
@@ -148,15 +152,21 @@ document.addEventListener('DOMContentLoaded', function () {
             _this.currentLevelObjects["inventory"] = inventory;
             objects["level" + _this.currentLevel].forEach(function (e) {
                 if (e.type === "static") {
-                    var _tempObject = new CanvasStaticObject(e.x, e.y, e.width, e.height, e.fill);
+                    var _tempObject = new CanvasStaticObject(e.x, e.y, e.width, e.height, e.fill, e.name);
                     _tempObject.createCanvasObject();
                     _this.currentLevelObjects[e.name] = _tempObject;
                     return;
                 }
-                var tempObject = new CanvasMovingObject(e.x, e.y, e.width, e.height, e.fill);
+                var tempObject = new CanvasMovingObject(e.x, e.y, e.width, e.height, e.fill, e.name);
                 tempObject.createCanvasObject();
                 _this.currentLevelObjects[e.name] = tempObject;
             });
+        };
+
+        this.getClickCoords = function (e) {
+            var xCoord = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2) * 10) / 10; //Formula for canvas click coords - works well
+            var yCoord = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2) * 10) / 10;
+            console.log(xCoord, yCoord);
         };
 
         this.logCurrentLevelObjects = function () {
@@ -171,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
         this.currentLevelObjects = {};
     };
 
-    var CanvasObject = function CanvasObject(x, y, width, height, fill) {
+    var CanvasObject = function CanvasObject(x, y, width, height, fill, name) {
         var _this2 = this;
 
         _classCallCheck(this, CanvasObject);
@@ -186,6 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
         this.width = width;
         this.height = height;
         this.fill = fill;
+        this.name = name;
     };
 
     var CanvasStaticObject = function (_CanvasObject) {

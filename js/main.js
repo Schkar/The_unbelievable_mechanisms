@@ -3,29 +3,52 @@ document.addEventListener('DOMContentLoaded',function(){
     //Variables section
 
         //Temporary dev variables
-            const creationButtom = document.querySelector(".temporaryGodlyCreationButton")
+            const creationButton = document.querySelector(".temporaryGodlyCreationButton")
 
-        //Temporary functions
-            function creo(){
+        //Temporary dev functions
 
-            }
+            creationButton.addEventListener("click",function(e){
+                e.preventDefault()
+            })
 
         //Buttons variables
             const resetButton = document.querySelector(".resetButton");
             const resetConfirmButton = document.querySelector(".resetConfirmButton");
             const resetDeclineButton = document.querySelector(".resetDeclineButton");
+            const startLevelButton = document.querySelector(".startLevelButton");
+
+        //Welcome screen variable
+            
+            const welcomeScreen = document.querySelector(".welcomeTextWrapper")
 
         //Reset screen variable
 
             const resetConfirmScreen = document.querySelector(".resetConfirmWrapper");
 
-        //Timer variable
+        //Timer variables
             const timer = document.querySelector(".timer");
-            let seconds = "00";
-            let minutes = "00";
-            let hours = "00";
-            let currentTime = hours+":"+minutes+":"+seconds;
-            timer.innerText = currentTime;
+            let seconds = 0;
+            let minutes = 0;
+            let hours = 0;
+            let start = false;
+
+        //Levels data
+            
+            const levelsInfo = {
+                level1: [
+                    {name: "something",x:400,y:0,width:100,height:100,fill:"red",type:"static"},
+                    {name: "somethingelse",x:600,y:0,width:100,height:100,fill:"green",type:"moving"}
+                ],
+                level2: [],
+                level3: [],
+                level4: [],
+                level5: [],
+                level6: [],
+                level7: [],
+                level8: [],
+                level9: [],
+                level10: [],
+            };
 
         //Canvas variables
 
@@ -36,55 +59,31 @@ document.addEventListener('DOMContentLoaded',function(){
 
     //Playfield objects classes
         class Playfield {
-            constructor(){
-                this.currentLevel = 1;
-                //TODO: Think about how to store info on levels.
-                this.levelInfo = {
-                    1: [
-
-                    ],
-                    2: [
-
-                    ],
-                    3: [
-
-                    ],
-                    4: [
-
-                    ],
-                    5: [
-
-                    ],
-                    6: [
-
-                    ],
-                    7: [
-
-                    ],
-                    8: [
-
-                    ],
-                    9: [
-
-                    ],
-                    10: [
-
-                    ]
-                };
-                this.currentLevelObjects = [];
+            constructor(level){
+                this.currentLevel = (level === undefined ? 1 : level);
+                this.currentLevelObjects = {};
             }
 
-            createObjects = (x,y,width,height,fill,type) =>{
-                console.log("creating");
-                if (type === "static") {
-                    let tempObject = new CanvasStaticObject(x,y,width,height,fill);
-                    this.currentLevelObjects.push(tempObject)
-                    //FIXME: Check if this works... Need dynamic variables?
-
-                }
-                let tempObject = new CanvasMovingObject(x,y,width,height,fill)
-                this.currentLevelObjects.push(tempObject)
+            createObjects = (objects) =>{
+                let inventory = new ItemInventory;
+                inventory.createCanvasObject();
+                this.currentLevelObjects["inventory"] = inventory;
+                objects["level"+this.currentLevel].forEach( (e) => {
+                    if (e.type === "static") {
+                        let tempObject = new CanvasStaticObject(e.x,e.y,e.width,e.height,e.fill);
+                        tempObject.createCanvasObject()
+                        this.currentLevelObjects[e.name] = tempObject;
+                        return;
+                    }
+                    let tempObject = new CanvasMovingObject(e.x,e.y,e.width,e.height,e.fill);
+                    tempObject.createCanvasObject()
+                    this.currentLevelObjects[e.name] = tempObject;
+                }); 
                 
+            }
+
+            logCurrentLevelObjects = () => {
+                console.log(this.currentLevelObjects);
             }
 
             resetCurrentLevel = (level) => {
@@ -92,21 +91,19 @@ document.addEventListener('DOMContentLoaded',function(){
             }
         }
 
-
         class CanvasObject {
             constructor(x,y,width,height,fill) {
-                x = this.x;
-                y = this.y;
-                width = this.width;
-                height = this.height;
-                fill = this.fill;
-                init = () =>{
-                    playfieldContext.fillStyle(this.fill)
-                    playfieldContext.fillRect(this.x,this.y,this.width,this.height);
-                }
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.fill = fill;
             }
-            //FIXME: Check how init works...
-            init()
+
+            createCanvasObject = () =>{
+                playfieldContext.fillStyle=this.fill;
+                playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+            }
         }
 
         class CanvasStaticObject extends CanvasObject {
@@ -132,7 +129,7 @@ document.addEventListener('DOMContentLoaded',function(){
             }
         }
 
-        class ItemRepository extends CanvasStaticObject {
+        class ItemInventory extends CanvasStaticObject {
             constructor() {
                 super()
                 this.x = 0;
@@ -140,58 +137,89 @@ document.addEventListener('DOMContentLoaded',function(){
                 this.width = 200;
                 this.height = playfieldHeight;
                 this.fill = "darkgrey";
+                this.objectsInInventory = [];
             }
 
-            createRepository = () =>{
-                console.log("ItemRepository->createRepository");
-                playfieldContext.fillStyle=this.color;
-                playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+            addItem = () => {
+                console.log("Maybe i will need it");
+                //TODO: Think about this function.
+            }
+
+            removeItem = (itemID) => {
+                let itemToRemove = this.objectsInInventory.filter( (p) => {
+                    if (p === itemID) {
+                        return p;
+                    }
+                })
+                return itemToRemove
             }
         }
         
-        //Test repository creation
-        // playfieldContext.fillStyle="darkgrey";
-        // playfieldContext.fillRect(0,0,200,playfieldHeight);
-            let repository = new ItemRepository()
-            console.log(repository);
-            repository.createRepository()
-        //Test falling rectangle
-            // playfieldContext.fillStyle="#00ff00";
-            // playfieldContext.fillRect(300,0,100,200);
-            // let y = 0;
-        //Test gravity function
-            // function whatever(){
-            //     playfieldContext.clearRect(300,0,1000,600);
-            //     playfieldContext.fillRect(300,y,100,200);
+    //Background functions    
+        //Reset button functionality
+            resetButton.addEventListener("click", (e) => {
+                e.preventDefault();
+                resetConfirmScreen.style.display = "block";
+            });
+        
+
+        //Time functionality
+            let timerInterval = setInterval( () => {
+                if (!start) {
+                    return
+                }
+                if (seconds === 60) {
+                    seconds = 0;
+                    minutes++;
+                }
+                if (minutes >= 60) {
+                    minutes = 0;
+                    hours++;
+                }
+                let currentTime = (hours.toString().length < 2 ? "0"+hours : hours)+":"+(minutes.toString().length < 2 ? "0"+minutes : minutes)+":"+(seconds.toString().length < 2 ? "0"+seconds : seconds);
+                timer.innerText = currentTime;
+                seconds++;
+            },1000);
+        //Level display
+            
+
+
+        //Start button functionality
+            startLevelButton.addEventListener("click",(e) => {
+                e.preventDefault();
+                welcomeScreen.style.opacity = 0;
+                setTimeout(() => {
+                    welcomeScreen.classList.add("goodLuck");
+                    welcomeScreen.innerText = "Good Luck!"
+                    welcomeScreen.style.opacity = 1;
+                },700)
+                setTimeout(()=>{
+                    welcomeScreen.style.opacity = 0;
+                    start = true;
+                    let currentLevel = new Playfield(1)
+                    currentLevel.createObjects(levelsInfo)
+                    currentLevel.logCurrentLevelObjects();
+                },4000)
+                setTimeout(()=>{
+                    welcomeScreen.style.display = "none";
+                },5000)
                 
-            //     if (y === playfieldHeight - 200) {
-            //         y = playfieldHeight - 200;
-            //         return;
-            //     }
-            //     y++
-            // }
+            })
 
-        //setInterval(whatever,50);
-    //Reset button functionality
-        resetButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            resetConfirmScreen.style.display = "block";
-        });
-    
+        //Reset screen functionality
+            resetConfirmButton.addEventListener("click",(e) => {
+                e.preventDefault();
+                resetConfirmScreen.style.display = "none";
+                currentLevel.resetCurrentLevel(currentLevel.currentLevel)
+                //TODO: Reset whole canvas to beggining. Must be an variable to hold initial state? Or just start function - this might be better
+            });
 
-    //Time functionality
-        //TODO: create function to show time in timer
+            resetDeclineButton.addEventListener("click",(e) => {
+                e.preventDefault();
+                resetConfirmScreen.style.display = "none";
+            });
 
-    //Reset screen functionality
-        resetConfirmButton.addEventListener("click",(e) => {
-            e.preventDefault()
-            resetConfirmScreen.style.display = "none";
-            //TODO: Reset whole canvas to beggining. Must be an variable to hold initial state? Or just start function - this might be better
-        });
-
-        resetDeclineButton.addEventListener("click",(e) => {
-            e.preventDefault()
-            resetConfirmScreen.style.display = "none";
-        });
+    //Objects creation
+        
 
 });

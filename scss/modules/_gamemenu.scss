@@ -1,14 +1,18 @@
 .menuWrapper{
     margin-top: 5px;
     text-align: center;
-    .timer{
+    .timer,.level{
         display: inline-block;
         @include testMixin;
         font-family: "orbitron";
         font-size: 2em;
         background-color: white;
     }
-    .resetButton{
+    .level{
+        margin: 0 20px;
+        padding: 0 20px;
+    }
+    .resetButton,.startLevelButton{
         display: inline-block;
         border: 2px solid black;
         box-shadow: 0 0 0 2px black;

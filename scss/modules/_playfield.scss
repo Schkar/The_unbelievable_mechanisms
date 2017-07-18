@@ -2,6 +2,31 @@
     margin-top: 5px;
     @include testMixin;
     text-align: center;
+    .welcomeTextWrapper{
+        position: absolute;
+        text-align: center;
+        left: 50%;
+        transform: translate(-50%,0);
+        top: 30%;
+        width: 1000px;
+        height: 600px;
+        font-size: 2em;
+        transition: opacity 0.5s;
+        &.goodLuck{
+            transition: opacity 1s;
+            padding-top: 150px;
+            font-size: 4em;
+            color: darkgreen;
+        }
+        .welcomeText{
+            .welcomeTitle{
+                display: block;
+                margin: 20px 0;
+                font-size: 1.5em;
+                color: blue;
+            }
+        }
+    }
     .playfield{
        @include testMixin;
        background: white;

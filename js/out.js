@@ -85,11 +85,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Temporary dev variables
     var creationButton = document.querySelector(".temporaryGodlyCreationButton");
-
+    var tempID = null;
     //Temporary dev functions
+
+    function dupa() {
+        console.log("fafafafafa");
+        tempID = requestAnimationFrame(dupa);
+    }
 
     creationButton.addEventListener("click", function (e) {
         e.preventDefault();
+        //tempID = requestAnimationFrame(dupa);
+        //currentLevel.physicsEngineRun()
+        //requestAnimationFrame(currentLevel.physicsEngineRun)
     });
 
     //Buttons variables
@@ -107,16 +115,21 @@ document.addEventListener('DOMContentLoaded', function () {
     var resetConfirmScreen = document.querySelector(".resetConfirmWrapper");
 
     //Timer variables
+
     var timer = document.querySelector(".timer");
     var seconds = 0;
     var minutes = 0;
     var hours = 0;
     var start = false;
 
+    //RqAnimFrame ID
+
+    var engineID = null;
+
     //Levels data
 
     var levelsInfo = {
-        level1: [{ name: "something", x: 400, y: 0, width: 100, height: 100, fill: "red", type: "static" }, { name: "somethingelse", x: 600, y: 0, width: 100, height: 100, fill: "green", type: "moving" }],
+        level1: [{ name: "something", x: 400, y: 0, width: 100, height: 100, fill: "red", type: "kinetic" }, { name: "somethingelse", x: 600, y: 0, width: 100, height: 100, fill: "green", type: "kinetic", velocity: 0, direction: 0 }],
         level2: [],
         level3: [],
         level4: [],
@@ -127,6 +140,8 @@ document.addEventListener('DOMContentLoaded', function () {
         level9: [],
         level10: []
     };
+
+    var currentLevel = null;
 
     //Canvas variables
 
@@ -140,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
     playfield.addEventListener("click", function (e) {});
 
     //Playfield objects classes
+    //Demiurge - main object, creator of objects, physics engine, collision detector
 
     var Playfield = function Playfield(level) {
         var _this = this;
@@ -150,17 +166,25 @@ document.addEventListener('DOMContentLoaded', function () {
             var inventory = new ItemInventory();
             inventory.createCanvasObject();
             _this.currentLevelObjects["inventory"] = inventory;
-            objects["level" + _this.currentLevel].forEach(function (e) {
+            objects["level" + _this.currentLevelNumber].forEach(function (e) {
+
                 if (e.type === "static") {
-                    var _tempObject = new CanvasStaticObject(e.x, e.y, e.width, e.height, e.fill, e.name);
+                    var _tempObject = new CanvasStaticObject(e.x, e.y, e.width, e.height, e.fill, e.type);
                     _tempObject.createCanvasObject();
                     _this.currentLevelObjects[e.name] = _tempObject;
                     return;
                 }
-                var tempObject = new CanvasMovingObject(e.x, e.y, e.width, e.height, e.fill, e.name);
+                var tempObject = new CanvasMovingObject(e.x, e.y, e.width, e.height, e.fill, e.type, e.velocity, e.direction);
                 tempObject.createCanvasObject();
                 _this.currentLevelObjects[e.name] = tempObject;
             });
+        };
+
+        this.resetCurrentLevel = function (level) {
+            playfieldContext.clearRect(0, 0, playfieldWidth, playfieldHeight);
+            _this.currentLevelObjects = {};
+            _this.createObjects(levelsInfo);
+            console.log("resetCurrentLevel");
         };
 
         this.getClickCoords = function (e) {
@@ -173,15 +197,45 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(_this.currentLevelObjects);
         };
 
-        this.resetCurrentLevel = function (level) {
-            playfieldContext.clearRect(0, 0, playfieldWidth, playfieldHeight);
+        this.physicsEngineRun = function () {
+            _this.collisionCheck();
+            _this.gravity();
+            engineID = requestAnimationFrame(_this.physicsEngineRun);
         };
 
-        this.currentLevel = level === undefined ? 1 : level;
-        this.currentLevelObjects = {};
-    };
+        this.collisionCheck = function () {
+            //TODO: Collisions checker
+            //console.log("collisionCheck");
+        };
 
-    var CanvasObject = function CanvasObject(x, y, width, height, fill, name) {
+        this.gravity = function () {
+
+            //TODO: Think - is this one is better, or a check in every single object (by calling a method?) - this needs only one raf, so it seems that is better. Either this, or calling a method, no many rafs.
+
+            Object.keys(_this.currentLevelObjects).forEach(function (e) {
+                var obj = _this.currentLevelObjects[e];
+                if (obj.type === "kinetic") {
+                    if (obj.y + obj.height === playfieldHeight) {
+                        obj.y = obj.y;
+                        return;
+                    }
+                    obj.y = obj.y + _this.gravityValue;
+                    playfieldContext.clearRect(obj.x, obj.y - 1, obj.width, obj.height);
+                    playfieldContext.fillStyle = obj.fill;
+                    playfieldContext.fillRect(obj.x, obj.y, obj.width, obj.height);
+                }
+            });
+            //TODO: Gravity check
+        };
+
+        this.currentLevelNumber = level === undefined ? 1 : level;
+        this.currentLevelObjects = {};
+        this.gravityValue = 0.5;
+    };
+    //Arch-class - object prototype
+
+
+    var CanvasObject = function CanvasObject(x, y, width, height, fill, type) {
         var _this2 = this;
 
         _classCallCheck(this, CanvasObject);
@@ -196,16 +250,16 @@ document.addEventListener('DOMContentLoaded', function () {
         this.width = width;
         this.height = height;
         this.fill = fill;
-        this.name = name;
+        this.type = type;
     };
 
     var CanvasStaticObject = function (_CanvasObject) {
         _inherits(CanvasStaticObject, _CanvasObject);
 
-        function CanvasStaticObject(x, y, width, height, fill) {
+        function CanvasStaticObject(x, y, width, height, fill, type) {
             _classCallCheck(this, CanvasStaticObject);
 
-            return _possibleConstructorReturn(this, (CanvasStaticObject.__proto__ || Object.getPrototypeOf(CanvasStaticObject)).call(this, x, y, width, height, fill));
+            return _possibleConstructorReturn(this, (CanvasStaticObject.__proto__ || Object.getPrototypeOf(CanvasStaticObject)).call(this, x, y, width, height, fill, type));
         }
 
         return CanvasStaticObject;
@@ -214,10 +268,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var CanvasMovingObject = function (_CanvasObject2) {
         _inherits(CanvasMovingObject, _CanvasObject2);
 
-        function CanvasMovingObject(x, y, width, height, fill) {
+        function CanvasMovingObject(x, y, width, height, fill, type) {
             _classCallCheck(this, CanvasMovingObject);
 
-            var _this4 = _possibleConstructorReturn(this, (CanvasMovingObject.__proto__ || Object.getPrototypeOf(CanvasMovingObject)).call(this, x, y, width, height, fill));
+            var _this4 = _possibleConstructorReturn(this, (CanvasMovingObject.__proto__ || Object.getPrototypeOf(CanvasMovingObject)).call(this, x, y, width, height, fill, type));
 
             _this4.gravity = function () {
                 if (_this4.y === playfieldHeight - _this4.height) {
@@ -264,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
             _this5.height = playfieldHeight;
             _this5.fill = "darkgrey";
             _this5.objectsInInventory = [];
+            _this5.type = "static";
             return _this5;
         }
 
@@ -296,8 +351,6 @@ document.addEventListener('DOMContentLoaded', function () {
         timer.innerText = currentTime;
         seconds++;
     }, 1000);
-    //Level display
-
 
     //Start button functionality
     startLevelButton.addEventListener("click", function (e) {
@@ -311,12 +364,12 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () {
             welcomeScreen.style.opacity = 0;
             start = true;
-            var currentLevel = new Playfield(1);
+            currentLevel = new Playfield(1);
             currentLevel.createObjects(levelsInfo);
-            currentLevel.logCurrentLevelObjects();
         }, 4000);
         setTimeout(function () {
             welcomeScreen.style.display = "none";
+            currentLevel.physicsEngineRun();
         }, 5000);
     });
 
@@ -324,17 +377,13 @@ document.addEventListener('DOMContentLoaded', function () {
     resetConfirmButton.addEventListener("click", function (e) {
         e.preventDefault();
         resetConfirmScreen.style.display = "none";
-        currentLevel.resetCurrentLevel(currentLevel.currentLevel);
-        //TODO: Reset whole canvas to beggining. Must be an variable to hold initial state? Or just start function - this might be better
+        currentLevel.resetCurrentLevel(currentLevel.currentLevelNumber);
     });
 
     resetDeclineButton.addEventListener("click", function (e) {
         e.preventDefault();
         resetConfirmScreen.style.display = "none";
     });
-
-    //Objects creation
-
 });
 
 /***/ }),

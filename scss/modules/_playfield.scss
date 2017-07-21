@@ -1,8 +1,8 @@
 .playfieldWrapper{
     margin-top: 5px;
-    @include testMixin;
     text-align: center;
     .welcomeTextWrapper{
+        display: none;
         position: absolute;
         text-align: center;
         left: 50%;
@@ -28,7 +28,6 @@
         }
     }
     .playfield{
-       @include testMixin;
        background: white;
        border: 2px solid black;
     }

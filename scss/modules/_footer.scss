@@ -1,11 +1,8 @@
 .footerWrapper{
     text-align: center;
     background-color: rgba( white, 0.6);
-    @include testMixin;
     .footerText{
-        @include testMixin;
     }
     .footerLink{
-        @include testMixin;
     }
 }

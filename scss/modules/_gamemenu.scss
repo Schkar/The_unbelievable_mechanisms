@@ -3,7 +3,6 @@
     text-align: center;
     .timer,.level{
         display: inline-block;
-        @include testMixin;
         font-family: "orbitron";
         font-size: 2em;
         background-color: white;

@@ -1,15 +1,13 @@
 .headerWrapper{
     text-align: center;
     background-color: rgba( white, 0.6);
-    @include testMixin;
     .headerTitle{
-        @include testMixin;
+        border-bottom: 5px solid blue;
         margin-bottom: 0;
         font-size: 2em;
     }
     .headerText{
         margin-top: 0;
-        @include testMixin;
         font-size: 1.5em;
     }
 }

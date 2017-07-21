@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 collisionCheck = () => {
-                    console.log("collision check");
                     Object.keys(this.currentLevelObjects).forEach( (e) => {
                         let colider = this.currentLevelObjects[e];
                         if (colider.type === "static" || e === "inventory"){
@@ -153,7 +152,9 @@ document.addEventListener('DOMContentLoaded',function(){
                             if ((colidee.x <= (colider.x - colider.r)) && (colidee.x + colidee.width >= (colider.x + colider.r)) ) {
                                 if (colider.y + colider.r === colidee.y) {
                                     colider.isCollided = true;
+                                    return;
                                 }
+                                colider.isCollided = false;
                             }
                         })
                     })
@@ -175,9 +176,12 @@ document.addEventListener('DOMContentLoaded',function(){
                         if ((obj.y + obj.height === playfieldHeight || obj.y + obj.r === playfieldHeight) || obj.isCollided){
                                 obj.y = obj.y;
                                 return;
-                            }
+                        }
 
-                        obj.y = obj.y + this.gravityValue;
+                        if (obj.velocity < this.gravityValue) {
+                            obj.velocity = obj.velocityChange(obj.velocity);
+                        }
+                        obj.y = (obj.velocity === this.gravityValue) ? Math.round(obj.y + obj.velocity) : obj.y + obj.velocity;
 
                         if (obj.r===null){
                             playfieldContext.clearRect(obj.x,obj.y-1,obj.width,obj.height);
@@ -185,7 +189,7 @@ document.addEventListener('DOMContentLoaded',function(){
                             playfieldContext.fillRect(obj.x,obj.y,obj.width,obj.height);
                             return
                         }
-                        playfieldContext.arc(obj.x, obj.y-1, obj.r+1, 0, Math.PI*2, true);
+                        playfieldContext.arc(obj.x, obj.y-1.5, obj.r+1.5, 0, Math.PI*2, true);
                         playfieldContext.fillStyle = "white";
                         playfieldContext.fill();
                         playfieldContext.beginPath();
@@ -238,15 +242,9 @@ document.addEventListener('DOMContentLoaded',function(){
                     super(x,y,r,fill,type,velocity,direction,isCollided)
                 }
 
-                gravity = () =>{
-                    if (this.y === playfieldHeight - this.height) {
-                        this.y = playfieldHeight - this.height;
-                        return;
-                    }
-                    this.y = this.y + 1;
-                    playfieldContext.clearRect(this.x,this.y,this.width,this.height);
-                    playfieldContext.fillRect(this.x,this.y,this.width,this.height);
-                    window.requestAnimationFrame(this.gravity);
+                velocityChange = (velocity) =>{
+                    velocity = velocity + 0.005;
+                    return Math.round(velocity*1000)/1000;
                 }
             }
 

@@ -207,7 +207,6 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.collisionCheck = function () {
-            console.log("collision check");
             Object.keys(_this.currentLevelObjects).forEach(function (e) {
                 var colider = _this.currentLevelObjects[e];
                 if (colider.type === "static" || e === "inventory") {
@@ -221,7 +220,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (colidee.x <= colider.x - colider.r && colidee.x + colidee.width >= colider.x + colider.r) {
                         if (colider.y + colider.r === colidee.y) {
                             colider.isCollided = true;
+                            return;
                         }
+                        colider.isCollided = false;
                     }
                 });
             });
@@ -245,7 +246,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                obj.y = obj.y + _this.gravityValue;
+                if (obj.velocity < _this.gravityValue) {
+                    obj.velocity = obj.velocityChange(obj.velocity);
+                }
+                obj.y = obj.velocity === _this.gravityValue ? Math.round(obj.y + obj.velocity) : obj.y + obj.velocity;
 
                 if (obj.r === null) {
                     playfieldContext.clearRect(obj.x, obj.y - 1, obj.width, obj.height);
@@ -253,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     playfieldContext.fillRect(obj.x, obj.y, obj.width, obj.height);
                     return;
                 }
-                playfieldContext.arc(obj.x, obj.y - 1, obj.r + 1, 0, Math.PI * 2, true);
+                playfieldContext.arc(obj.x, obj.y - 1.5, obj.r + 1.5, 0, Math.PI * 2, true);
                 playfieldContext.fillStyle = "white";
                 playfieldContext.fill();
                 playfieldContext.beginPath();
@@ -324,22 +328,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var _this4 = _possibleConstructorReturn(this, (CanvasMovingObject.__proto__ || Object.getPrototypeOf(CanvasMovingObject)).call(this, x, y, r, fill, type, velocity, direction, isCollided));
 
-            _this4.gravity = function () {
-                if (_this4.y === playfieldHeight - _this4.height) {
-                    _this4.y = playfieldHeight - _this4.height;
-                    return;
-                }
-                _this4.y = _this4.y + 1;
-                playfieldContext.clearRect(_this4.x, _this4.y, _this4.width, _this4.height);
-                playfieldContext.fillRect(_this4.x, _this4.y, _this4.width, _this4.height);
-                window.requestAnimationFrame(_this4.gravity);
-            };
+            _initialiseProps.call(_this4);
 
             return _this4;
         }
 
         return CanvasMovingObject;
     }(CanvasObject);
+
+    var _initialiseProps = function _initialiseProps() {
+        this.velocityChange = function (velocity) {
+            velocity = velocity + 0.005;
+            return Math.round(velocity * 1000) / 1000;
+        };
+    };
 
     var ItemInventory = function (_CanvasStaticObject) {
         _inherits(ItemInventory, _CanvasStaticObject);

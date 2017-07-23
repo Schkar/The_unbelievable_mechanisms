@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {name: "movingObject",x:450,y:150,r:null, width:100,height:30,fill:"red",type:"static", velocity: 0, direction: 0, isCollided: false, rotation: 0},
                     {name: "staticObject",x:600,y:300,r:null,width:80,height:30,fill:"green",type:"static", velocity: 0, direction: 0, isCollided: false, rotation: 0},
-                    {name: "someCircle",x:500,y:15,r:10,fill:"blue",type:"kinetic", velocity: 0, direction: 0, isCollided: false, rotation: 0}
+                    {name: "someCircle",x:442,y:15,r:10,fill:"blue",type:"kinetic", velocity: 0, direction: 0, isCollided: false, rotation: 0}
                 ]
             }
 
@@ -148,6 +148,30 @@ document.addEventListener('DOMContentLoaded',function(){
                             if (e2 === "inventory") {
                                 return;
                             }
+                            // This is wrong, use this:
+                            // function RectCircleColliding(rect,circle){
+                            //         let dx=Math.abs(circle.x-(rect.x+rect.w/2));
+                            //         let dy=Math.abs(circle.y-(rect.y+rect.y/2));
+
+                            //         if( dx > circle.r+rect.w2 ){
+                            //             return(false); 
+                            //         }
+                            //         if( dy > circle.r+rect.h2 ){ 
+                            //             return(false); 
+                            //         }
+
+                            //         if( dx <= rect.w ){ 
+                            //             return(true); 
+                            //         }
+                            //         if( dy <= rect.h ){ 
+                            //             return(true); 
+                            //         }
+                                        // This is for corner collisions
+                            //         dx=dx-rect.w;
+                            //         dy=dy-rect.h
+                            //         return(dx*dx+dy*dy<=circle.r*circle.r);
+                            //     }
+
                             let colidee = this.currentLevelObjects[e2];
                             if ((colidee.x <= (colider.x - colider.r)) && (colidee.x + colidee.width >= (colider.x + colider.r)) ) {
                                 if (colider.y + colider.r === colidee.y) {
@@ -343,17 +367,25 @@ document.addEventListener('DOMContentLoaded',function(){
     // rect and circle are a rectangle and a circle as defined above
 
     function RectCircleColliding(rect,circle){
-        var dx=Math.abs(circle.x-(rect.x+rect.w/2));
-        var dy=Math.abs(circle.y-(rect.y+rect.y/2));
+        let dx=Math.abs(circle.x-(rect.x+rect.w/2));
+        let dy=Math.abs(circle.y-(rect.y+rect.y/2));
 
-        if( dx > circle.r+rect.w2 ){ return(false); }
-        if( dy > circle.r+rect.h2 ){ return(false); }
+        if( dx > circle.r+rect.w2 ){
+             return(false); 
+        }
+        if( dy > circle.r+rect.h2 ){ 
+            return(false); 
+        }
 
-        if( dx <= rect.w ){ return(true); }
-        if( dy <= rect.h ){ return(true); }
+        if( dx <= rect.w ){ 
+            return(true); 
+        }
+        if( dy <= rect.h ){ 
+            return(true); 
+        }
 
-        var dx=dx-rect.w;
-        var dy=dy-rect.h
+        dx=dx-rect.w;
+        dy=dy-rect.h
         return(dx*dx+dy*dy<=circle.r*circle.r);
     }
     

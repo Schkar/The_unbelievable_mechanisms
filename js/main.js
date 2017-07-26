@@ -7,9 +7,24 @@ document.addEventListener('DOMContentLoaded',function(){
             let testplayfield = null;
             const testLevel = {
                 level1: [
-                    {name: "movingObject",x:450,y:150,r:null, width:100,height:30,fill:"red",type:"static", velocity: 0, direction: 0, isCollided: false, rotation: 0},
-                    {name: "staticObject",x:600,y:300,r:null,width:80,height:30,fill:"green",type:"static", velocity: 0, direction: 0, isCollided: false, rotation: 0},
-                    {name: "someCircle",x:442,y:15,r:10,fill:"blue",type:"kinetic", velocity: 0, direction: 0, isCollided: false, rotation: 0}
+                    {
+                        name: "movingObject",
+                        position: {x:450, y:150},
+                        data: {width:100, height:30, rotation: 0, color:"red", type:"static"},
+                        motion:{value: 0, direction: 0, Vx: 0, Vx: 0, isCollided: false}
+                    },
+                    {
+                        name: "staticObject",
+                        position: {x:600, y:300}, 
+                        data:{width:80, height:30, rotation: 0, color:"green", type:"static"},
+                        motion:{value: 0, direction: 0, Vx: 0, Vy: 0, isCollided: false}
+                    },
+                    {
+                        name: "someCircle",
+                        position:{x:442, y:15},
+                        data:{r:10, color:"blue", type:"kinetic"},
+                        motion: {value: 0, direction: 0, Vx: 0, Vy:0, isCollided: false}
+                    }
                 ]
             }
 
@@ -19,11 +34,10 @@ document.addEventListener('DOMContentLoaded',function(){
                 e.preventDefault()
                 testplayfield = new Playfield()
                 testplayfield.createObjects(testLevel);
-                testplayfield.logCurrentLevelObjects();
+                //testplayfield.logCurrentLevelObjects();
                 testplayfield.physicsEngineRun();
                 
                 
-                //tempID = requestAnimationFrame(dupa);
                 //currentLevel.physicsEngineRun()
                 //requestAnimationFrame(currentLevel.physicsEngineRun)
             })
@@ -58,8 +72,9 @@ document.addEventListener('DOMContentLoaded',function(){
             
             const levelsInfo = {
                 level1: [
-                    {name: "something",x:400,y:0,width:100,height:100,fill:"red",type:"kinetic"},
-                    {name: "somethingelse",x:600,y:0,width:100,height:100,fill:"green",type:"kinetic", velocity: 0, direction: 0 }
+                    {
+                        
+                    }
                 ],
                 level2: [],
                 level3: [],
@@ -98,20 +113,20 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 createObjects = (objects) =>{
-                    let inventory = new ItemInventory;
-                    inventory.createCanvasObject();
-                    this.currentLevelObjects["inventory"] = inventory;
-                    objects["level"+this.currentLevelNumber].forEach( (e) => {
-                        
-                        if (e.type === "static") {
-                            let tempObject = new CanvasStaticObject(e.x,e.y,e.r,e.width,e.height,e.fill,e.type,e.rotation);
+                    //let inventory = new ItemInventory;
+                    //inventory.createCanvasObject();
+                    //this.currentLevelObjects["inventory"] = inventory;
+                    objects["level"+this.currentLevelNumber].forEach( (object) => {
+                        console.log(object);
+                        if (object.data.type === "static") {
+                            let tempObject = new CanvasStaticObject(object);
                             tempObject.createCanvasObject()
-                            this.currentLevelObjects[e.name] = tempObject;
+                            this.currentLevelObjects[object.name] = tempObject;
                             return;
                         }
-                        let tempObject = new CanvasMovingObject(e.x,e.y,e.r,e.width,e.height,e.fill,e.type,e.velocity,e.direction,e.isCollided);
+                        let tempObject = new CanvasMovingObject(object);
                         tempObject.createCanvasObject()
-                        this.currentLevelObjects[e.name] = tempObject;
+                        this.currentLevelObjects[object.name] = tempObject;
                     }); 
                 }
 
@@ -122,9 +137,9 @@ document.addEventListener('DOMContentLoaded',function(){
                     console.log("resetCurrentLevel");
                 }
                 
-                getClickCoords = (e) => {
-                    let xCoord = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2)*10)/10; //Formula for canvas click coords - works well
-                    let yCoord = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
+                getClickCoords = (click) => {
+                    let xCoord = Math.round((click.clientX - playfield.getBoundingClientRect().x - 2)*10)/10; //Formula for canvas click coords - works well
+                    let yCoord = Math.round((click.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
                     console.log(xCoord,yCoord);
                 }
 
@@ -139,86 +154,87 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 collisionCheck = () => {
-                    Object.keys(this.currentLevelObjects).forEach( (e) => {
-                        let colider = this.currentLevelObjects[e];
-                        if (colider.type === "static" || e === "inventory"){
+                    Object.keys(this.currentLevelObjects).forEach( (object1) => {
+                        let colider = this.currentLevelObjects[object1];
+                        colider = colider.currentObject
+                        if (colider.type === "static" || object1 === "inventory"){
                             return;
                         }
-                        Object.keys(this.currentLevelObjects).forEach( (e2) => {
-                            if (e2 === "inventory") {
+                        Object.keys(this.currentLevelObjects).forEach( (object2) => {
+                            if (object2 === "inventory") {
                                 return;
                             }
-                            // This is wrong, use this:
-                            // function RectCircleColliding(rect,circle){
-                            //         let dx=Math.abs(circle.x-(rect.x+rect.w/2));
-                            //         let dy=Math.abs(circle.y-(rect.y+rect.y/2));
+                            let colidee = this.currentLevelObjects[object2];
+                            colidee = colidee.currentObject
+                            let dx=Math.abs(colider.position.x-(colidee.position.x+colidee.data.width/2));
+                            let dy=Math.abs(colider.position.y-(colidee.position.y+colidee.data.height/2));
+                            //console.log(dx);
+                            //console.log(dy);
 
-                            //         if( dx > circle.r+rect.w2 ){
-                            //             return(false); 
-                            //         }
-                            //         if( dy > circle.r+rect.h2 ){ 
-                            //             return(false); 
-                            //         }
-
-                            //         if( dx <= rect.w ){ 
-                            //             return(true); 
-                            //         }
-                            //         if( dy <= rect.h ){ 
-                            //             return(true); 
-                            //         }
-                                        // This is for corner collisions
-                            //         dx=dx-rect.w;
-                            //         dy=dy-rect.h
-                            //         return(dx*dx+dy*dy<=circle.r*circle.r);
-                            //     }
-
-                            let colidee = this.currentLevelObjects[e2];
-                            if ((colidee.x <= (colider.x - colider.r)) && (colidee.x + colidee.width >= (colider.x + colider.r)) ) {
-                                if (colider.y + colider.r === colidee.y) {
-                                    colider.isCollided = true;
-                                    return;
-                                }
-                                colider.isCollided = false;
+                            if( dx > colider.data.r+colidee.data.width/2 ){
+                                return(false); 
                             }
+
+                            if( dy > colider.data.r+colidee.data.height/2 ){ 
+                                return(false); 
+                            }
+
+                            if( dx <= colidee.data.width ){
+                                console.log("collision on X-axis")
+                                colider.motion.isCollided = true;
+                                return(true); 
+                            }
+
+                            if( dy <= colidee.data.height ){
+                                console.log("collision on Y-axis")
+                                colider.motion.isCollided = true;
+                                return(true); 
+                            }
+
+                            dx=dx-colidee.data.width;
+                            dy=dy-colidee.data.height;
+                            return(dx*dx+dy*dy<=colider.data.r*colider.data.r);
                         })
                     })
                     //TODO: Collisions checker
                     //console.log("collisionCheck");
                 }
-// BOUNCER - IF COLLISION TRUE THEN IF ROTATION = 45 THEN VELOCITY = grav.value, direction = 45 < !!!!!!!!!!!
+
                 gravity = () => {
 
                     //TODO: Think - is this one is better, or a check in every single object (by calling a method?) - this needs only one raf, so it seems that is better. Either this, or calling a method, no many rafs.
 
-                    Object.keys(this.currentLevelObjects).forEach( (e) => {
-                        let obj = this.currentLevelObjects[e];
-
-                        if (obj.type === "static" || e === "inventory") {
+                    Object.keys(this.currentLevelObjects).forEach( (object) => {
+                        let obj = this.currentLevelObjects[object];
+                        obj = obj.currentObject
+                        let thisobj = this.currentLevelObjects[object];
+                        console.log(obj);
+                        if (obj.data.type === "static" || object === "inventory") {
                             return;
                         }
 
-                        if ((obj.y + obj.height === playfieldHeight || obj.y + obj.r === playfieldHeight) || obj.isCollided){
-                                obj.y = obj.y;
+                        if ((obj.position.y + obj.data.height === playfieldHeight || obj.position.y + obj.data.r === playfieldHeight) || obj.motion.isCollided){
+                                obj.position.y = obj.position.y;
                                 return;
                         }
 
-                        if (obj.velocity < this.gravityValue) {
-                            obj.velocity = obj.velocityChange(obj.velocity);
+                        if (obj.motion.value < this.gravityValue) {
+                            obj.motion.value = thisobj.velocityChange(obj.motion.value);
                         }
-                        obj.y = (obj.velocity === this.gravityValue) ? Math.round(obj.y + obj.velocity) : obj.y + obj.velocity;
+                        obj.position.y = (obj.motion.value === this.gravityValue) ? Math.round(obj.position.y + obj.motion.value) : obj.position.y + obj.motion.value;
 
-                        if (obj.r===null){
-                            playfieldContext.clearRect(obj.x,obj.y-1,obj.width,obj.height);
-                            playfieldContext.fillStyle=obj.fill;
-                            playfieldContext.fillRect(obj.x,obj.y,obj.width,obj.height);
+                        if (obj.data.r===null){
+                            playfieldContext.clearRect(obj.position.x,obj.position.y-1,obj.data.width,obj.data.height);
+                            playfieldContext.fillStyle=obj.data.color;
+                            playfieldContext.fillRect(obj.position.x,obj.position.y,obj.data.width,obj.data.height);
                             return
                         }
-                        playfieldContext.arc(obj.x, obj.y-1.5, obj.r+1.5, 0, Math.PI*2, true);
+                        playfieldContext.arc(obj.position.x, obj.position.y-1.5, obj.data.r+1.5, 0, Math.PI*2, true);
                         playfieldContext.fillStyle = "white";
                         playfieldContext.fill();
                         playfieldContext.beginPath();
-                        playfieldContext.arc(obj.x,obj.y,obj.r,0,2*Math.PI);
-                        playfieldContext.fillStyle = obj.fill;
+                        playfieldContext.arc(obj.position.x,obj.position.y,obj.data.r,0,2*Math.PI);
+                        playfieldContext.fillStyle = obj.data.color;
                         playfieldContext.fill();
                         playfieldContext.closePath();
                     })
@@ -226,44 +242,35 @@ document.addEventListener('DOMContentLoaded',function(){
             }
         //Arch-class - object prototype
             class CanvasObject {
-                constructor(x,y,r,width,height,fill,type,velocity,direction,isCollided,rotation) {
-                    this.x = x;
-                    this.y = y;
-                    this.r = r;
-                    this.width = width;
-                    this.height = height;
-                    this.fill = fill;
-                    this.type = type;
-                    this.velocity = velocity;
-                    this.direction = direction;
-                    this.isCollided = isCollided;
-                    this.rotation = rotation;
+                constructor(object) {
+                    this.currentObject = object
                 }
 
                 createCanvasObject = () =>{
-                    if (this.r !== null) {
+                    //console.log(this.currentObject);
+                    if (this.currentObject.data.r !== undefined) {
                         playfieldContext.beginPath();
-                        playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
-                        playfieldContext.fillStyle = this.fill;
+                        playfieldContext.arc(this.currentObject.position.x,this.currentObject.position.y,this.currentObject.data.r,0,2*Math.PI);
+                        playfieldContext.fillStyle = this.currentObject.data.color;
                         playfieldContext.fill();
                         playfieldContext.closePath();
                         return;
                     }
-                    playfieldContext.fillStyle=this.fill;
-                    playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+                    playfieldContext.fillStyle=this.currentObject.data.color;
+                    playfieldContext.fillRect(this.currentObject.position.x,this.currentObject.position.y,this.currentObject.data.width,this.currentObject.data.height);
                 }
 
             }
         
             class CanvasStaticObject extends CanvasObject {
-                constructor(x,y,r,width,height,fill,type,rotation) {
-                    super(x,y,r,width,height,fill,type,rotation)
+                constructor(object) {
+                    super(object)
                 }
             }
 
             class CanvasMovingObject extends CanvasObject {
-                constructor(x,y,r,fill,type,velocity,direction,isCollided) {
-                    super(x,y,r,fill,type,velocity,direction,isCollided)
+                constructor(object) {
+                    super(object)
                 }
 
                 velocityChange = (velocity) =>{
@@ -360,149 +367,3 @@ document.addEventListener('DOMContentLoaded',function(){
                 resetConfirmScreen.style.display = "none";
             });        
 });
-
-/*You can detect Rectangle vs Circle collisions like this using this Rectangle vs Circle collision-test code:
-
-    // return true if the rectangle and circle are colliding
-    // rect and circle are a rectangle and a circle as defined above
-
-    function RectCircleColliding(rect,circle){
-        let dx=Math.abs(circle.x-(rect.x+rect.w/2));
-        let dy=Math.abs(circle.y-(rect.y+rect.y/2));
-
-        if( dx > circle.r+rect.w2 ){
-             return(false); 
-        }
-        if( dy > circle.r+rect.h2 ){ 
-            return(false); 
-        }
-
-        if( dx <= rect.w ){ 
-            return(true); 
-        }
-        if( dy <= rect.h ){ 
-            return(true); 
-        }
-
-        dx=dx-rect.w;
-        dy=dy-rect.h
-        return(dx*dx+dy*dy<=circle.r*circle.r);
-    }
-    
-    What i need:
-    
-    Collision detector
-    Collision Solver -> Stop or Bounce
-    
-ctx.fillStyle = "lightgray";
-ctx.strokeStyle = "skyblue";
-
-// from top
-var rect1 = {
-    x: 125,
-    y: 10,
-    w: 20,
-    h: 20
-};
-var direction1 = 1;
-
-// from bottom
-var rect2 = {
-    x: 125,
-    y: 275,
-    w: 20,
-    h: 20
-};
-var direction2 = -1;
-
-// from left
-var rect3 = {
-    x: 0,
-    y: 125,
-    w: 20,
-    h: 20
-};
-var direction3 = 1;
-
-// from right
-var rect4 = {
-    x: 270,
-    y: 125,
-    w: 20,
-    h: 20
-};
-var direction4 = -1;
-
-// the center rect
-var rect5 = {
-    x: 120,
-    y: 120,
-    w: 30,
-    h: 30
-};
-
-
-function drawAll() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawRect(rect1);
-    drawRect(rect2);
-    drawRect(rect3);
-    drawRect(rect4);
-    drawRect(rect5);
-}
-
-
-function drawRect(r) {
-    ctx.beginPath();
-    ctx.rect(r.x, r.y, r.w, r.h);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-}
-
-
-// return true if the 2 rectangles are colliding
-function RectsColliding(r1, r2) {
-    return !(r1.x > r2.x + r2.w || r1.x + r1.w < r2.x || r1.y > r2.y + r2.h || r1.y + r1.h < r2.y);
-}
-
-
-var fps = 60;
-
-function animate() {
-    setTimeout(function () {
-        requestAnimFrame(animate);
-
-        // rect1 vs center rect
-        rect1.y = rect1.y + direction1;
-        if (RectsColliding(rect5, rect1) || rect1.y <= 0) {
-            direction1 = -direction1;
-        }
-
-        // rect2 vs center rect
-        rect2.y = rect2.y + direction2;
-        if (RectsColliding(rect5, rect2) || rect2.y > 280) {
-            direction2 = -direction2;
-        }
-
-        // rect3 vs center rect
-        rect3.x = rect3.x + direction3;
-        if (RectsColliding(rect5, rect3) || rect3.x <= 0) {
-            direction3 = -direction3;
-        }
-
-        // rect4 vs center rect
-        rect4.x = rect4.x + direction4;
-        if (RectsColliding(rect5, rect4) || rect4.x >= 280) {
-            direction4 = -direction4;
-        }
-
-
-        drawAll();
-
-    }, 1000 / fps);
-}
-
-animate();
-    
-    */

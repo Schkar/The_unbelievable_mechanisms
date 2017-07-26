@@ -2,12 +2,14 @@
     text-align: center;
     background-color: rgba( white, 0.6);
     .headerTitle{
+        margin-top: 10px;
         border-bottom: 5px solid blue;
         margin-bottom: 0;
         font-size: 2em;
     }
     .headerText{
         margin-top: 0;
+        margin-bottom: 10px;
         font-size: 1.5em;
     }
 }

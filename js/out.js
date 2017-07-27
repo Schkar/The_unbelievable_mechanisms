@@ -79,11 +79,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 document.addEventListener('DOMContentLoaded', function () {
-    var _motion;
-
     console.log("DOM loaded. Script is working");
     //Variables section
 
@@ -92,38 +88,41 @@ document.addEventListener('DOMContentLoaded', function () {
     var testplayfield = null;
     var testLevel = {
         level1: [{
-            name: "movingObject",
+            name: "staticObject1",
             position: { x: 450, y: 150 },
-            data: { width: 100, height: 30, rotation: 0, color: "red", type: "static" },
-            motion: (_motion = { value: 0, direction: 0, Vx: 0 }, _defineProperty(_motion, "Vx", 0), _defineProperty(_motion, "isCollided", false), _motion)
+            data: { width: 100, height: 30, rotation: 0, color: "red", type: "static" }
         }, {
-            name: "staticObject",
+            name: "staticObject2",
             position: { x: 600, y: 300 },
-            data: { width: 80, height: 30, rotation: 0, color: "green", type: "static" },
-            motion: { value: 0, direction: 0, Vx: 0, Vy: 0, isCollided: false }
+            data: { width: 80, height: 30, rotation: 0, color: "green", type: "static" }
         }, {
             name: "someCircle",
             position: { x: 442, y: 15 },
             data: { r: 10, color: "blue", type: "kinetic" },
-            motion: { value: 0, direction: 0, Vx: 0, Vy: 0, isCollided: false }
+            motion: { speed: 0, direction: 0, vx: 0, vy: 0, isCollided: false }
+        }],
+        level2: [{
+            name: "aBall",
+            position: { x: 500, y: 200 },
+            data: { r: 10, color: "green", type: "kinetic" },
+            motion: { speed: 0.15, direction: 4, vx: 0, vy: 0, isCollided: false }
+        }, {
+            name: "staticObject2",
+            position: { x: 600, y: 300 },
+            data: { width: 80, height: 30, rotation: 0, color: "red", type: "static" }
         }]
 
         //Temporary dev functions
-    };function step(timestamp) {
-        console.log(Math.floor(timestamp));
-        requestAnimationFrame(step);
-    }
 
-    var timeNow = 0;
-    var timePrevious = 0;
-
-    creationButton.addEventListener("click", function (e) {
+    };creationButton.addEventListener("click", function (e) {
         e.preventDefault();
-        //requestAnimationFrame(step)
-        testplayfield = new Playfield();
+
+        testplayfield = new Playfield(2);
         testplayfield.createObjects(testLevel);
-        //testplayfield.logCurrentLevelObjects();
         testplayfield.physicsEngineRun();
+        //testplayfield.logCurrentLevelObjects();
+        //testplayfield.physicsEngineRun();
+
 
         //currentLevel.physicsEngineRun()
         //requestAnimationFrame(currentLevel.physicsEngineRun)
@@ -184,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
     playfield.addEventListener("click", function (e) {});
 
     //Playfield objects classes
-    //Demiurge - main object, creator of objects, physics engine, collision detector
+    //Main object, creator of objects, physics engine
 
     var Playfield = function Playfield(level) {
         var _this = this;
@@ -192,11 +191,10 @@ document.addEventListener('DOMContentLoaded', function () {
         _classCallCheck(this, Playfield);
 
         this.createObjects = function (objects) {
-            //let inventory = new ItemInventory;
-            //inventory.createCanvasObject();
-            //this.currentLevelObjects["inventory"] = inventory;
+            // let inventory = new ItemInventory;
+            // inventory.createCanvasObject();
+            // this.currentLevelObjects["inventory"] = inventory;
             objects["level" + _this.currentLevelNumber].forEach(function (object) {
-                console.log(object);
                 if (object.data.type === "static") {
                     var _tempObject = new CanvasStaticObject(object);
                     _tempObject.createCanvasObject();
@@ -206,6 +204,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 var tempObject = new CanvasMovingObject(object);
                 tempObject.createCanvasObject();
                 _this.currentLevelObjects[object.name] = tempObject;
+            });
+        };
+
+        this.clearCanvas = function () {
+            playfieldContext.clearRect(0, 0, playfieldWidth, playfieldHeight);
+            Object.keys(_this.currentLevelObjects).forEach(function (object) {
+                _this.currentLevelObjects[object].redrawCanvasObject();
             });
         };
 
@@ -226,100 +231,16 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(_this.currentLevelObjects);
         };
 
-        this.physicsEngineRun = function (timestamp) {
-            _this.collisionCheck();
-            _this.gravity();
-            timeNow = timestamp;
-            console.log(timeNow, timeNow - timePrevious);
-            timePrevious = Math.floor(timestamp);
-            engineID = requestAnimationFrame(_this.physicsEngineRun);
-        };
-
-        this.collisionCheck = function () {
-            Object.keys(_this.currentLevelObjects).forEach(function (object1) {
-                var colider = _this.currentLevelObjects[object1];
-                colider = colider.currentObject;
-                if (colider.type === "static" || object1 === "inventory") {
-                    return;
-                }
-                Object.keys(_this.currentLevelObjects).forEach(function (object2) {
-                    if (object2 === "inventory") {
-                        return;
-                    }
-                    var colidee = _this.currentLevelObjects[object2];
-                    colidee = colidee.currentObject;
-                    var dx = Math.abs(colider.position.x - (colidee.position.x + colidee.data.width / 2));
-                    var dy = Math.abs(colider.position.y - (colidee.position.y + colidee.data.height / 2));
-                    //console.log(dx);
-                    //console.log(dy);
-
-                    if (dx > colider.data.r + colidee.data.width / 2) {
-                        return false;
-                    }
-
-                    if (dy > colider.data.r + colidee.data.height / 2) {
-                        return false;
-                    }
-
-                    if (dx <= colidee.data.width) {
-                        console.log("collision on X-axis");
-                        colider.motion.isCollided = true;
-                        return true;
-                    }
-
-                    if (dy <= colidee.data.height) {
-                        console.log("collision on Y-axis");
-                        colider.motion.isCollided = true;
-                        return true;
-                    }
-
-                    dx = dx - colidee.data.width;
-                    dy = dy - colidee.data.height;
-                    return dx * dx + dy * dy <= colider.data.r * colider.data.r;
-                });
-            });
-            //TODO: Collisions checker
-            //console.log("collisionCheck");
-        };
-
-        this.gravity = function () {
-
-            //TODO: Think - is this one is better, or a check in every single object (by calling a method?) - this needs only one raf, so it seems that is better. Either this, or calling a method, no many rafs.
-
+        this.physicsEngineRun = function () {
+            _this.clearCanvas();
             Object.keys(_this.currentLevelObjects).forEach(function (object) {
-                var obj = _this.currentLevelObjects[object];
-                obj = obj.currentObject;
-                var thisobj = _this.currentLevelObjects[object];
-                console.log(obj);
-                if (obj.data.type === "static" || object === "inventory") {
+                if (_this.currentLevelObjects[object].type === "static") {
                     return;
                 }
-
-                if (obj.position.y + obj.data.height === playfieldHeight || obj.position.y + obj.data.r === playfieldHeight || obj.motion.isCollided) {
-                    obj.position.y = obj.position.y;
-                    return;
-                }
-
-                if (obj.motion.value < _this.gravityValue) {
-                    obj.motion.value = thisobj.velocityChange(obj.motion.value);
-                }
-                obj.position.y = obj.motion.value === _this.gravityValue ? Math.round(obj.position.y + obj.motion.value) : obj.position.y + obj.motion.value;
-
-                if (obj.data.r === null) {
-                    playfieldContext.clearRect(obj.position.x, obj.position.y - 1, obj.data.width, obj.data.height);
-                    playfieldContext.fillStyle = obj.data.color;
-                    playfieldContext.fillRect(obj.position.x, obj.position.y, obj.data.width, obj.data.height);
-                    return;
-                }
-                playfieldContext.arc(obj.position.x, obj.position.y - 1.5, obj.data.r + 1.5, 0, Math.PI * 2, true);
-                playfieldContext.fillStyle = "white";
-                playfieldContext.fill();
-                playfieldContext.beginPath();
-                playfieldContext.arc(obj.position.x, obj.position.y, obj.data.r, 0, 2 * Math.PI);
-                playfieldContext.fillStyle = obj.data.color;
-                playfieldContext.fill();
-                playfieldContext.closePath();
+                _this.currentLevelObjects[object].movement();
+                _this.currentLevelObjects[object].collisionCheck();
             });
+            requestAnimationFrame(_this.physicsEngineRun);
         };
 
         this.currentLevelNumber = level || 1;
@@ -335,20 +256,27 @@ document.addEventListener('DOMContentLoaded', function () {
         _classCallCheck(this, CanvasObject);
 
         this.createCanvasObject = function () {
-            //console.log(this.currentObject);
-            if (_this2.currentObject.data.r !== undefined) {
+            if (_this2.r !== undefined) {
                 playfieldContext.beginPath();
-                playfieldContext.arc(_this2.currentObject.position.x, _this2.currentObject.position.y, _this2.currentObject.data.r, 0, 2 * Math.PI);
-                playfieldContext.fillStyle = _this2.currentObject.data.color;
+                playfieldContext.arc(_this2.x, _this2.y, _this2.r, 0, 2 * Math.PI);
+                playfieldContext.fillStyle = _this2.color;
                 playfieldContext.fill();
                 playfieldContext.closePath();
                 return;
             }
-            playfieldContext.fillStyle = _this2.currentObject.data.color;
-            playfieldContext.fillRect(_this2.currentObject.position.x, _this2.currentObject.position.y, _this2.currentObject.data.width, _this2.currentObject.data.height);
+            playfieldContext.fillStyle = _this2.color;
+            playfieldContext.fillRect(_this2.x, _this2.y, _this2.width, _this2.height);
         };
 
-        this.currentObject = object;
+        this.redrawCanvasObject = function () {
+            _this2.createCanvasObject();
+        };
+
+        this.object = object;
+        this.x = object.position.x;
+        this.y = object.position.y;
+        this.color = object.data.color;
+        this.type = object.data.type;
     };
 
     var CanvasStaticObject = function (_CanvasObject) {
@@ -357,7 +285,12 @@ document.addEventListener('DOMContentLoaded', function () {
         function CanvasStaticObject(object) {
             _classCallCheck(this, CanvasStaticObject);
 
-            return _possibleConstructorReturn(this, (CanvasStaticObject.__proto__ || Object.getPrototypeOf(CanvasStaticObject)).call(this, object));
+            var _this3 = _possibleConstructorReturn(this, (CanvasStaticObject.__proto__ || Object.getPrototypeOf(CanvasStaticObject)).call(this, object));
+
+            _this3.width = object.data.width;
+            _this3.height = object.data.height;
+            _this3.rotation = object.data.rotation;
+            return _this3;
         }
 
         return CanvasStaticObject;
@@ -371,32 +304,153 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var _this4 = _possibleConstructorReturn(this, (CanvasMovingObject.__proto__ || Object.getPrototypeOf(CanvasMovingObject)).call(this, object));
 
-            _this4.velocityChange = function (velocity) {
-                velocity = velocity + 0.005;
-                return Math.round(velocity * 1000) / 1000;
-            };
+            _initialiseProps.call(_this4);
 
+            _this4.name = object.name;
+            _this4.r = object.data.r;
+            _this4.speed = object.motion.speed;
+            _this4.direction = object.motion.direction;
+            _this4.vx = object.motion.vx;
+            _this4.vy = object.motion.vy;
+            _this4.isCollided = object.motion.isCollided;
             return _this4;
         }
 
         return CanvasMovingObject;
     }(CanvasObject);
 
-    var ItemInventory = function (_CanvasStaticObject) {
-        _inherits(ItemInventory, _CanvasStaticObject);
+    var _initialiseProps = function _initialiseProps() {
+        var _this7 = this;
+
+        this.speedChange = function (speed) {
+            speed = speed + 0.005;
+            return Math.round(speed * 1000) / 1000;
+        };
+
+        this.directionChange = function () {
+            //this.direction = Math.floor(Math.random() * (360 - 1 + 1)) + 1
+            _this7.direction = document.querySelector(".temporaryDirectionChange").value;
+        };
+
+        this.movement = function () {
+            // console.log(this.direction);
+            _this7.vx = Math.cos(_this7.direction);
+            _this7.vy = Math.sin(_this7.direction);
+            // this.x = Math.round((this.x + this.vx)*100)/100;
+            // this.y = Math.round((this.y + this.vy)*100)/100;
+            _this7.x = _this7.x + _this7.vx;
+            _this7.y = _this7.y + _this7.vy + testplayfield.gravityValue;
+            //this.directionChange()
+        };
+
+        this.collisionCheck = function () {
+            Object.keys(testplayfield.currentLevelObjects).forEach(function (object) {
+                var colidee = testplayfield.currentLevelObjects[object];
+                if (colidee.name === "inventory" || colidee.name === _this7.name) {
+                    return;
+                }
+                //FIXME: Check them - it sticks to left and right wall... probably because degrees
+                // Wall collision check: 
+                // Left wall
+                if (_this7.x - _this7.r <= 0) {
+                    // console.log("lw");
+                    _this7.x = 0 + _this7.r;
+                    _this7.bouncer(90);
+                }
+
+                // Right wall
+                if (_this7.x + _this7.r >= 1000) {
+                    // console.log("rw");
+                    _this7.x = 1000 - _this7.r;
+                    _this7.bouncer(90);
+                }
+
+                // Ceiling
+                if (_this7.y - _this7.r <= 0) {
+                    // console.log("cl");
+                    _this7.y = 0 + _this7.r;
+                    _this7.bouncer(0);
+                }
+
+                // Floor
+                if (_this7.y + _this7.r >= 400) {
+                    // console.log("fl");
+                    _this7.y = 400 - _this7.r;
+                    _this7.bouncer(0);
+                }
+
+                var dx = Math.abs(_this7.x - (colidee.x + colidee.width / 2));
+                var dy = Math.abs(_this7.y - (colidee.y + colidee.height / 2));
+
+                //Object collision check
+                //is collision on X-axis?
+                if (dx > _this7.r + colidee.width / 2) {
+                    _this7.isCollided = false;
+                    return;
+                }
+
+                //is collision on Y-axis?
+                if (dy > _this7.r + colidee.height / 2) {
+                    _this7.isCollided = false;
+                    return;
+                }
+
+                // collision on X-axis
+                if (dx <= colidee.width) {
+                    _this7.isCollided = true;
+                    _this7.bouncer(colidee.rotation);
+                    return;
+                }
+
+                // collision on Y-axis
+                if (dy <= colidee.data.height) {
+                    _this7.isCollided = true;
+                    _this7.bouncer(colidee.rotation);
+                    return;
+                }
+
+                dx = dx - colidee.width;
+                dy = dy - colidee.height;
+                return dx * dx + dy * dy <= _this7.r * _this7.r;
+            });
+        };
+
+        this.bouncer = function (rotation) {
+            _this7.vx = _this7.speed * Math.sin(_this7.direction - rotation) * Math.cos(rotation + Math.PI / 2);
+            _this7.vy = _this7.speed * Math.sin(_this7.direction - rotation) * Math.sin(rotation + Math.PI / 2);
+            _this7.direction = //TODO: Here count the new direction;
+            _this7.x += _this7.vx;
+            _this7.y += _this7.vy;
+        };
+    };
+
+    var CanvasMovableObject = function (_CanvasStaticObject) {
+        _inherits(CanvasMovableObject, _CanvasStaticObject);
+
+        function CanvasMovableObject(object) {
+            _classCallCheck(this, CanvasMovableObject);
+
+            return _possibleConstructorReturn(this, (CanvasMovableObject.__proto__ || Object.getPrototypeOf(CanvasMovableObject)).call(this, object));
+        }
+
+        return CanvasMovableObject;
+    }(CanvasStaticObject);
+
+    var ItemInventory = function (_CanvasStaticObject2) {
+        _inherits(ItemInventory, _CanvasStaticObject2);
 
         function ItemInventory() {
             _classCallCheck(this, ItemInventory);
 
-            var _this5 = _possibleConstructorReturn(this, (ItemInventory.__proto__ || Object.getPrototypeOf(ItemInventory)).call(this));
+            var _this6 = _possibleConstructorReturn(this, (ItemInventory.__proto__ || Object.getPrototypeOf(ItemInventory)).call(this));
 
-            _this5.addItem = function () {
+            _this6.addItem = function () {
                 console.log("Maybe i will need it");
                 //TODO: Think about this function.
             };
 
-            _this5.removeItem = function (itemID) {
-                var itemToRemove = _this5.objectsInInventory.filter(function (p) {
+            _this6.removeItem = function (itemID) {
+                var itemToRemove = _this6.objectsInInventory.filter(function (p) {
                     if (p === itemID) {
                         return p;
                     }
@@ -404,15 +458,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 return itemToRemove;
             };
 
-            _this5.x = 0;
-            _this5.y = 0;
+            _this6.x = 0;
+            _this6.y = 0;
             //this.r = null;
-            _this5.width = 200;
-            _this5.height = playfieldHeight;
-            _this5.fill = "darkgrey";
-            _this5.objectsInInventory = [];
-            _this5.type = "static";
-            return _this5;
+            _this6.width = 200;
+            _this6.height = playfieldHeight;
+            _this6.fill = "darkgrey";
+            _this6.objectsInInventory = [];
+            _this6.type = "static";
+            return _this6;
         }
 
         return ItemInventory;

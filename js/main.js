@@ -8,44 +8,51 @@ document.addEventListener('DOMContentLoaded',function(){
             const testLevel = {
                 level1: [
                     {
-                        name: "movingObject",
+                        name: "staticObject1",
                         position: {x:450, y:150},
                         data: {width:100, height:30, rotation: 0, color:"red", type:"static"},
-                        motion:{value: 0, direction: 0, Vx: 0, Vx: 0, isCollided: false}
                     },
                     {
-                        name: "staticObject",
+                        name: "staticObject2",
                         position: {x:600, y:300}, 
                         data:{width:80, height:30, rotation: 0, color:"green", type:"static"},
-                        motion:{value: 0, direction: 0, Vx: 0, Vy: 0, isCollided: false}
                     },
                     {
                         name: "someCircle",
                         position:{x:442, y:15},
                         data:{r:10, color:"blue", type:"kinetic"},
-                        motion: {value: 0, direction: 0, Vx: 0, Vy:0, isCollided: false}
+                        motion: {speed: 0, direction: 0, vx: 0, vy:0, isCollided: false}
+                    }
+                ],
+                level2: [
+                    {
+                        name: "aBall",
+                        position: {x: 500, y: 200},
+                        data: {r: 10, color: "green", type: "kinetic"},
+                        motion: {speed: 0.15, direction: 4, vx: 0, vy:0, isCollided: false}
+                    },
+                    {
+                        name: "staticObject2",
+                        position: {x:600, y:300}, 
+                        data:{width:80, height:30, rotation: 0, color:"red", type:"static"},
                     }
                 ]
             }
 
-        //Temporary dev functions
-            function step(timestamp) {
-                console.log(Math.floor(timestamp));
-                requestAnimationFrame(step);
-            }
 
-            let timeNow = 0;
-            let timePrevious = 0;
+            
+        //Temporary dev functions
 
             creationButton.addEventListener("click",function(e){
                 e.preventDefault()
-                //requestAnimationFrame(step)
-                testplayfield = new Playfield()
+
+
+                
+                testplayfield = new Playfield(2)
                 testplayfield.createObjects(testLevel);
-                testplayfield.logCurrentLevelObjects();
-                 testplayfield.physicsEngineRun();
+                testplayfield.physicsEngineRun()
                 //testplayfield.logCurrentLevelObjects();
-                testplayfield.physicsEngineRun();
+                //testplayfield.physicsEngineRun();
                 
                 
                 //currentLevel.physicsEngineRun()
@@ -114,7 +121,7 @@ document.addEventListener('DOMContentLoaded',function(){
             })
 
     //Playfield objects classes
-        //Demiurge - main object, creator of objects, physics engine, collision detector
+        //Main object, creator of objects, physics engine
             class Playfield {
                 constructor(level){
                     this.currentLevelNumber = level || 1;
@@ -123,11 +130,10 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 createObjects = (objects) =>{
-                    //let inventory = new ItemInventory;
-                    //inventory.createCanvasObject();
-                    //this.currentLevelObjects["inventory"] = inventory;
+                    // let inventory = new ItemInventory;
+                    // inventory.createCanvasObject();
+                    // this.currentLevelObjects["inventory"] = inventory;
                     objects["level"+this.currentLevelNumber].forEach( (object) => {
-                        console.log(object);
                         if (object.data.type === "static") {
                             let tempObject = new CanvasStaticObject(object);
                             tempObject.createCanvasObject()
@@ -138,6 +144,13 @@ document.addEventListener('DOMContentLoaded',function(){
                         tempObject.createCanvasObject()
                         this.currentLevelObjects[object.name] = tempObject;
                     }); 
+                }
+
+                clearCanvas = () => {
+                    playfieldContext.clearRect(0,0,playfieldWidth,playfieldHeight);
+                    Object.keys(this.currentLevelObjects).forEach( (object) => {
+                        this.currentLevelObjects[object].redrawCanvasObject()
+                    });
                 }
 
                 resetCurrentLevel = (level) => {
@@ -158,116 +171,42 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 physicsEngineRun = () => {
-                    this.collisionCheck();
-                    this.gravity();
-                    engineID = requestAnimationFrame(this.physicsEngineRun);
-                }
-
-                collisionCheck = () => {
-                    Object.keys(this.currentLevelObjects).forEach( (object1) => {
-                        let colider = this.currentLevelObjects[object1];
-                        colider = colider.currentObject
-                        if (colider.type === "static" || object1 === "inventory"){
-                            return;
-                        }
-                        Object.keys(this.currentLevelObjects).forEach( (object2) => {
-                            if (object2 === "inventory") {
-                                return;
-                            }
-                            let colidee = this.currentLevelObjects[object2];
-                            colidee = colidee.currentObject
-                            let dx=Math.abs(colider.position.x-(colidee.position.x+colidee.data.width/2));
-                            let dy=Math.abs(colider.position.y-(colidee.position.y+colidee.data.height/2));
-                            //console.log(dx);
-                            //console.log(dy);
-
-                            if( dx > colider.data.r+colidee.data.width/2 ){
-                                return(false); 
-                            }
-
-                            if( dy > colider.data.r+colidee.data.height/2 ){ 
-                                return(false); 
-                            }
-
-                            if( dx <= colidee.data.width ){
-                                console.log("collision on X-axis")
-                                colider.motion.isCollided = true;
-                                return(true); 
-                            }
-
-                            if( dy <= colidee.data.height ){
-                                console.log("collision on Y-axis")
-                                colider.motion.isCollided = true;
-                                return(true); 
-                            }
-
-                            dx=dx-colidee.data.width;
-                            dy=dy-colidee.data.height;
-                            return(dx*dx+dy*dy<=colider.data.r*colider.data.r);
-                        })
-                    })
-                    //TODO: Collisions checker
-                    //console.log("collisionCheck");
-                }
-
-                gravity = () => {
-
-                    //TODO: Think - is this one is better, or a check in every single object (by calling a method?) - this needs only one raf, so it seems that is better. Either this, or calling a method, no many rafs.
-
+                    this.clearCanvas()
                     Object.keys(this.currentLevelObjects).forEach( (object) => {
-                        let obj = this.currentLevelObjects[object];
-                        obj = obj.currentObject
-                        let thisobj = this.currentLevelObjects[object];
-                        console.log(obj);
-                        if (obj.data.type === "static" || object === "inventory") {
-                            return;
+                        if (this.currentLevelObjects[object].type === "static") {
+                           return; 
                         }
-
-                        if ((obj.position.y + obj.data.height === playfieldHeight || obj.position.y + obj.data.r === playfieldHeight) || obj.motion.isCollided){
-                                obj.position.y = obj.position.y;
-                                return;
-                        }
-
-                        if (obj.motion.value < this.gravityValue) {
-                            obj.motion.value = thisobj.velocityChange(obj.motion.value);
-                        }
-                        obj.position.y = (obj.motion.value === this.gravityValue) ? Math.round(obj.position.y + obj.motion.value) : obj.position.y + obj.motion.value;
-
-                        if (obj.data.r===null){
-                            playfieldContext.clearRect(obj.position.x,obj.position.y-1,obj.data.width,obj.data.height);
-                            playfieldContext.fillStyle=obj.data.color;
-                            playfieldContext.fillRect(obj.position.x,obj.position.y,obj.data.width,obj.data.height);
-                            return
-                        }
-                        playfieldContext.arc(obj.position.x, obj.position.y-1.5, obj.data.r+1.5, 0, Math.PI*2, true);
-                        playfieldContext.fillStyle = "white";
-                        playfieldContext.fill();
-                        playfieldContext.beginPath();
-                        playfieldContext.arc(obj.position.x,obj.position.y,obj.data.r,0,2*Math.PI);
-                        playfieldContext.fillStyle = obj.data.color;
-                        playfieldContext.fill();
-                        playfieldContext.closePath();
+                        this.currentLevelObjects[object].movement()
+                        this.currentLevelObjects[object].collisionCheck()
                     })
+                    requestAnimationFrame(this.physicsEngineRun)
                 }
             }
         //Arch-class - object prototype
             class CanvasObject {
                 constructor(object) {
-                    this.currentObject = object
+                    this.object = object
+                    this.x = object.position.x
+                    this.y = object.position.y
+                    this.color = object.data.color
+                    this.type = object.data.type
                 }
 
                 createCanvasObject = () =>{
-                    //console.log(this.currentObject);
-                    if (this.currentObject.data.r !== undefined) {
+                    if (this.r !== undefined) {
                         playfieldContext.beginPath();
-                        playfieldContext.arc(this.currentObject.position.x,this.currentObject.position.y,this.currentObject.data.r,0,2*Math.PI);
-                        playfieldContext.fillStyle = this.currentObject.data.color;
+                        playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
+                        playfieldContext.fillStyle = this.color;
                         playfieldContext.fill();
                         playfieldContext.closePath();
                         return;
                     }
-                    playfieldContext.fillStyle=this.currentObject.data.color;
-                    playfieldContext.fillRect(this.currentObject.position.x,this.currentObject.position.y,this.currentObject.data.width,this.currentObject.data.height);
+                    playfieldContext.fillStyle=this.color;
+                    playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+                }
+
+                redrawCanvasObject = () =>{
+                    this.createCanvasObject();
                 }
 
             }
@@ -275,19 +214,136 @@ document.addEventListener('DOMContentLoaded',function(){
             class CanvasStaticObject extends CanvasObject {
                 constructor(object) {
                     super(object)
+                    this.width = object.data.width
+                    this.height = object.data.height
+                    this.rotation = object.data.rotation 
                 }
             }
-
+            
             class CanvasMovingObject extends CanvasObject {
+                constructor(object) {
+                    super(object)
+                    this.name = object.name
+                    this.r = object.data.r
+                    this.speed = object.motion.speed
+                    this.direction = object.motion.direction
+                    this.vx = object.motion.vx
+                    this.vy = object.motion.vy
+                    this.isCollided = object.motion.isCollided
+                }
+
+                speedChange = (speed) =>{
+                    speed = speed + 0.005;
+                    return Math.round(speed*1000)/1000;
+                }
+
+                directionChange = () => {
+                    //this.direction = Math.floor(Math.random() * (360 - 1 + 1)) + 1
+                    this.direction = document.querySelector(".temporaryDirectionChange").value;
+                }
+
+                movement = () => {
+                    // console.log(this.direction);
+                    this.vx = Math.cos(this.direction);
+                    this.vy = Math.sin(this.direction);
+                    // this.x = Math.round((this.x + this.vx)*100)/100;
+                    // this.y = Math.round((this.y + this.vy)*100)/100;
+                    this.x = this.x + this.vx;
+                    this.y = this.y + this.vy + testplayfield.gravityValue;
+                    //this.directionChange()
+                }
+
+                collisionCheck = () => {
+                    Object.keys(testplayfield.currentLevelObjects).forEach( (object) => {
+                        let colidee = testplayfield.currentLevelObjects[object];
+                        if (colidee.name === "inventory" || colidee.name === this.name){
+                            return;
+                        }
+                        //FIXME: Check them - it sticks to left and right wall... probably because degrees
+                        // Wall collision check: 
+                        // Left wall
+                        if (this.x - this.r <= 0) {
+                            // console.log("lw");
+                            this.x = 0 + this.r;
+                            this.bouncer(90);
+                        }
+
+                        // Right wall
+                        if (this.x + this.r >= 1000) {
+                            // console.log("rw");
+                            this.x = 1000 - this.r;
+                            this.bouncer(90)
+                        }
+
+                        // Ceiling
+                        if (this.y - this.r <= 0) {
+                            // console.log("cl");
+                            this.y = 0 + this.r;
+                            this.bouncer(0)
+                        }
+
+                        // Floor
+                        if (this.y + this.r >= 400) {
+                            // console.log("fl");
+                            this.y = 400 - this.r;
+                            this.bouncer(0)
+                        }
+                        
+
+                        let dx=Math.abs(this.x-(colidee.x+colidee.width/2));
+                        let dy=Math.abs(this.y-(colidee.y+colidee.height/2));
+
+                        //Object collision check
+                        //is collision on X-axis?
+                        if( dx > this.r+colidee.width/2 ){
+                            this.isCollided = false;
+                            return; 
+                        }
+
+                        //is collision on Y-axis?
+                        if( dy > this.r+colidee.height/2 ){
+                            this.isCollided = false;
+                            return; 
+                        }
+
+                        // collision on X-axis
+                        if( dx <= colidee.width ){
+                            this.isCollided = true;
+                            this.bouncer(colidee.rotation)
+                            return; 
+                        }
+
+                        // collision on Y-axis
+                        if( dy <= colidee.data.height ){
+                            this.isCollided = true;
+                            this.bouncer(colidee.rotation)
+                            return; 
+                        }
+
+                        dx=dx-colidee.width;
+                        dy=dy-colidee.height;
+                        return(dx*dx+dy*dy<=this.r*this.r);
+                    })
+                }
+
+                bouncer = (rotation) => {
+                    this.vx = this.speed*Math.sin(this.direction - rotation)*Math.cos(rotation + Math.PI/2)
+                    this.vy = this.speed*Math.sin(this.direction - rotation)*Math.sin(rotation + Math.PI/2)
+                    this.direction = //TODO: Here count the new direction;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                }                
+            }
+
+            class CanvasMovableObject extends CanvasStaticObject {
                 constructor(object) {
                     super(object)
                 }
 
-                velocityChange = (velocity) =>{
-                    velocity = velocity + 0.005;
-                    return Math.round(velocity*1000)/1000;
-                }
+
+                
             }
+
 
         class ItemInventory extends CanvasStaticObject {
             constructor() {

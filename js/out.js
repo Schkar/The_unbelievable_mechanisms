@@ -79,7 +79,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 document.addEventListener('DOMContentLoaded', function () {
+    var _motion;
+
     console.log("DOM loaded. Script is working");
     //Variables section
 
@@ -87,7 +91,22 @@ document.addEventListener('DOMContentLoaded', function () {
     var creationButton = document.querySelector(".temporaryGodlyCreationButton");
     var testplayfield = null;
     var testLevel = {
-        level1: [{ name: "movingObject", x: 450, y: 150, r: null, width: 100, height: 30, fill: "red", type: "static", velocity: 0, direction: 0, isCollided: false, rotation: 0 }, { name: "staticObject", x: 600, y: 300, r: null, width: 80, height: 30, fill: "green", type: "static", velocity: 0, direction: 0, isCollided: false, rotation: 0 }, { name: "someCircle", x: 500, y: 15, r: 10, fill: "blue", type: "kinetic", velocity: 0, direction: 0, isCollided: false, rotation: 0 }]
+        level1: [{
+            name: "movingObject",
+            position: { x: 450, y: 150 },
+            data: { width: 100, height: 30, rotation: 0, color: "red", type: "static" },
+            motion: (_motion = { value: 0, direction: 0, Vx: 0 }, _defineProperty(_motion, "Vx", 0), _defineProperty(_motion, "isCollided", false), _motion)
+        }, {
+            name: "staticObject",
+            position: { x: 600, y: 300 },
+            data: { width: 80, height: 30, rotation: 0, color: "green", type: "static" },
+            motion: { value: 0, direction: 0, Vx: 0, Vy: 0, isCollided: false }
+        }, {
+            name: "someCircle",
+            position: { x: 442, y: 15 },
+            data: { r: 10, color: "blue", type: "kinetic" },
+            motion: { value: 0, direction: 0, Vx: 0, Vy: 0, isCollided: false }
+        }]
 
         //Temporary dev functions
     };function step(timestamp) {
@@ -103,10 +122,9 @@ document.addEventListener('DOMContentLoaded', function () {
         //requestAnimationFrame(step)
         testplayfield = new Playfield();
         testplayfield.createObjects(testLevel);
-        testplayfield.logCurrentLevelObjects();
+        //testplayfield.logCurrentLevelObjects();
         testplayfield.physicsEngineRun();
 
-        //tempID = requestAnimationFrame(dupa);
         //currentLevel.physicsEngineRun()
         //requestAnimationFrame(currentLevel.physicsEngineRun)
     });
@@ -140,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Levels data
 
     var levelsInfo = {
-        level1: [{ name: "something", x: 400, y: 0, width: 100, height: 100, fill: "red", type: "kinetic" }, { name: "somethingelse", x: 600, y: 0, width: 100, height: 100, fill: "green", type: "kinetic", velocity: 0, direction: 0 }],
+        level1: [{}],
         level2: [],
         level3: [],
         level4: [],
@@ -174,20 +192,20 @@ document.addEventListener('DOMContentLoaded', function () {
         _classCallCheck(this, Playfield);
 
         this.createObjects = function (objects) {
-            var inventory = new ItemInventory();
-            inventory.createCanvasObject();
-            _this.currentLevelObjects["inventory"] = inventory;
-            objects["level" + _this.currentLevelNumber].forEach(function (e) {
-
-                if (e.type === "static") {
-                    var _tempObject = new CanvasStaticObject(e.x, e.y, e.r, e.width, e.height, e.fill, e.type, e.rotation);
+            //let inventory = new ItemInventory;
+            //inventory.createCanvasObject();
+            //this.currentLevelObjects["inventory"] = inventory;
+            objects["level" + _this.currentLevelNumber].forEach(function (object) {
+                console.log(object);
+                if (object.data.type === "static") {
+                    var _tempObject = new CanvasStaticObject(object);
                     _tempObject.createCanvasObject();
-                    _this.currentLevelObjects[e.name] = _tempObject;
+                    _this.currentLevelObjects[object.name] = _tempObject;
                     return;
                 }
-                var tempObject = new CanvasMovingObject(e.x, e.y, e.r, e.width, e.height, e.fill, e.type, e.velocity, e.direction, e.isCollided);
+                var tempObject = new CanvasMovingObject(object);
                 tempObject.createCanvasObject();
-                _this.currentLevelObjects[e.name] = tempObject;
+                _this.currentLevelObjects[object.name] = tempObject;
             });
         };
 
@@ -198,9 +216,9 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("resetCurrentLevel");
         };
 
-        this.getClickCoords = function (e) {
-            var xCoord = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2) * 10) / 10; //Formula for canvas click coords - works well
-            var yCoord = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2) * 10) / 10;
+        this.getClickCoords = function (click) {
+            var xCoord = Math.round((click.clientX - playfield.getBoundingClientRect().x - 2) * 10) / 10; //Formula for canvas click coords - works well
+            var yCoord = Math.round((click.clientY - playfield.getBoundingClientRect().y - 2) * 10) / 10;
             console.log(xCoord, yCoord);
         };
 
@@ -218,23 +236,46 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.collisionCheck = function () {
-            Object.keys(_this.currentLevelObjects).forEach(function (e) {
-                var colider = _this.currentLevelObjects[e];
-                if (colider.type === "static" || e === "inventory") {
+            Object.keys(_this.currentLevelObjects).forEach(function (object1) {
+                var colider = _this.currentLevelObjects[object1];
+                colider = colider.currentObject;
+                if (colider.type === "static" || object1 === "inventory") {
                     return;
                 }
-                Object.keys(_this.currentLevelObjects).forEach(function (e2) {
-                    if (e2 === "inventory") {
+                Object.keys(_this.currentLevelObjects).forEach(function (object2) {
+                    if (object2 === "inventory") {
                         return;
                     }
-                    var colidee = _this.currentLevelObjects[e2];
-                    if (colidee.x <= colider.x - colider.r && colidee.x + colidee.width >= colider.x + colider.r) {
-                        if (colider.y + colider.r === colidee.y) {
-                            colider.isCollided = true;
-                            return;
-                        }
-                        colider.isCollided = false;
+                    var colidee = _this.currentLevelObjects[object2];
+                    colidee = colidee.currentObject;
+                    var dx = Math.abs(colider.position.x - (colidee.position.x + colidee.data.width / 2));
+                    var dy = Math.abs(colider.position.y - (colidee.position.y + colidee.data.height / 2));
+                    //console.log(dx);
+                    //console.log(dy);
+
+                    if (dx > colider.data.r + colidee.data.width / 2) {
+                        return false;
                     }
+
+                    if (dy > colider.data.r + colidee.data.height / 2) {
+                        return false;
+                    }
+
+                    if (dx <= colidee.data.width) {
+                        console.log("collision on X-axis");
+                        colider.motion.isCollided = true;
+                        return true;
+                    }
+
+                    if (dy <= colidee.data.height) {
+                        console.log("collision on Y-axis");
+                        colider.motion.isCollided = true;
+                        return true;
+                    }
+
+                    dx = dx - colidee.data.width;
+                    dy = dy - colidee.data.height;
+                    return dx * dx + dy * dy <= colider.data.r * colider.data.r;
                 });
             });
             //TODO: Collisions checker
@@ -245,35 +286,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
             //TODO: Think - is this one is better, or a check in every single object (by calling a method?) - this needs only one raf, so it seems that is better. Either this, or calling a method, no many rafs.
 
-            Object.keys(_this.currentLevelObjects).forEach(function (e) {
-                var obj = _this.currentLevelObjects[e];
-
-                if (obj.type === "static" || e === "inventory") {
+            Object.keys(_this.currentLevelObjects).forEach(function (object) {
+                var obj = _this.currentLevelObjects[object];
+                obj = obj.currentObject;
+                var thisobj = _this.currentLevelObjects[object];
+                console.log(obj);
+                if (obj.data.type === "static" || object === "inventory") {
                     return;
                 }
 
-                if (obj.y + obj.height === playfieldHeight || obj.y + obj.r === playfieldHeight || obj.isCollided) {
-                    obj.y = obj.y;
+                if (obj.position.y + obj.data.height === playfieldHeight || obj.position.y + obj.data.r === playfieldHeight || obj.motion.isCollided) {
+                    obj.position.y = obj.position.y;
                     return;
                 }
 
-                if (obj.velocity < _this.gravityValue) {
-                    obj.velocity = obj.velocityChange(obj.velocity);
+                if (obj.motion.value < _this.gravityValue) {
+                    obj.motion.value = thisobj.velocityChange(obj.motion.value);
                 }
-                obj.y = obj.velocity === _this.gravityValue ? Math.round(obj.y + obj.velocity) : obj.y + obj.velocity;
+                obj.position.y = obj.motion.value === _this.gravityValue ? Math.round(obj.position.y + obj.motion.value) : obj.position.y + obj.motion.value;
 
-                if (obj.r === null) {
-                    playfieldContext.clearRect(obj.x, obj.y - 1, obj.width, obj.height);
-                    playfieldContext.fillStyle = obj.fill;
-                    playfieldContext.fillRect(obj.x, obj.y, obj.width, obj.height);
+                if (obj.data.r === null) {
+                    playfieldContext.clearRect(obj.position.x, obj.position.y - 1, obj.data.width, obj.data.height);
+                    playfieldContext.fillStyle = obj.data.color;
+                    playfieldContext.fillRect(obj.position.x, obj.position.y, obj.data.width, obj.data.height);
                     return;
                 }
-                playfieldContext.arc(obj.x, obj.y - 1.5, obj.r + 1.5, 0, Math.PI * 2, true);
+                playfieldContext.arc(obj.position.x, obj.position.y - 1.5, obj.data.r + 1.5, 0, Math.PI * 2, true);
                 playfieldContext.fillStyle = "white";
                 playfieldContext.fill();
                 playfieldContext.beginPath();
-                playfieldContext.arc(obj.x, obj.y, obj.r, 0, 2 * Math.PI);
-                playfieldContext.fillStyle = obj.fill;
+                playfieldContext.arc(obj.position.x, obj.position.y, obj.data.r, 0, 2 * Math.PI);
+                playfieldContext.fillStyle = obj.data.color;
                 playfieldContext.fill();
                 playfieldContext.closePath();
             });
@@ -282,50 +325,39 @@ document.addEventListener('DOMContentLoaded', function () {
         this.currentLevelNumber = level || 1;
         this.currentLevelObjects = {};
         this.gravityValue = 0.5; //
-    }
-    // BOUNCER - IF COLLISION TRUE THEN IF ROTATION = 45 THEN VELOCITY = grav.value, direction = 45 < !!!!!!!!!!!
-    ;
+    };
     //Arch-class - object prototype
 
 
-    var CanvasObject = function CanvasObject(x, y, r, width, height, fill, type, velocity, direction, isCollided, rotation) {
+    var CanvasObject = function CanvasObject(object) {
         var _this2 = this;
 
         _classCallCheck(this, CanvasObject);
 
         this.createCanvasObject = function () {
-            if (_this2.r !== null) {
+            //console.log(this.currentObject);
+            if (_this2.currentObject.data.r !== undefined) {
                 playfieldContext.beginPath();
-                playfieldContext.arc(_this2.x, _this2.y, _this2.r, 0, 2 * Math.PI);
-                playfieldContext.fillStyle = _this2.fill;
+                playfieldContext.arc(_this2.currentObject.position.x, _this2.currentObject.position.y, _this2.currentObject.data.r, 0, 2 * Math.PI);
+                playfieldContext.fillStyle = _this2.currentObject.data.color;
                 playfieldContext.fill();
                 playfieldContext.closePath();
                 return;
             }
-            playfieldContext.fillStyle = _this2.fill;
-            playfieldContext.fillRect(_this2.x, _this2.y, _this2.width, _this2.height);
+            playfieldContext.fillStyle = _this2.currentObject.data.color;
+            playfieldContext.fillRect(_this2.currentObject.position.x, _this2.currentObject.position.y, _this2.currentObject.data.width, _this2.currentObject.data.height);
         };
 
-        this.x = x;
-        this.y = y;
-        this.r = r;
-        this.width = width;
-        this.height = height;
-        this.fill = fill;
-        this.type = type;
-        this.velocity = velocity;
-        this.direction = direction;
-        this.isCollided = isCollided;
-        this.rotation = rotation;
+        this.currentObject = object;
     };
 
     var CanvasStaticObject = function (_CanvasObject) {
         _inherits(CanvasStaticObject, _CanvasObject);
 
-        function CanvasStaticObject(x, y, r, width, height, fill, type, rotation) {
+        function CanvasStaticObject(object) {
             _classCallCheck(this, CanvasStaticObject);
 
-            return _possibleConstructorReturn(this, (CanvasStaticObject.__proto__ || Object.getPrototypeOf(CanvasStaticObject)).call(this, x, y, r, width, height, fill, type, rotation));
+            return _possibleConstructorReturn(this, (CanvasStaticObject.__proto__ || Object.getPrototypeOf(CanvasStaticObject)).call(this, object));
         }
 
         return CanvasStaticObject;
@@ -334,25 +366,21 @@ document.addEventListener('DOMContentLoaded', function () {
     var CanvasMovingObject = function (_CanvasObject2) {
         _inherits(CanvasMovingObject, _CanvasObject2);
 
-        function CanvasMovingObject(x, y, r, fill, type, velocity, direction, isCollided) {
+        function CanvasMovingObject(object) {
             _classCallCheck(this, CanvasMovingObject);
 
-            var _this4 = _possibleConstructorReturn(this, (CanvasMovingObject.__proto__ || Object.getPrototypeOf(CanvasMovingObject)).call(this, x, y, r, fill, type, velocity, direction, isCollided));
+            var _this4 = _possibleConstructorReturn(this, (CanvasMovingObject.__proto__ || Object.getPrototypeOf(CanvasMovingObject)).call(this, object));
 
-            _initialiseProps.call(_this4);
+            _this4.velocityChange = function (velocity) {
+                velocity = velocity + 0.005;
+                return Math.round(velocity * 1000) / 1000;
+            };
 
             return _this4;
         }
 
         return CanvasMovingObject;
     }(CanvasObject);
-
-    var _initialiseProps = function _initialiseProps() {
-        this.velocityChange = function (velocity) {
-            velocity = velocity + 0.005;
-            return Math.round(velocity * 1000) / 1000;
-        };
-    };
 
     var ItemInventory = function (_CanvasStaticObject) {
         _inherits(ItemInventory, _CanvasStaticObject);
@@ -450,144 +478,6 @@ document.addEventListener('DOMContentLoaded', function () {
         resetConfirmScreen.style.display = "none";
     });
 });
-
-/*You can detect Rectangle vs Circle collisions like this using this Rectangle vs Circle collision-test code:
-
-    // return true if the rectangle and circle are colliding
-    // rect and circle are a rectangle and a circle as defined above
-
-    function RectCircleColliding(rect,circle){
-        var dx=Math.abs(circle.x-(rect.x+rect.w/2));
-        var dy=Math.abs(circle.y-(rect.y+rect.y/2));
-
-        if( dx > circle.r+rect.w2 ){ return(false); }
-        if( dy > circle.r+rect.h2 ){ return(false); }
-
-        if( dx <= rect.w ){ return(true); }
-        if( dy <= rect.h ){ return(true); }
-
-        var dx=dx-rect.w;
-        var dy=dy-rect.h
-        return(dx*dx+dy*dy<=circle.r*circle.r);
-    }
-    
-    What i need:
-    
-    Collision detector
-    Collision Solver -> Stop or Bounce
-    
-ctx.fillStyle = "lightgray";
-ctx.strokeStyle = "skyblue";
-
-// from top
-var rect1 = {
-    x: 125,
-    y: 10,
-    w: 20,
-    h: 20
-};
-var direction1 = 1;
-
-// from bottom
-var rect2 = {
-    x: 125,
-    y: 275,
-    w: 20,
-    h: 20
-};
-var direction2 = -1;
-
-// from left
-var rect3 = {
-    x: 0,
-    y: 125,
-    w: 20,
-    h: 20
-};
-var direction3 = 1;
-
-// from right
-var rect4 = {
-    x: 270,
-    y: 125,
-    w: 20,
-    h: 20
-};
-var direction4 = -1;
-
-// the center rect
-var rect5 = {
-    x: 120,
-    y: 120,
-    w: 30,
-    h: 30
-};
-
-
-function drawAll() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawRect(rect1);
-    drawRect(rect2);
-    drawRect(rect3);
-    drawRect(rect4);
-    drawRect(rect5);
-}
-
-
-function drawRect(r) {
-    ctx.beginPath();
-    ctx.rect(r.x, r.y, r.w, r.h);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-}
-
-
-// return true if the 2 rectangles are colliding
-function RectsColliding(r1, r2) {
-    return !(r1.x > r2.x + r2.w || r1.x + r1.w < r2.x || r1.y > r2.y + r2.h || r1.y + r1.h < r2.y);
-}
-
-
-var fps = 60;
-
-function animate() {
-    setTimeout(function () {
-        requestAnimFrame(animate);
-
-        // rect1 vs center rect
-        rect1.y = rect1.y + direction1;
-        if (RectsColliding(rect5, rect1) || rect1.y <= 0) {
-            direction1 = -direction1;
-        }
-
-        // rect2 vs center rect
-        rect2.y = rect2.y + direction2;
-        if (RectsColliding(rect5, rect2) || rect2.y > 280) {
-            direction2 = -direction2;
-        }
-
-        // rect3 vs center rect
-        rect3.x = rect3.x + direction3;
-        if (RectsColliding(rect5, rect3) || rect3.x <= 0) {
-            direction3 = -direction3;
-        }
-
-        // rect4 vs center rect
-        rect4.x = rect4.x + direction4;
-        if (RectsColliding(rect5, rect4) || rect4.x >= 280) {
-            direction4 = -direction4;
-        }
-
-
-        drawAll();
-
-    }, 1000 / fps);
-}
-
-animate();
-    
-    */
 
 /***/ }),
 /* 1 */

@@ -1,0 +1,80 @@
+Kulkadane: Wektor, X, Y, Wektor prędkości, współczynnik prędkości
+
+1. Obliczamy komponenty wektora predkości
+Vx = współczynnik prędkości * cos(gamma) (gamma = W - 180)
+Vy = współczynnik prędkości * sin(gamma)
+
+X2 = X0 + Vx
+Y2 = Y0 + Vy
+
+2. Obliczenie wektora wyjściowego po uderzeniu
+
+https://en.wikipedia.org/wiki/Elastic_collision#Two-dimensional
+
+theta = W?
+fi = rotacja?
+
+V1X = v1*sin(theta - fi)*cos(fi + pi/2)
+
+V1Y = v1*sin(theta - fi)*sin(fi + pi/2)
+
+X3 = Xkolizji + V1X;
+Y3 = Ykolizji + V1Y;
+
+
+
+function BallObject(elasticity) {
+  this.v = { x: 1, y: 20 }; // velocity: m/s^2
+  this.m = 10; // mass: kg
+  this.p = { x: 40, y: 0}; // position
+  this.r = 15; // radius of obj
+  this.cr = elasticity; // elasticity
+}
+
+function collide(obj) {
+  obj.v.y = (obj.cr * floor.m * -obj.v.y + obj.m * obj.v.y) / (obj.m + floor.m);
+  obj.v.y = (-obj.v.y + obj.v.y);
+}
+
+function update(obj, dt) {
+  
+  // over-simplified collision detection
+  // only consider the floor for simplicity
+  if ((obj.p.y + obj.r) > c.height) { 
+     obj.p.y = c.height - obj.r;
+     collide(obj);
+  }
+  
+  obj.v.y += g * dt;
+  obj.p.x += obj.v.x * dt * ppm;
+  obj.p.y += obj.v.y * dt * ppm;
+}
+    fps = 60, // target frames per second
+    ppm = 20, // pixels per meter
+    g = 9.8, // m/s^2 - acceleration due to gravity
+    objs = [],
+    floor = {
+      v: { x: 0, y: 0 }, // floor is immobile
+      m: 5.9722 * Math.pow(10, 24) // mass of earth (probably could be smaller)
+    },
+    t = new Date().getTime();
+
+
+setInterval(function() {
+  
+  var nt = new Date().getTime(),
+      dt = (nt - t) / 1000;
+  
+  if (clr.checked) {
+    ctx.clearRect(0, 0, c.width, c.height);
+  }
+  
+  for (var i = 0; i < objs.length; i++) {
+    update(objs[i], dt);
+    draw(objs[i]);
+  }
+  
+  t = nt;
+  
+}, 1000 / fps);
+

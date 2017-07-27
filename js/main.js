@@ -14,13 +14,21 @@ document.addEventListener('DOMContentLoaded',function(){
             }
 
         //Temporary dev functions
+            function step(timestamp) {
+                console.log(Math.floor(timestamp));
+                requestAnimationFrame(step);
+            }
+
+            let timeNow = 0;
+            let timePrevious = 0;
 
             creationButton.addEventListener("click",function(e){
                 e.preventDefault()
+                //requestAnimationFrame(step)
                 testplayfield = new Playfield()
                 testplayfield.createObjects(testLevel);
                 testplayfield.logCurrentLevelObjects();
-                testplayfield.physicsEngineRun();
+                 testplayfield.physicsEngineRun();
                 
                 
                 //tempID = requestAnimationFrame(dupa);

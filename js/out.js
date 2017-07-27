@@ -90,9 +90,17 @@ document.addEventListener('DOMContentLoaded', function () {
         level1: [{ name: "movingObject", x: 450, y: 150, r: null, width: 100, height: 30, fill: "red", type: "static", velocity: 0, direction: 0, isCollided: false, rotation: 0 }, { name: "staticObject", x: 600, y: 300, r: null, width: 80, height: 30, fill: "green", type: "static", velocity: 0, direction: 0, isCollided: false, rotation: 0 }, { name: "someCircle", x: 500, y: 15, r: 10, fill: "blue", type: "kinetic", velocity: 0, direction: 0, isCollided: false, rotation: 0 }]
 
         //Temporary dev functions
+    };function step(timestamp) {
+        console.log(Math.floor(timestamp));
+        requestAnimationFrame(step);
+    }
 
-    };creationButton.addEventListener("click", function (e) {
+    var timeNow = 0;
+    var timePrevious = 0;
+
+    creationButton.addEventListener("click", function (e) {
         e.preventDefault();
+        //requestAnimationFrame(step)
         testplayfield = new Playfield();
         testplayfield.createObjects(testLevel);
         testplayfield.logCurrentLevelObjects();
@@ -200,9 +208,12 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(_this.currentLevelObjects);
         };
 
-        this.physicsEngineRun = function () {
+        this.physicsEngineRun = function (timestamp) {
             _this.collisionCheck();
             _this.gravity();
+            timeNow = timestamp;
+            console.log(timeNow, timeNow - timePrevious);
+            timePrevious = Math.floor(timestamp);
             engineID = requestAnimationFrame(_this.physicsEngineRun);
         };
 

@@ -105,11 +105,11 @@ document.addEventListener('DOMContentLoaded', function () {
             name: "aBall",
             position: { x: 500, y: 200 },
             data: { r: 10, color: "green", type: "kinetic" },
-            motion: { speed: 1, direction: 135, vx: 0, vy: 0, isCollided: false }
+            motion: { speed: 1, direction: 0, vx: 0, vy: 0, isCollided: false }
         }, {
             name: "staticObject2",
             position: { x: 100, y: 300 },
-            data: { width: 900, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, isBeingRotated: false }
+            data: { width: 800, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, isBeingRotated: false }
         }]
 
         //Temporary dev functions
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 _this.currentLevelObjects[object].moveMe();
-                _this.currentLevelObjects[object].rotateMe();
+                //this.currentLevelObjects[object].rotateMe();
             });
         };
 
@@ -253,13 +253,13 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(_this.currentLevelObjects);
         };
 
-        this.physicsEngineRun = function () {
+        this.physicsEngineRun = function (time) {
             _this.clearCanvas();
             Object.keys(_this.currentLevelObjects).forEach(function (object) {
                 if (_this.currentLevelObjects[object].type === "static") {
                     return;
                 }
-                _this.currentLevelObjects[object].movement();
+                _this.currentLevelObjects[object].movement(time);
                 _this.currentLevelObjects[object].collisionCheck();
             });
             _this.moveObject();
@@ -268,8 +268,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.currentLevelNumber = level || 1;
         this.currentLevelObjects = {};
-        this.gravityValue = 0.5; //
+        this.gravityValue = 0.02; //
     };
+
     //Arch-class - object prototype
 
 
@@ -393,6 +394,7 @@ document.addEventListener('DOMContentLoaded', function () {
             _this3.isBeingRotated = object.data.isBeingRotated;
             return _this3;
         }
+
         //FIXME: this.isBeingRotated must be put somewhere. Don't know where.
         //Also, think about diffrent rotation method...
 
@@ -436,15 +438,17 @@ document.addEventListener('DOMContentLoaded', function () {
             //this.direction = document.querySelector(".temporaryDirectionChange").value;
         };
 
-        this.movement = function () {
+        this.movement = function (time) {
+            //console.log(time);
             _this7.vx = Math.cos(_this7.direction * (Math.PI / 180));
-            _this7.vy = Math.sin(_this7.direction * (Math.PI / 180));
+            _this7.vy = Math.sin(_this7.direction * (Math.PI / 180)) + testplayfield.gravityValue;
             // this.vx = Math.cos(this.direction);
             // this.vy = Math.sin(this.direction);
             // this
+            _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
             _this7.x = Math.round((_this7.x + _this7.vx) * 100) / 100;
-            // this.y = Math.round((this.y + this.vy + testplayfield.gravityValue)*100)/100;
             _this7.y = Math.round((_this7.y + _this7.vy) * 100) / 100;
+            //this.y = Math.round((this.y + this.vy)*100)/100;
 
             //this.directionChange()
         };
@@ -524,18 +528,20 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.bouncer = function (rotation) {
-            console.log(rotation);
+            //console.log(rotation);
             // console.log("dupa");
             _this7.vx = _this7.speed * Math.cos((_this7.direction - rotation) * Math.PI / 180) * Math.cos(rotation * (Math.PI / 180)) + _this7.speed * Math.sin((_this7.direction - rotation) * Math.PI / 180) * Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
             _this7.vy = _this7.speed * Math.cos((_this7.direction - rotation) * Math.PI / 180) * Math.sin(rotation * (Math.PI / 180)) + _this7.speed * Math.sin((_this7.direction - rotation) * Math.PI / 180) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2);
             //FIXME: sprawdzić czy vx + x > x prostokąta
-            console.log(_this7.vx, _this7.vy);
-            var tanBeta = _this7.vy / _this7.vx;
-            var beta = Math.atan(tanBeta);
-            var betadegree = beta * (180 / Math.PI);
-            console.log(betadegree);
-            _this7.direction = betadegree; //Math.acos()
 
+            //console.log(this.vx,this.vy);
+            // let tanBeta = this.vy/this.vx;
+            // let beta = Math.atan(tanBeta)
+            // let betadegree = (beta*(180/Math.PI))
+            //console.log(betadegree);
+            _this7.speed = _this7.speed / 2;
+            _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
+            console.log(_this7.direction);
 
             _this7.x += _this7.vx;
             _this7.y += _this7.vy;

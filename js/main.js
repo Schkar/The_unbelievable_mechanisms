@@ -29,12 +29,12 @@ document.addEventListener('DOMContentLoaded',function(){
                         name: "aBall",
                         position: {x: 500, y: 200},
                         data: {r: 10, color: "green", type: "kinetic"},
-                        motion: {speed: 1, direction: 135, vx: 0, vy:0, isCollided: false}
+                        motion: {speed: 1, direction: 0, vx: 0, vy:0, isCollided: false}
                     },
                     {
                         name: "staticObject2",
                         position: {x:100, y:300}, 
-                        data:{width:900, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
+                        data:{width:800, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
                     }
                 ]
             }
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 constructor(level){
                     this.currentLevelNumber = level || 1;
                     this.currentLevelObjects = {};
-                    this.gravityValue = 0.5; //
+                    this.gravityValue = 0.02; //
                 }
 
                 createObjects = (objects) =>{
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded',function(){
                             return;
                         }
                         this.currentLevelObjects[object].moveMe();
-                        this.currentLevelObjects[object].rotateMe();
+                        //this.currentLevelObjects[object].rotateMe();
                     });
                 }
 
@@ -191,19 +191,20 @@ document.addEventListener('DOMContentLoaded',function(){
                     console.log(this.currentLevelObjects);
                 }
 
-                physicsEngineRun = () => {
+                physicsEngineRun = (time) => {
                     this.clearCanvas()
                     Object.keys(this.currentLevelObjects).forEach( (object) => {
                         if (this.currentLevelObjects[object].type === "static") {
                            return; 
                         }
-                        this.currentLevelObjects[object].movement()
+                        this.currentLevelObjects[object].movement(time)
                         this.currentLevelObjects[object].collisionCheck()
                     })
                     this.moveObject()
                     requestAnimationFrame(this.physicsEngineRun)
                 }
             }
+
         //Arch-class - object prototype
             class CanvasObject {
                 constructor(object) {
@@ -282,6 +283,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.y = yMove - this.height/2;
                     this.redrawCanvasObject()
                 }
+                
                 //FIXME: this.isBeingRotated must be put somewhere. Don't know where.
                 //Also, think about diffrent rotation method...
                 rotateMe = () => {
@@ -345,16 +347,18 @@ document.addEventListener('DOMContentLoaded',function(){
                     //this.direction = document.querySelector(".temporaryDirectionChange").value;
                 }
 
-                movement = () => {
+                movement = (time) => {
+                    //console.log(time);
                     this.vx = Math.cos(this.direction*(Math.PI/180));
-                    this.vy = Math.sin(this.direction*(Math.PI/180));
+                    this.vy = Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
                     // this.vx = Math.cos(this.direction);
                     // this.vy = Math.sin(this.direction);
                     // this
+                    this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
                     this.x = Math.round((this.x + this.vx)*100)/100;
-                    // this.y = Math.round((this.y + this.vy + testplayfield.gravityValue)*100)/100;
                     this.y = Math.round((this.y + this.vy)*100)/100;
-
+                    //this.y = Math.round((this.y + this.vy)*100)/100;
+                    
                     //this.directionChange()
                 }
 
@@ -434,17 +438,20 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 bouncer = (rotation) => {
-                    console.log(rotation);
+                    //console.log(rotation);
                     // console.log("dupa");
                     this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
                     this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
                     //FIXME: sprawdzić czy vx + x > x prostokąta
-                    console.log(this.vx,this.vy);
-                    let tanBeta = this.vy/this.vx;
-                    let beta = Math.atan(tanBeta)
-                    let betadegree = (beta*(180/Math.PI))
-                    console.log(betadegree);
-                    this.direction = betadegree//Math.acos()
+                    
+                    //console.log(this.vx,this.vy);
+                    // let tanBeta = this.vy/this.vx;
+                    // let beta = Math.atan(tanBeta)
+                    // let betadegree = (beta*(180/Math.PI))
+                    //console.log(betadegree);
+                    this.speed = this.speed/2
+                    this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
+                    console.log(this.direction);
                     
 
                     this.x += this.vx;

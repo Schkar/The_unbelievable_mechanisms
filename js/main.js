@@ -452,6 +452,8 @@ document.addEventListener('DOMContentLoaded',function(){
                 }                
             }
 
+            
+
             class CanvasMovableObject extends CanvasStaticObject {
                 constructor(object) {
                     super(object)

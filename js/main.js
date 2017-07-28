@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "staticObject1",
                         position: {x:450, y:150},
-                        data: {width:100, height:30, rotation: 0, color:"red", type:"static"},
+                        data: {width:100, height:30, rotation: 0, color:"red", type:"static", isMovable: true},
                     },
                     {
                         name: "staticObject2",
@@ -25,16 +25,16 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                 ],
                 level2: [
-                    {
-                        name: "aBall",
-                        position: {x: 500, y: 200},
-                        data: {r: 10, color: "green", type: "kinetic"},
-                        motion: {speed: 0.15, direction: 4, vx: 0, vy:0, isCollided: false}
-                    },
+                    // {
+                    //     name: "aBall",
+                    //     position: {x: 500, y: 200},
+                    //     data: {r: 10, color: "green", type: "kinetic"},
+                    //     motion: {speed: 0.15, direction: 6, vx: 0, vy:0, isCollided: false}
+                    // },
                     {
                         name: "staticObject2",
                         position: {x:600, y:300}, 
-                        data:{width:80, height:30, rotation: 0, color:"red", type:"static"},
+                        data:{width:80, height:30, rotation: 0, color:"green", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
                     }
                 ]
             }
@@ -81,9 +81,10 @@ document.addEventListener('DOMContentLoaded',function(){
             let hours = 0;
             let start = false;
 
-        //RqAnimFrame ID
+        //AnimFrame IDs
             
             let engineID = null;
+            let draggerID = null;
 
         //Levels data
             
@@ -112,13 +113,29 @@ document.addEventListener('DOMContentLoaded',function(){
             const playfieldContext = playfield.getContext("2d");
             const playfieldWidth = playfield.width;
             const playfieldHeight = playfield.height;
-            
+            let xClick = 0;
+            let yClick = 0;
+            let prevxClick = 0;
+            let prevyClick = 0;
+            let xMove = 0;
+            let yMove = 0;
+            let prevxMove = 0;
+            let prevyMove = 0;
 
         //Canvas functions
             
-            playfield.addEventListener("click",(e) => {
-                
+            playfield.addEventListener("mousedown",(e) => {
+                xClick = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2)*10)/10; //Formula for canvas click coords - works well
+                yClick = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
+                testplayfield.moveObject(e)
             })
+
+            playfield.addEventListener("mousemove",(e) => {
+                xMove = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2)*10)/10;
+                yMove = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
+            })
+
+
 
     //Playfield objects classes
         //Main object, creator of objects, physics engine
@@ -160,10 +177,14 @@ document.addEventListener('DOMContentLoaded',function(){
                     console.log("resetCurrentLevel");
                 }
                 
-                getClickCoords = (click) => {
-                    let xCoord = Math.round((click.clientX - playfield.getBoundingClientRect().x - 2)*10)/10; //Formula for canvas click coords - works well
-                    let yCoord = Math.round((click.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
-                    console.log(xCoord,yCoord);
+                moveObject = () => {
+                    Object.keys(this.currentLevelObjects).forEach( (object) => {
+                        if (!this.currentLevelObjects[object].isMovable){
+                            return;
+                        }
+                        this.currentLevelObjects[object].moveMe();
+                        this.currentLevelObjects[object].rotateMe();
+                    });
                 }
 
                 logCurrentLevelObjects = () => {
@@ -179,6 +200,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         this.currentLevelObjects[object].movement()
                         this.currentLevelObjects[object].collisionCheck()
                     })
+                    this.moveObject()
                     requestAnimationFrame(this.physicsEngineRun)
                 }
             }
@@ -201,6 +223,16 @@ document.addEventListener('DOMContentLoaded',function(){
                         playfieldContext.closePath();
                         return;
                     }
+                    if (this.isDragged) {
+                        playfieldContext.strokeStyle="red";
+                        playfieldContext.lineWidth = 4;
+                        playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
+                    }
+                    if (this.isBeingRotated) {
+                        playfieldContext.strokeStyle="blue";
+                        playfieldContext.lineWidth = 4;
+                        playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
+                    }
                     playfieldContext.fillStyle=this.color;
                     playfieldContext.fillRect(this.x,this.y,this.width,this.height);
                 }
@@ -217,6 +249,76 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.width = object.data.width
                     this.height = object.data.height
                     this.rotation = object.data.rotation 
+                    this.isMovable = object.data.isMovable
+                    this.isDragged = object.data.isDragged
+                    this.isBeingRotated = object.data.isBeingRotated
+                }
+
+                moveMe = () => {
+                    if (this.isDragged && prevxClick === xClick && prevyClick === yClick) {
+                        this.dragger()
+                        return
+                    }
+                    else if (prevxClick !== 0 && prevxClick !== 0) {
+                        prevxClick = 0;
+                        prevyClick = 0;
+                        xClick = 0;
+                        yClick = 0;
+                        this.isDragged = false;
+                        //this.isBeingRotated = true;
+                        return
+                    }
+                    if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)) {
+                        this.isDragged = true;
+                        prevxClick = xClick;
+                        prevyClick = yClick;
+                        this.dragger()
+                    }
+                    
+                }
+
+                dragger = () => {
+                    this.x = xMove - this.width/2;
+                    this.y = yMove - this.height/2;
+                    this.redrawCanvasObject()
+                }
+                //FIXME: this.isBeingRotated must be put somewhere. Don't know where.
+                //Also, think about diffrent rotation method...
+                rotateMe = () => {
+                    if (this.isDragged) {
+                        return;
+                    }
+                    if (!this.isBeingRotated) {
+                        return;
+                    }
+                    if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)&&(xClick !== 0 && yClick !== 0)) {
+                        this.isBeingRotated = false;
+                        return;
+                    }
+                    // console.log(yMove,prevyMove);
+                    // if (yMove - prevyMove > 0) {
+                    //     this.rotation +=45;
+                    // }
+                    // else if (yMove - prevyMove < 0) {
+                    //     this.rotation -=45;
+                    // }
+                    this.rotation = yMove/360;
+                    if(this.rotation === 360) {
+                        this.rotation = 0;
+                    }
+                    if(this.rotation <= 0) {
+                        this.rotation = 315;
+                    }
+                    // playfieldContext.save();
+                    playfieldContext.translate(this.x + this.width/2,this.y + this.height/2);
+                    playfieldContext.rotate(this.rotation*(Math.PI/180));
+                    // console.log(this.x,this.y);
+                    // playfieldContext.fillStyle=this.color;
+                    // playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+                    playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
+                    this.redrawCanvasObject();
+                    //playfieldContext.restore();
+                    prevyMove = yMove;
                 }
             }
             
@@ -329,7 +431,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 bouncer = (rotation) => {
                     this.vx = this.speed*Math.sin(this.direction - rotation)*Math.cos(rotation + Math.PI/2)
                     this.vy = this.speed*Math.sin(this.direction - rotation)*Math.sin(rotation + Math.PI/2)
-                    this.direction = //TODO: Here count the new direction;
+                    //this.direction = //TODO: Here count the new direction. It is weird, however it does it on its own...;
                     this.x += this.vx;
                     this.y += this.vy;
                 }                

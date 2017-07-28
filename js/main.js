@@ -25,16 +25,16 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                 ],
                 level2: [
-                    // {
-                    //     name: "aBall",
-                    //     position: {x: 500, y: 200},
-                    //     data: {r: 10, color: "green", type: "kinetic"},
-                    //     motion: {speed: 0.15, direction: 6, vx: 0, vy:0, isCollided: false}
-                    // },
+                    {
+                        name: "aBall",
+                        position: {x: 500, y: 200},
+                        data: {r: 10, color: "green", type: "kinetic"},
+                        motion: {speed: 1, direction: 135, vx: 0, vy:0, isCollided: false}
+                    },
                     {
                         name: "staticObject2",
-                        position: {x:600, y:300}, 
-                        data:{width:80, height:30, rotation: 0, color:"green", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
+                        position: {x:100, y:300}, 
+                        data:{width:900, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
                     }
                 ]
             }
@@ -342,17 +342,19 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 directionChange = () => {
                     //this.direction = Math.floor(Math.random() * (360 - 1 + 1)) + 1
-                    this.direction = document.querySelector(".temporaryDirectionChange").value;
+                    //this.direction = document.querySelector(".temporaryDirectionChange").value;
                 }
 
                 movement = () => {
-                    // console.log(this.direction);
-                    this.vx = Math.cos(this.direction);
-                    this.vy = Math.sin(this.direction);
-                    // this.x = Math.round((this.x + this.vx)*100)/100;
-                    // this.y = Math.round((this.y + this.vy)*100)/100;
-                    this.x = this.x + this.vx;
-                    this.y = this.y + this.vy + testplayfield.gravityValue;
+                    this.vx = Math.cos(this.direction*(Math.PI/180));
+                    this.vy = Math.sin(this.direction*(Math.PI/180));
+                    // this.vx = Math.cos(this.direction);
+                    // this.vy = Math.sin(this.direction);
+                    // this
+                    this.x = Math.round((this.x + this.vx)*100)/100;
+                    // this.y = Math.round((this.y + this.vy + testplayfield.gravityValue)*100)/100;
+                    this.y = Math.round((this.y + this.vy)*100)/100;
+
                     //this.directionChange()
                 }
 
@@ -368,14 +370,14 @@ document.addEventListener('DOMContentLoaded',function(){
                         if (this.x - this.r <= 0) {
                             // console.log("lw");
                             this.x = 0 + this.r;
-                            this.bouncer(90);
+                            this.bouncer(0);
                         }
 
                         // Right wall
                         if (this.x + this.r >= 1000) {
                             // console.log("rw");
                             this.x = 1000 - this.r;
-                            this.bouncer(90)
+                            this.bouncer(0)
                         }
 
                         // Ceiling
@@ -412,12 +414,14 @@ document.addEventListener('DOMContentLoaded',function(){
                         // collision on X-axis
                         if( dx <= colidee.width ){
                             this.isCollided = true;
+                            console.log("xcol");
                             this.bouncer(colidee.rotation)
                             return; 
                         }
 
                         // collision on Y-axis
-                        if( dy <= colidee.data.height ){
+                        if( dy <= colidee.height ){
+                            console.log("ycol");
                             this.isCollided = true;
                             this.bouncer(colidee.rotation)
                             return; 
@@ -430,9 +434,19 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 bouncer = (rotation) => {
-                    this.vx = this.speed*Math.sin(this.direction - rotation)*Math.cos(rotation + Math.PI/2)
-                    this.vy = this.speed*Math.sin(this.direction - rotation)*Math.sin(rotation + Math.PI/2)
-                    //this.direction = //TODO: Here count the new direction. It is weird, however it does it on its own...;
+                    console.log(rotation);
+                    // console.log("dupa");
+                    this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
+                    this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
+                    //FIXME: sprawdzić czy vx + x > x prostokąta
+                    console.log(this.vx,this.vy);
+                    let tanBeta = this.vy/this.vx;
+                    let beta = Math.atan(tanBeta)
+                    let betadegree = (beta*(180/Math.PI))
+                    console.log(betadegree);
+                    this.direction = betadegree//Math.acos()
+                    
+
                     this.x += this.vx;
                     this.y += this.vy;
                 }                

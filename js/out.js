@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     xClick = 0;
                     yClick = 0;
                     _this3.isDragged = false;
-                    //this.isBeingRotated = true;
+                    _this3.isBeingRotated = true;
                     return;
                 }
                 if (_this3.x <= xClick && _this3.x + _this3.width >= xClick && _this3.y <= yClick && _this3.y + _this3.height >= yClick) {
@@ -367,7 +367,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 // else if (yMove - prevyMove < 0) {
                 //     this.rotation -=45;
                 // }
-                _this3.rotation = yMove / 360;
+                _this3.rotation = xMove / 360;
+                console.log(_this3.rotation);
                 if (_this3.rotation === 360) {
                     _this3.rotation = 0;
                 }

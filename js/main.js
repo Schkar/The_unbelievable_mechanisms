@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         name: "someCircle",
                         position:{x:442, y:15},
                         data:{r:10, color:"blue", type:"kinetic"},
-                        motion: {speed: 0, direction: 0, vx: 0, vy:0, isCollided: false}
+                        motion: {speed: 0, vx: 0, vy:0, isCollided: false}
                     }
                 ],
                 level2: [
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         name: "aBall",
                         position: {x: 950, y: 200},
                         data: {r: 10, color: "green", type: "kinetic"},
-                        motion: {speed: 5, direction: -15, vx: 0, vy:0, isCollided: false}
+                        motion: {speed: 2, vx: -2, vy: 1, isCollided: false}
                     },
                     // {
                     //     name: "staticObject2",
@@ -121,6 +121,8 @@ document.addEventListener('DOMContentLoaded',function(){
             let yMove = 0;
             // let prevxMove = 0;
             // let prevyMove = 0;
+            let difTime = 0;
+            let previousTime = 0;
 
         //Canvas functions
             
@@ -143,7 +145,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 constructor(level){
                     this.currentLevelNumber = level || 1;
                     this.currentLevelObjects = {};
-                    this.gravityValue = 0.02; //
+                    this.gravityValue = 0; //
                 }
 
                 createObjects = (objects) =>{
@@ -227,22 +229,22 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                     if (this.rotation !== 0) {
                         playfieldContext.save();
-                        playfieldContext.translate(this.x + this.width/2,this.y + this.height/2);
+                        playfieldContext.translate(this.x,this.y);
                         playfieldContext.rotate(this.rotation*(Math.PI/180));
                         playfieldContext.fillStyle=this.color;
                         
-                        playfieldContext.fillRect(-this.width/2,-this.height/2,this.width,this.height);
+                        playfieldContext.fillRect(-this.width,-this.height,this.width,this.height);
                         if (this.isDragged) {
-                            playfieldContext.strokeStyle="red";
+                            playfieldContext.strokeStyle="green";
                             playfieldContext.lineWidth = 4;
-                            playfieldContext.strokeRect(-this.width/2,-this.height/2,this.width,this.height); 
+                            playfieldContext.strokeRect(-this.width,-this.height,this.width,this.height); 
                         }
-                        //playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
+                        playfieldContext.translate(this.x,this.y);
                         playfieldContext.restore();
                         return;
                     }
                     if (this.isDragged) {
-                        playfieldContext.strokeStyle="red";
+                        playfieldContext.strokeStyle="green";
                         playfieldContext.lineWidth = 4;
                         playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                     }
@@ -361,14 +363,11 @@ document.addEventListener('DOMContentLoaded',function(){
                     if (this.speed < 0) {
                         this.speed = 0
                     }
-                    this.vx = this.speed*Math.cos(this.direction*(Math.PI/180));
-                    this.vy = this.speed*Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
-                    // this.vx = Math.cos(this.direction*(Math.PI/180));
-                    // this.vy = Math.sin(this.direction*(Math.PI/180));
-                    //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
-                    //this.speed = this.speed - 0.001;
-                    this.x = this.x + this.vx;
-                    this.y = this.y + this.vy;
+                    
+                    this.x = this.x + (this.vx*this.speed);
+                    this.vy = this.vy + 0.01;
+                    this.y = this.y + (this.vy*this.speed);
+                    previousTime = time;
                 }
 
                 wallCollisionCheck = () => {
@@ -376,7 +375,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         // Wall collision check: 
                         // Left wall
                         if (this.x - this.r <= 0) {
-                             console.log("lw");
+                            //  console.log("lw");
                             //this.x = 0 + this.r;
                             this.bouncer(90);
                         }
@@ -398,7 +397,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         // Floor
                         if (this.y + this.r >= 400) {
                             // console.log("fl");
-                            //this.y = 400 - this.r;
+                            this.y = 400 - this.r;
                             this.bouncer(0)
                         }
                 }
@@ -476,11 +475,19 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 bouncer = (rotation) => {
                     //console.log(rotation);
-                    this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
+                    // this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
 
-                    this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
+                    // this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
+                    let a = this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy));
+                    let b = this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy));
+                    let c = Math.cos(rotation*(Math.PI/180));
+                    let d = Math.sin(rotation*(Math.PI/180));
+                    let e = Math.cos(rotation*(Math.PI/180)-Math.PI/2);
+                    let f = Math.sin(rotation*(Math.PI/180)-Math.PI/2);
 
-
+                    this.vx = this.speed*(a*c+b*d)*c+this.speed*(b*c-a*d)*e;
+                    this.vy = this.speed*(a*c+b*d)*d+this.speed*(b*c-a*d)*f + 0.01;
+                    //console.log(this.vx,this.vy);
                     //FIXME:  arctan zwraca kąty tylko od -90 do 90. Nie zwróci kąta wyższego od tych wartości! Wymyśleć rozwiązanie! To samo jest dla movementu!!!!! Jeżeli vx jest ujemny, to leci w ćwiartkę od -90,0000001 do -179,9999999 i od 90,0000001 do 179,999999999
 
 
@@ -502,48 +509,33 @@ document.addEventListener('DOMContentLoaded',function(){
                     //         this.direction = -(this.direction)
                     //     // } 
                     // }
-                    if (this.direction === 0 && rotation % 90 === 0) {
-                        this.direction = 180
-                    }
-                    else if (this.direction % 90 === 0 && rotation % 90 === 0) {
-                        this.direction = -this.direction
-                    }
-                    else if  (this.direction > 90) {
-                        this.direction = -180 + (this.direction - 180) 
-                    }
-                    else if (this.direction < -90) {
-                        this.direction = 180 - (this.direction + 180)
-                    }
-                    else if (this.direction > -90 && this.direction < 0 && this.vx < 0) {
-                        this.direction = -180 + Math.abs(this.direction)
-                    }
-                    else if (this.direction < 90 && this.direction > 0 && this.vx < 0) {
-                        this.direction = 180 - this.direction
-                    }
-                    else {
-                        this.direction = Math.atan(this.vy/this.vx)*(180/Math.PI)
-                    }
+                    // if (this.direction === 0 && rotation % 90 === 0) {
+                    //     this.direction = 180
+                    // }
+                    // else if (this.direction % 90 === 0 && rotation % 90 === 0) {
+                    //     this.direction = -this.direction
+                    // }
+                    // else if  (this.direction > 90) {
+                    //     this.direction = -180 + (this.direction - 180) 
+                    // }
+                    // else if (this.direction < -90) {
+                    //     this.direction = 180 - (this.direction + 180)
+                    // }
+                    // else if (this.direction > -90 && this.direction < 0 && this.vx < 0) {
+                    //     this.direction = -180 + Math.abs(this.direction)
+                    // }
+                    // else if (this.direction < 90 && this.direction > 0 && this.vx < 0) {
+                    //     this.direction = 180 - this.direction
+                    // }
+                    // else {
+                    //     this.direction = Math.atan(this.vy/this.vx)*(180/Math.PI)
+                    // }
                     //this works for every bounce with vx > 0
                     //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
 
-                    //console.log(this.vx,this.vy,this.direction);
-                    //direction: -15 (right wall)
-                    //-0.9659258262890683 -0.25881904510252085 15.000000000000005
-                    //-0.9659258262890683 0.25881904510252074 -14.999999999999998
-                    //direction: 15 (right wall)
-                    //-0.9659258262890683 -0.25881904510252085 15.000000000000005  
-                    //-0.9659258262890683 0.25881904510252074 -14.999999999999998
-                    //direction: 30 (right wall)
-                    //-0.8660254037844385 -0.5000000000000002 30.000000000000018  
-                    //-0.8660254037844385 0.5000000000000003 -30.000000000000025
-                    //direction: 45 (right wall)
-                    //-0.7071067811865476 -0.7071067811865475 45
-                    //-0.7071067811865475 0.7071067811865476 -45.00000000000001
-                    //direction: 60 (right wall)
-                    //-0.5 -0.8660254037844387 60.00000000000001
-                    //-0.4999999999999998 0.8660254037844387 -60.00000000000001
+                    
 
-                    console.log(this.direction);
+                    //console.log(this.direction);
                     this.x += this.vx;
                     this.y += this.vy;
                 }                

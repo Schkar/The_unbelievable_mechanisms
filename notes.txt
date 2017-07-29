@@ -45,8 +45,8 @@ function update(obj, dt) {
      collide(obj);
   }
   
-  obj.v.y += g * dt;
-  obj.p.x += obj.v.x * dt * ppm;
+  obj.v.y = obj.v.y + g * dt;
+  obj.p.x = obj.p.x + obj.v.x * dt * ppm;
   obj.p.y += obj.v.y * dt * ppm;
 }
     fps = 60, // target frames per second

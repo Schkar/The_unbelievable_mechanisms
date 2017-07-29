@@ -99,13 +99,13 @@ document.addEventListener('DOMContentLoaded', function () {
             name: "someCircle",
             position: { x: 442, y: 15 },
             data: { r: 10, color: "blue", type: "kinetic" },
-            motion: { speed: 0, direction: 0, vx: 0, vy: 0, isCollided: false }
+            motion: { speed: 0, vx: 0, vy: 0, isCollided: false }
         }],
         level2: [{
             name: "aBall",
             position: { x: 950, y: 200 },
             data: { r: 10, color: "green", type: "kinetic" },
-            motion: { speed: 5, direction: -15, vx: 0, vy: 0, isCollided: false }
+            motion: { speed: 2, vx: -2, vy: 1, isCollided: false }
         }]
 
         //Temporary dev functions
@@ -182,6 +182,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var yMove = 0;
     // let prevxMove = 0;
     // let prevyMove = 0;
+    var difTime = 0;
+    var previousTime = 0;
 
     //Canvas functions
 
@@ -265,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.currentLevelNumber = level || 1;
         this.currentLevelObjects = {};
-        this.gravityValue = 0.02; //
+        this.gravityValue = 0; //
     };
 
     //Arch-class - object prototype
@@ -287,22 +289,22 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (_this2.rotation !== 0) {
                 playfieldContext.save();
-                playfieldContext.translate(_this2.x + _this2.width / 2, _this2.y + _this2.height / 2);
+                playfieldContext.translate(_this2.x, _this2.y);
                 playfieldContext.rotate(_this2.rotation * (Math.PI / 180));
                 playfieldContext.fillStyle = _this2.color;
 
-                playfieldContext.fillRect(-_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
+                playfieldContext.fillRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
                 if (_this2.isDragged) {
-                    playfieldContext.strokeStyle = "red";
+                    playfieldContext.strokeStyle = "green";
                     playfieldContext.lineWidth = 4;
-                    playfieldContext.strokeRect(-_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
+                    playfieldContext.strokeRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
                 }
-                //playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
+                playfieldContext.translate(_this2.x, _this2.y);
                 playfieldContext.restore();
                 return;
             }
             if (_this2.isDragged) {
-                playfieldContext.strokeStyle = "red";
+                playfieldContext.strokeStyle = "green";
                 playfieldContext.lineWidth = 4;
                 playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
             }
@@ -447,14 +449,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (_this7.speed < 0) {
                 _this7.speed = 0;
             }
-            _this7.vx = _this7.speed * Math.cos(_this7.direction * (Math.PI / 180));
-            _this7.vy = _this7.speed * Math.sin(_this7.direction * (Math.PI / 180)) + testplayfield.gravityValue;
-            // this.vx = Math.cos(this.direction*(Math.PI/180));
-            // this.vy = Math.sin(this.direction*(Math.PI/180));
-            //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
-            //this.speed = this.speed - 0.001;
-            _this7.x = _this7.x + _this7.vx;
-            _this7.y = _this7.y + _this7.vy;
+
+            _this7.x = _this7.x + _this7.vx * _this7.speed;
+            _this7.vy = _this7.vy + 0.01;
+            _this7.y = _this7.y + _this7.vy * _this7.speed;
+            previousTime = time;
         };
 
         this.wallCollisionCheck = function () {
@@ -462,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Wall collision check: 
             // Left wall
             if (_this7.x - _this7.r <= 0) {
-                console.log("lw");
+                //  console.log("lw");
                 //this.x = 0 + this.r;
                 _this7.bouncer(90);
             }
@@ -484,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Floor
             if (_this7.y + _this7.r >= 400) {
                 // console.log("fl");
-                //this.y = 400 - this.r;
+                _this7.y = 400 - _this7.r;
                 _this7.bouncer(0);
             }
         };
@@ -559,10 +558,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.bouncer = function (rotation) {
             //console.log(rotation);
-            _this7.vx = _this7.speed * Math.cos((_this7.direction - rotation) * Math.PI / 180) * Math.cos(rotation * (Math.PI / 180)) + _this7.speed * Math.sin((_this7.direction - rotation) * Math.PI / 180) * Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
+            // this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
 
-            _this7.vy = _this7.speed * Math.cos((_this7.direction - rotation) * Math.PI / 180) * Math.sin(rotation * (Math.PI / 180)) + _this7.speed * Math.sin((_this7.direction - rotation) * Math.PI / 180) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2);
+            // this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
+            var a = _this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy);
+            var b = _this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy);
+            var c = Math.cos(rotation * (Math.PI / 180));
+            var d = Math.sin(rotation * (Math.PI / 180));
+            var e = Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
+            var f = Math.sin(rotation * (Math.PI / 180) - Math.PI / 2);
 
+            _this7.vx = _this7.speed * (a * c + b * d) * c + _this7.speed * (b * c - a * d) * e;
+            _this7.vy = _this7.speed * (a * c + b * d) * d + _this7.speed * (b * c - a * d) * f + 0.01;
+            //console.log(this.vx,this.vy);
             //FIXME:  arctan zwraca kąty tylko od -90 do 90. Nie zwróci kąta wyższego od tych wartości! Wymyśleć rozwiązanie! To samo jest dla movementu!!!!! Jeżeli vx jest ujemny, to leci w ćwiartkę od -90,0000001 do -179,9999999 i od 90,0000001 do 179,999999999
 
 
@@ -583,42 +591,32 @@ document.addEventListener('DOMContentLoaded', function () {
             //         this.direction = -(this.direction)
             //     // } 
             // }
-            if (_this7.direction === 0 && rotation % 90 === 0) {
-                _this7.direction = 180;
-            } else if (_this7.direction % 90 === 0 && rotation % 90 === 0) {
-                _this7.direction = -_this7.direction;
-            } else if (_this7.direction > 90) {
-                _this7.direction = -180 + (_this7.direction - 180);
-            } else if (_this7.direction < -90) {
-                _this7.direction = 180 - (_this7.direction + 180);
-            } else if (_this7.direction > -90 && _this7.direction < 0 && _this7.vx < 0) {
-                _this7.direction = -180 + Math.abs(_this7.direction);
-            } else if (_this7.direction < 90 && _this7.direction > 0 && _this7.vx < 0) {
-                _this7.direction = 180 - _this7.direction;
-            } else {
-                _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
-            }
+            // if (this.direction === 0 && rotation % 90 === 0) {
+            //     this.direction = 180
+            // }
+            // else if (this.direction % 90 === 0 && rotation % 90 === 0) {
+            //     this.direction = -this.direction
+            // }
+            // else if  (this.direction > 90) {
+            //     this.direction = -180 + (this.direction - 180) 
+            // }
+            // else if (this.direction < -90) {
+            //     this.direction = 180 - (this.direction + 180)
+            // }
+            // else if (this.direction > -90 && this.direction < 0 && this.vx < 0) {
+            //     this.direction = -180 + Math.abs(this.direction)
+            // }
+            // else if (this.direction < 90 && this.direction > 0 && this.vx < 0) {
+            //     this.direction = 180 - this.direction
+            // }
+            // else {
+            //     this.direction = Math.atan(this.vy/this.vx)*(180/Math.PI)
+            // }
             //this works for every bounce with vx > 0
             //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
 
-            //console.log(this.vx,this.vy,this.direction);
-            //direction: -15 (right wall)
-            //-0.9659258262890683 -0.25881904510252085 15.000000000000005
-            //-0.9659258262890683 0.25881904510252074 -14.999999999999998
-            //direction: 15 (right wall)
-            //-0.9659258262890683 -0.25881904510252085 15.000000000000005  
-            //-0.9659258262890683 0.25881904510252074 -14.999999999999998
-            //direction: 30 (right wall)
-            //-0.8660254037844385 -0.5000000000000002 30.000000000000018  
-            //-0.8660254037844385 0.5000000000000003 -30.000000000000025
-            //direction: 45 (right wall)
-            //-0.7071067811865476 -0.7071067811865475 45
-            //-0.7071067811865475 0.7071067811865476 -45.00000000000001
-            //direction: 60 (right wall)
-            //-0.5 -0.8660254037844387 60.00000000000001
-            //-0.4999999999999998 0.8660254037844387 -60.00000000000001
 
-            console.log(_this7.direction);
+            //console.log(this.direction);
             _this7.x += _this7.vx;
             _this7.y += _this7.vy;
         };

@@ -29,12 +29,12 @@ document.addEventListener('DOMContentLoaded',function(){
                         name: "aBall",
                         position: {x: 500, y: 200},
                         data: {r: 10, color: "green", type: "kinetic"},
-                        motion: {speed: 1, direction: 0, vx: 0, vy:0, isCollided: false}
+                        motion: {speed: 1, direction: 5, vx: 0, vy:0, isCollided: false}
                     },
                     {
                         name: "staticObject2",
                         position: {x:100, y:300}, 
-                        data:{width:800, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
+                        data:{width:100, height:30, rotation: 45, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
                     }
                 ]
             }
@@ -119,8 +119,8 @@ document.addEventListener('DOMContentLoaded',function(){
             let prevyClick = 0;
             let xMove = 0;
             let yMove = 0;
-            let prevxMove = 0;
-            let prevyMove = 0;
+            // let prevxMove = 0;
+            // let prevyMove = 0;
 
         //Canvas functions
             
@@ -198,6 +198,7 @@ document.addEventListener('DOMContentLoaded',function(){
                            return; 
                         }
                         this.currentLevelObjects[object].movement(time)
+                        this.currentLevelObjects[object].wallCollisionCheck()
                         this.currentLevelObjects[object].collisionCheck()
                     })
                     this.moveObject()
@@ -224,16 +225,33 @@ document.addEventListener('DOMContentLoaded',function(){
                         playfieldContext.closePath();
                         return;
                     }
+                    if (this.rotation !== 0) {
+                        playfieldContext.save();
+                        playfieldContext.translate(this.x + this.width/2,this.y + this.height/2);
+                        playfieldContext.rotate(this.rotation*(Math.PI/180));
+                        playfieldContext.fillStyle=this.color;
+                        
+                        playfieldContext.fillRect(-this.width/2,-this.height/2,this.width,this.height);
+                        if (this.isDragged) {
+                            playfieldContext.strokeStyle="red";
+                            playfieldContext.lineWidth = 4;
+                            playfieldContext.strokeRect(-this.width/2,-this.height/2,this.width,this.height); 
+                        }
+                        //playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
+                        playfieldContext.restore();
+                        return;
+                    }
                     if (this.isDragged) {
                         playfieldContext.strokeStyle="red";
                         playfieldContext.lineWidth = 4;
                         playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                     }
-                    if (this.isBeingRotated) {
-                        playfieldContext.strokeStyle="blue";
-                        playfieldContext.lineWidth = 4;
-                        playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
-                    }
+                    // if (this.isBeingRotated) {
+                    //     playfieldContext.strokeStyle="blue";
+                    //     playfieldContext.lineWidth = 4;
+                    //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
+                    // }
+                    
                     playfieldContext.fillStyle=this.color;
                     playfieldContext.fillRect(this.x,this.y,this.width,this.height);
                 }
@@ -260,15 +278,17 @@ document.addEventListener('DOMContentLoaded',function(){
                         this.dragger()
                         return
                     }
+                    
                     else if (prevxClick !== 0 && prevxClick !== 0) {
                         prevxClick = 0;
                         prevyClick = 0;
                         xClick = 0;
                         yClick = 0;
                         this.isDragged = false;
-                        this.isBeingRotated = true;
+                        //this.isBeingRotated = true;
                         return
                     }
+
                     if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)) {
                         this.isDragged = true;
                         prevxClick = xClick;
@@ -284,44 +304,44 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.redrawCanvasObject()
                 }
                 
-                //FIXME: this.isBeingRotated must be put somewhere. Don't know where.
+                //FIXME: this.isBeingRotated must be put somewhere. Don't know where. This function is commented - will maybe work later
                 //Also, think about diffrent rotation method...
                 rotateMe = () => {
-                    if (this.isDragged) {
-                        return;
-                    }
-                    if (!this.isBeingRotated) {
-                        return;
-                    }
-                    if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)&&(xClick !== 0 && yClick !== 0)) {
-                        this.isBeingRotated = false;
-                        return;
-                    }
-                    // console.log(yMove,prevyMove);
-                    // if (yMove - prevyMove > 0) {
-                    //     this.rotation +=45;
-                    // }
-                    // else if (yMove - prevyMove < 0) {
-                    //     this.rotation -=45;
-                    // }
-                    this.rotation = xMove/360;
-                    console.log(this.rotation);
-                    if(this.rotation === 360) {
-                        this.rotation = 0;
-                    }
-                    if(this.rotation <= 0) {
-                        this.rotation = 315;
-                    }
-                    // playfieldContext.save();
-                    playfieldContext.translate(this.x + this.width/2,this.y + this.height/2);
-                    playfieldContext.rotate(this.rotation*(Math.PI/180));
-                    // console.log(this.x,this.y);
-                    // playfieldContext.fillStyle=this.color;
-                    // playfieldContext.fillRect(this.x,this.y,this.width,this.height);
-                    playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
-                    this.redrawCanvasObject();
-                    //playfieldContext.restore();
-                    prevyMove = yMove;
+                    //         if (this.isDragged) {
+                    //             return;
+                    //         }
+                    //         if (!this.isBeingRotated) {
+                    //             return;
+                    //         }
+                    //         if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)&&(xClick !== 0 && yClick !== 0)) {
+                    //             this.isBeingRotated = false;
+                    //             return;
+                    //         }
+                    //         // console.log(yMove,prevyMove);
+                    //         // if (yMove - prevyMove > 0) {
+                    //         //     this.rotation +=45;
+                    //         // }
+                    //         // else if (yMove - prevyMove < 0) {
+                    //         //     this.rotation -=45;
+                    //         // }
+                    //         this.rotation = xMove/360;
+                    //         console.log(this.rotation);
+                    //         if(this.rotation === 360) {
+                    //             this.rotation = 0;
+                    //         }
+                    //         if(this.rotation <= 0) {
+                    //             this.rotation = 315;
+                    //         }
+                    //         // playfieldContext.save();
+                    //         playfieldContext.translate(this.x + this.width/2,this.y + this.height/2);
+                    //         playfieldContext.rotate(this.rotation*(Math.PI/180));
+                    //         // console.log(this.x,this.y);
+                    //         // playfieldContext.fillStyle=this.color;
+                    //         // playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+                    //         playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
+                    //         this.redrawCanvasObject();
+                    //         //playfieldContext.restore();
+                    //         prevyMove = yMove;
                 }
             }
             
@@ -337,70 +357,85 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.isCollided = object.motion.isCollided
                 }
 
-                speedChange = (speed) =>{
-                    speed = speed + 0.005;
-                    return Math.round(speed*1000)/1000;
-                }
-
-                directionChange = () => {
-                    //this.direction = Math.floor(Math.random() * (360 - 1 + 1)) + 1
-                    //this.direction = document.querySelector(".temporaryDirectionChange").value;
-                }
-
                 movement = (time) => {
-                    //console.log(time);
+
                     this.vx = Math.cos(this.direction*(Math.PI/180));
-                    this.vy = Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
-                    // this.vx = Math.cos(this.direction);
-                    // this.vy = Math.sin(this.direction);
-                    // this
-                    this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
-                    this.x = Math.round((this.x + this.vx)*100)/100;
-                    this.y = Math.round((this.y + this.vy)*100)/100;
-                    //this.y = Math.round((this.y + this.vy)*100)/100;
-                    
-                    //this.directionChange()
+                    //this.vy = Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
+                    this.vy = Math.sin(this.direction*(Math.PI/180));
+                    //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
+                    this.x = this.x + this.vx;
+                    this.y = this.y + this.vy;
                 }
 
-                collisionCheck = () => {
-                    Object.keys(testplayfield.currentLevelObjects).forEach( (object) => {
-                        let colidee = testplayfield.currentLevelObjects[object];
-                        if (colidee.name === "inventory" || colidee.name === this.name){
-                            return;
-                        }
-                        //FIXME: Check them - it sticks to left and right wall... probably because degrees
+                wallCollisionCheck = () => {
+                    //FIXME: Check them - it sticks to left and right wall... probably because degrees
                         // Wall collision check: 
                         // Left wall
                         if (this.x - this.r <= 0) {
-                            // console.log("lw");
-                            this.x = 0 + this.r;
-                            this.bouncer(0);
+                             console.log("lw");
+                            //this.x = 0 + this.r;
+                            this.bouncer(90);
                         }
 
                         // Right wall
                         if (this.x + this.r >= 1000) {
                             // console.log("rw");
-                            this.x = 1000 - this.r;
-                            this.bouncer(0)
+                            //this.x = 1000 - this.r;
+                            this.bouncer(90)
                         }
 
                         // Ceiling
                         if (this.y - this.r <= 0) {
                             // console.log("cl");
-                            this.y = 0 + this.r;
+                            //this.y = 0 + this.r;
                             this.bouncer(0)
                         }
 
                         // Floor
                         if (this.y + this.r >= 400) {
                             // console.log("fl");
-                            this.y = 400 - this.r;
+                            //this.y = 400 - this.r;
                             this.bouncer(0)
                         }
-                        
+                }
 
-                        let dx=Math.abs(this.x-(colidee.x+colidee.width/2));
-                        let dy=Math.abs(this.y-(colidee.y+colidee.height/2));
+                collisionCheck = () => {
+                    //FIXME: Obliczyć faktyczny x kolizji - trzeba go przesunąć o kąt względem środka (o ileś na x i ileś na y). Jeżeli blok jest obrócony o 45 stopni, to jego prawy X podnosi się o 1/2 h, a jego lewy x opuszcza się o tę wysokość
+
+
+                    
+                    Object.keys(testplayfield.currentLevelObjects).forEach( (object) => {
+                        let colidee = testplayfield.currentLevelObjects[object];
+                        if (colidee.name === "inventory" || colidee.name === this.name){
+                            return;
+                        }
+
+
+
+                        // angle *= Math.PI / 180;
+
+                        // var x2 = x1 + length * Math.cos(angle),
+                        //     y2 = y1 + length * Math.sin(angle);
+
+                        // ctx.moveTo(x1, y1);
+                        // ctx.lineTo(x2, y2);
+                        // ctx.stroke();
+
+                        // return {x: x2, y: y2};
+                        let rectX = colidee.x;
+                        let rectY = colidee.y;
+                        let rectXW2 = colidee.x + colidee.width/2
+                        let rectYH2 = colidee.y + colidee.height/2
+                        if (colidee.rotation !== 0) {
+                            rectX = colidee.x + (colidee.width * Math.cos(colidee.rotation*Math.PI/180))
+                            rectY = colidee.y + (colidee.height * Math.sin(colidee.rotation*Math.PI/180))
+                            rectXW2
+                            rectYH2 = rectX + rectXW2
+                        }
+                        //console.log(rectX,rectY);
+
+                        let dx=Math.abs(this.x-(rectX+colidee.width/2));
+                        let dy=Math.abs(this.y-(rectY+colidee.height/2));
 
                         //Object collision check
                         //is collision on X-axis?
@@ -439,18 +474,33 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 bouncer = (rotation) => {
                     //console.log(rotation);
-                    // console.log("dupa");
                     this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
+
                     this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
+
                     //FIXME: sprawdzić czy vx + x > x prostokąta
+
+                    //FIXME:  arctan zwraca kąty tylko od -90 do 90. Nie zwróci kąta wyższego od tych wartości! Wymyśleć rozwiązanie! To samo jest dla movementu!!!!!
                     
                     //console.log(this.vx,this.vy);
-                    // let tanBeta = this.vy/this.vx;
-                    // let beta = Math.atan(tanBeta)
-                    // let betadegree = (beta*(180/Math.PI))
-                    //console.log(betadegree);
+                    // if (this.direction < ) {
+                        
+                    // }
                     this.speed = this.speed/2
-                    this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
+                    if (this.vx < 0 && this.vy < 0) {
+                        this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)+180
+                    }
+                    else if (this.vx < 0 && this.vy > 0 && this.direction < 0) {
+                        this.direction = -this.direction
+                    }
+                    else if (this.vx < 0 && this.vy > 0 && this.direction > 0) {
+                        this.direction = 180-(Math.atan(this.vy/this.vx))*(180/Math.PI)
+                    }
+                    else {
+                        this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
+                    }
+                    
+                    console.log(this.vx);
                     console.log(this.direction);
                     
 

@@ -105,11 +105,11 @@ document.addEventListener('DOMContentLoaded', function () {
             name: "aBall",
             position: { x: 500, y: 200 },
             data: { r: 10, color: "green", type: "kinetic" },
-            motion: { speed: 1, direction: 0, vx: 0, vy: 0, isCollided: false }
+            motion: { speed: 1, direction: 5, vx: 0, vy: 0, isCollided: false }
         }, {
             name: "staticObject2",
             position: { x: 100, y: 300 },
-            data: { width: 800, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, isBeingRotated: false }
+            data: { width: 100, height: 30, rotation: 45, color: "red", type: "static", isMovable: true, isDragged: false, isBeingRotated: false }
         }]
 
         //Temporary dev functions
@@ -184,8 +184,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var prevyClick = 0;
     var xMove = 0;
     var yMove = 0;
-    var prevxMove = 0;
-    var prevyMove = 0;
+    // let prevxMove = 0;
+    // let prevyMove = 0;
 
     //Canvas functions
 
@@ -260,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 _this.currentLevelObjects[object].movement(time);
+                _this.currentLevelObjects[object].wallCollisionCheck();
                 _this.currentLevelObjects[object].collisionCheck();
             });
             _this.moveObject();
@@ -288,16 +289,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 playfieldContext.closePath();
                 return;
             }
+            if (_this2.rotation !== 0) {
+                playfieldContext.save();
+                playfieldContext.translate(_this2.x + _this2.width / 2, _this2.y + _this2.height / 2);
+                playfieldContext.rotate(_this2.rotation * (Math.PI / 180));
+                playfieldContext.fillStyle = _this2.color;
+
+                playfieldContext.fillRect(-_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
+                if (_this2.isDragged) {
+                    playfieldContext.strokeStyle = "red";
+                    playfieldContext.lineWidth = 4;
+                    playfieldContext.strokeRect(-_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
+                }
+                //playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
+                playfieldContext.restore();
+                return;
+            }
             if (_this2.isDragged) {
                 playfieldContext.strokeStyle = "red";
                 playfieldContext.lineWidth = 4;
                 playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
             }
-            if (_this2.isBeingRotated) {
-                playfieldContext.strokeStyle = "blue";
-                playfieldContext.lineWidth = 4;
-                playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
-            }
+            // if (this.isBeingRotated) {
+            //     playfieldContext.strokeStyle="blue";
+            //     playfieldContext.lineWidth = 4;
+            //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
+            // }
+
             playfieldContext.fillStyle = _this2.color;
             playfieldContext.fillRect(_this2.x, _this2.y, _this2.width, _this2.height);
         };
@@ -331,9 +349,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     xClick = 0;
                     yClick = 0;
                     _this3.isDragged = false;
-                    _this3.isBeingRotated = true;
+                    //this.isBeingRotated = true;
                     return;
                 }
+
                 if (_this3.x <= xClick && _this3.x + _this3.width >= xClick && _this3.y <= yClick && _this3.y + _this3.height >= yClick) {
                     _this3.isDragged = true;
                     prevxClick = xClick;
@@ -349,41 +368,41 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             _this3.rotateMe = function () {
-                if (_this3.isDragged) {
-                    return;
-                }
-                if (!_this3.isBeingRotated) {
-                    return;
-                }
-                if (_this3.x <= xClick && _this3.x + _this3.width >= xClick && _this3.y <= yClick && _this3.y + _this3.height >= yClick && xClick !== 0 && yClick !== 0) {
-                    _this3.isBeingRotated = false;
-                    return;
-                }
-                // console.log(yMove,prevyMove);
-                // if (yMove - prevyMove > 0) {
-                //     this.rotation +=45;
-                // }
-                // else if (yMove - prevyMove < 0) {
-                //     this.rotation -=45;
-                // }
-                _this3.rotation = xMove / 360;
-                console.log(_this3.rotation);
-                if (_this3.rotation === 360) {
-                    _this3.rotation = 0;
-                }
-                if (_this3.rotation <= 0) {
-                    _this3.rotation = 315;
-                }
-                // playfieldContext.save();
-                playfieldContext.translate(_this3.x + _this3.width / 2, _this3.y + _this3.height / 2);
-                playfieldContext.rotate(_this3.rotation * (Math.PI / 180));
-                // console.log(this.x,this.y);
-                // playfieldContext.fillStyle=this.color;
-                // playfieldContext.fillRect(this.x,this.y,this.width,this.height);
-                playfieldContext.translate(-(_this3.x + _this3.width / 2), -(_this3.y + _this3.height / 2));
-                _this3.redrawCanvasObject();
-                //playfieldContext.restore();
-                prevyMove = yMove;
+                //         if (this.isDragged) {
+                //             return;
+                //         }
+                //         if (!this.isBeingRotated) {
+                //             return;
+                //         }
+                //         if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)&&(xClick !== 0 && yClick !== 0)) {
+                //             this.isBeingRotated = false;
+                //             return;
+                //         }
+                //         // console.log(yMove,prevyMove);
+                //         // if (yMove - prevyMove > 0) {
+                //         //     this.rotation +=45;
+                //         // }
+                //         // else if (yMove - prevyMove < 0) {
+                //         //     this.rotation -=45;
+                //         // }
+                //         this.rotation = xMove/360;
+                //         console.log(this.rotation);
+                //         if(this.rotation === 360) {
+                //             this.rotation = 0;
+                //         }
+                //         if(this.rotation <= 0) {
+                //             this.rotation = 315;
+                //         }
+                //         // playfieldContext.save();
+                //         playfieldContext.translate(this.x + this.width/2,this.y + this.height/2);
+                //         playfieldContext.rotate(this.rotation*(Math.PI/180));
+                //         // console.log(this.x,this.y);
+                //         // playfieldContext.fillStyle=this.color;
+                //         // playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+                //         playfieldContext.translate(-(this.x + this.width/2),-(this.y + this.height/2));
+                //         this.redrawCanvasObject();
+                //         //playfieldContext.restore();
+                //         prevyMove = yMove;
             };
 
             _this3.width = object.data.width;
@@ -395,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return _this3;
         }
 
-        //FIXME: this.isBeingRotated must be put somewhere. Don't know where.
+        //FIXME: this.isBeingRotated must be put somewhere. Don't know where. This function is commented - will maybe work later
         //Also, think about diffrent rotation method...
 
 
@@ -428,69 +447,82 @@ document.addEventListener('DOMContentLoaded', function () {
     var _initialiseProps = function _initialiseProps() {
         var _this7 = this;
 
-        this.speedChange = function (speed) {
-            speed = speed + 0.005;
-            return Math.round(speed * 1000) / 1000;
-        };
-
-        this.directionChange = function () {
-            //this.direction = Math.floor(Math.random() * (360 - 1 + 1)) + 1
-            //this.direction = document.querySelector(".temporaryDirectionChange").value;
-        };
-
         this.movement = function (time) {
-            //console.log(time);
-            _this7.vx = Math.cos(_this7.direction * (Math.PI / 180));
-            _this7.vy = Math.sin(_this7.direction * (Math.PI / 180)) + testplayfield.gravityValue;
-            // this.vx = Math.cos(this.direction);
-            // this.vy = Math.sin(this.direction);
-            // this
-            _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
-            _this7.x = Math.round((_this7.x + _this7.vx) * 100) / 100;
-            _this7.y = Math.round((_this7.y + _this7.vy) * 100) / 100;
-            //this.y = Math.round((this.y + this.vy)*100)/100;
 
-            //this.directionChange()
+            _this7.vx = Math.cos(_this7.direction * (Math.PI / 180));
+            //this.vy = Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
+            _this7.vy = Math.sin(_this7.direction * (Math.PI / 180));
+            //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
+            _this7.x = _this7.x + _this7.vx;
+            _this7.y = _this7.y + _this7.vy;
+        };
+
+        this.wallCollisionCheck = function () {
+            //FIXME: Check them - it sticks to left and right wall... probably because degrees
+            // Wall collision check: 
+            // Left wall
+            if (_this7.x - _this7.r <= 0) {
+                console.log("lw");
+                //this.x = 0 + this.r;
+                _this7.bouncer(90);
+            }
+
+            // Right wall
+            if (_this7.x + _this7.r >= 1000) {
+                // console.log("rw");
+                //this.x = 1000 - this.r;
+                _this7.bouncer(90);
+            }
+
+            // Ceiling
+            if (_this7.y - _this7.r <= 0) {
+                // console.log("cl");
+                //this.y = 0 + this.r;
+                _this7.bouncer(0);
+            }
+
+            // Floor
+            if (_this7.y + _this7.r >= 400) {
+                // console.log("fl");
+                //this.y = 400 - this.r;
+                _this7.bouncer(0);
+            }
         };
 
         this.collisionCheck = function () {
+            //FIXME: Obliczyć faktyczny x kolizji - trzeba go przesunąć o kąt względem środka (o ileś na x i ileś na y). Jeżeli blok jest obrócony o 45 stopni, to jego prawy X podnosi się o 1/2 h, a jego lewy x opuszcza się o tę wysokość
+
+
             Object.keys(testplayfield.currentLevelObjects).forEach(function (object) {
                 var colidee = testplayfield.currentLevelObjects[object];
                 if (colidee.name === "inventory" || colidee.name === _this7.name) {
                     return;
                 }
-                //FIXME: Check them - it sticks to left and right wall... probably because degrees
-                // Wall collision check: 
-                // Left wall
-                if (_this7.x - _this7.r <= 0) {
-                    // console.log("lw");
-                    _this7.x = 0 + _this7.r;
-                    _this7.bouncer(0);
-                }
 
-                // Right wall
-                if (_this7.x + _this7.r >= 1000) {
-                    // console.log("rw");
-                    _this7.x = 1000 - _this7.r;
-                    _this7.bouncer(0);
-                }
+                // angle *= Math.PI / 180;
 
-                // Ceiling
-                if (_this7.y - _this7.r <= 0) {
-                    // console.log("cl");
-                    _this7.y = 0 + _this7.r;
-                    _this7.bouncer(0);
-                }
+                // var x2 = x1 + length * Math.cos(angle),
+                //     y2 = y1 + length * Math.sin(angle);
 
-                // Floor
-                if (_this7.y + _this7.r >= 400) {
-                    // console.log("fl");
-                    _this7.y = 400 - _this7.r;
-                    _this7.bouncer(0);
-                }
+                // ctx.moveTo(x1, y1);
+                // ctx.lineTo(x2, y2);
+                // ctx.stroke();
 
-                var dx = Math.abs(_this7.x - (colidee.x + colidee.width / 2));
-                var dy = Math.abs(_this7.y - (colidee.y + colidee.height / 2));
+                // return {x: x2, y: y2};
+                var rectX = colidee.x;
+                var rectY = colidee.y;
+                var rectXW2 = colidee.x + colidee.width / 2;
+                var rectYH2 = colidee.y + colidee.height / 2;
+                if (colidee.rotation !== 0) {
+                    rectX = colidee.x + colidee.width * Math.cos(colidee.rotation * Math.PI / 180);
+                    rectY = colidee.y + colidee.height * Math.sin(colidee.rotation * Math.PI / 180);
+                    rectXW2;
+                    rectYH2 = rectX + rectXW2;
+                }
+                //console.log(rectX,rectY);
+
+                var dx = Math.abs(_this7.x - (rectX + colidee.width / 2));
+                var dy = Math.abs(_this7.y - (rectY + colidee.height / 2));
 
                 //Object collision check
                 //is collision on X-axis?
@@ -529,18 +561,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.bouncer = function (rotation) {
             //console.log(rotation);
-            // console.log("dupa");
             _this7.vx = _this7.speed * Math.cos((_this7.direction - rotation) * Math.PI / 180) * Math.cos(rotation * (Math.PI / 180)) + _this7.speed * Math.sin((_this7.direction - rotation) * Math.PI / 180) * Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
+
             _this7.vy = _this7.speed * Math.cos((_this7.direction - rotation) * Math.PI / 180) * Math.sin(rotation * (Math.PI / 180)) + _this7.speed * Math.sin((_this7.direction - rotation) * Math.PI / 180) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2);
+
             //FIXME: sprawdzić czy vx + x > x prostokąta
 
+            //FIXME:  arctan zwraca kąty tylko od -90 do 90. Nie zwróci kąta wyższego od tych wartości! Wymyśleć rozwiązanie! To samo jest dla movementu!!!!!
+
             //console.log(this.vx,this.vy);
-            // let tanBeta = this.vy/this.vx;
-            // let beta = Math.atan(tanBeta)
-            // let betadegree = (beta*(180/Math.PI))
-            //console.log(betadegree);
+            // if (this.direction < ) {
+
+            // }
             _this7.speed = _this7.speed / 2;
-            _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
+            if (_this7.vx < 0 && _this7.vy < 0) {
+                _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI) + 180;
+            } else if (_this7.vx < 0 && _this7.vy > 0 && _this7.direction < 0) {
+                _this7.direction = -_this7.direction;
+            } else if (_this7.vx < 0 && _this7.vy > 0 && _this7.direction > 0) {
+                _this7.direction = 180 - Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
+            } else {
+                _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
+            }
+
+            console.log(_this7.vx);
             console.log(_this7.direction);
 
             _this7.x += _this7.vx;

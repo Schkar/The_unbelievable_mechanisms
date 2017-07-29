@@ -103,9 +103,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }],
         level2: [{
             name: "aBall",
-            position: { x: 950, y: 200 },
-            data: { r: 10, color: "green", type: "kinetic" },
-            motion: { speed: 2, vx: -2, vy: 1, isCollided: false }
+            position: { x: 710, y: 200 },
+            data: { r: 10, color: "green", type: "kinetic", source: "../images/basketball.svg" },
+            motion: { speed: 2, vx: 0, vy: 0, direction: 0, isCollided: false }
+        }, {
+            name: "staticObject2",
+            position: { x: 705, y: 300 },
+            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, isBeingRotated: false }
         }]
 
         //Temporary dev functions
@@ -219,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 var tempObject = new CanvasMovingObject(object);
                 tempObject.createCanvasObject();
+                tempObject.countInitialVectors();
                 _this.currentLevelObjects[object.name] = tempObject;
             });
         };
@@ -267,7 +272,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.currentLevelNumber = level || 1;
         this.currentLevelObjects = {};
-        this.gravityValue = 0; //
     };
 
     //Arch-class - object prototype
@@ -279,10 +283,15 @@ document.addEventListener('DOMContentLoaded', function () {
         _classCallCheck(this, CanvasObject);
 
         this.createCanvasObject = function () {
+            var image = new Image();
+            image.src = _this2.source;
+            var pattern = playfieldContext.createPattern(_this2.source, "no-repeat");
+
+            //TODO: drawImage with a source in html is needed.
             if (_this2.r !== undefined) {
                 playfieldContext.beginPath();
                 playfieldContext.arc(_this2.x, _this2.y, _this2.r, 0, 2 * Math.PI);
-                playfieldContext.fillStyle = _this2.color;
+                playfieldContext.fillStyle = pattern;
                 playfieldContext.fill();
                 playfieldContext.closePath();
                 return;
@@ -291,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 playfieldContext.save();
                 playfieldContext.translate(_this2.x, _this2.y);
                 playfieldContext.rotate(_this2.rotation * (Math.PI / 180));
-                playfieldContext.fillStyle = _this2.color;
+                playfieldContext.fillStyle = pattern;
 
                 playfieldContext.fillRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
                 if (_this2.isDragged) {
@@ -314,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function () {
             //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
             // }
 
-            playfieldContext.fillStyle = _this2.color;
+            playfieldContext.fillStyle = pattern;
             playfieldContext.fillRect(_this2.x, _this2.y, _this2.width, _this2.height);
         };
 
@@ -327,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
         this.y = object.position.y;
         this.color = object.data.color;
         this.type = object.data.type;
+        this.source = object.data.source;
     };
 
     var CanvasStaticObject = function (_CanvasObject) {
@@ -412,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return _this3;
         }
 
-        //FIXME: this.isBeingRotated must be put somewhere. Don't know where. This function is commented - will maybe work later
+        //TODO: this.isBeingRotated must be put somewhere. Don't know where. This function is commented - will maybe work later
         //Also, think about diffrent rotation method...
 
 
@@ -436,6 +446,7 @@ document.addEventListener('DOMContentLoaded', function () {
             _this4.vx = object.motion.vx;
             _this4.vy = object.motion.vy;
             _this4.isCollided = object.motion.isCollided;
+            _this4.gravityValue = 0.01;
             return _this4;
         }
 
@@ -445,13 +456,19 @@ document.addEventListener('DOMContentLoaded', function () {
     var _initialiseProps = function _initialiseProps() {
         var _this7 = this;
 
+        this.countInitialVectors = function () {
+            _this7.vx = Math.cos(_this7.direction * (Math.PI / 180));
+            _this7.vy = Math.sin(_this7.direction * (Math.PI / 180));
+        };
+
         this.movement = function (time) {
+            _this7.speed = _this7.speed - 0.001 + _this7.gravityValue;
             if (_this7.speed < 0) {
                 _this7.speed = 0;
             }
 
             _this7.x = _this7.x + _this7.vx * _this7.speed;
-            _this7.vy = _this7.vy + 0.01;
+            _this7.vy = _this7.vy + _this7.gravityValue;
             _this7.y = _this7.y + _this7.vy * _this7.speed;
             previousTime = time;
         };
@@ -489,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.collisionCheck = function () {
-            //FIXME: Obliczyć faktyczny x kolizji - trzeba go przesunąć o kąt względem środka (o ileś na x i ileś na y). Jeżeli blok jest obrócony o 45 stopni, to jego prawy X podnosi się o 1/2 h, a jego lewy x opuszcza się o tę wysokość
+            //FIXME: Nie działa na boczne ścianki! Dunno why.
 
 
             Object.keys(testplayfield.currentLevelObjects).forEach(function (object) {
@@ -498,16 +515,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                // angle *= Math.PI / 180;
-
-                // var x2 = x1 + length * Math.cos(angle),
-                //     y2 = y1 + length * Math.sin(angle);
-
-                // ctx.moveTo(x1, y1);
-                // ctx.lineTo(x2, y2);
-                // ctx.stroke();
-
-                // return {x: x2, y: y2};
                 var rectX = colidee.x;
                 var rectY = colidee.y;
                 var rectXW2 = colidee.x + colidee.width / 2;
@@ -527,12 +534,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 //is collision on X-axis?
                 if (dx > _this7.r + colidee.width / 2) {
                     _this7.isCollided = false;
+                    _this7.gravityValue = 0.01;
                     return;
                 }
 
                 //is collision on Y-axis?
                 if (dy > _this7.r + colidee.height / 2) {
                     _this7.isCollided = false;
+                    _this7.gravityValue = 0.01;
                     return;
                 }
 
@@ -540,6 +549,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (dx <= colidee.width) {
                     _this7.isCollided = true;
                     _this7.bouncer(colidee.rotation);
+                    _this7.gravityValue = 0;
                     return;
                 }
 
@@ -547,6 +557,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (dy <= colidee.height) {
                     _this7.isCollided = true;
                     _this7.bouncer(colidee.rotation);
+                    _this7.gravityValue = 0;
                     return;
                 }
 
@@ -557,66 +568,16 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.bouncer = function (rotation) {
-            //console.log(rotation);
-            // this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
 
-            // this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
-            var a = _this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy);
-            var b = _this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy);
-            var c = Math.cos(rotation * (Math.PI / 180));
-            var d = Math.sin(rotation * (Math.PI / 180));
-            var e = Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
-            var f = Math.sin(rotation * (Math.PI / 180) - Math.PI / 2);
+            _this7.vx = _this7.speed * (_this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) + _this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180)) + _this7.speed * (_this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) - _this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
 
-            _this7.vx = _this7.speed * (a * c + b * d) * c + _this7.speed * (b * c - a * d) * e;
-            _this7.vy = _this7.speed * (a * c + b * d) * d + _this7.speed * (b * c - a * d) * f + 0.01;
-            //console.log(this.vx,this.vy);
-            //FIXME:  arctan zwraca kąty tylko od -90 do 90. Nie zwróci kąta wyższego od tych wartości! Wymyśleć rozwiązanie! To samo jest dla movementu!!!!! Jeżeli vx jest ujemny, to leci w ćwiartkę od -90,0000001 do -179,9999999 i od 90,0000001 do 179,999999999
+            _this7.vy = _this7.speed * (_this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) + _this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180)) + _this7.speed * (_this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) - _this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2) + _this7.gravityValue;
 
+            _this7.speed -= _this7.speed / 20;
+            if (_this7.speed < 0) {
+                _this7.speed = 0;
+            }
 
-            //TODO: Speed diffrence to do.
-            // this.speed =  this.speed - this.speed/20;
-            // if (this.speed < 0) {
-            //     this.speed = 0;
-            // }
-
-            //console.log(this.vx,this.vy);
-            // this changes the direction when rotation and direction are both multiply of 90. This stays.
-
-            // if (Math.abs(this.vx) === 5 || Math.abs(this.vy) === 5) {
-            //     // if (this.direction === 0) {
-            //     //     this.direction = 180
-            //     // }
-            //     // else{
-            //         this.direction = -(this.direction)
-            //     // } 
-            // }
-            // if (this.direction === 0 && rotation % 90 === 0) {
-            //     this.direction = 180
-            // }
-            // else if (this.direction % 90 === 0 && rotation % 90 === 0) {
-            //     this.direction = -this.direction
-            // }
-            // else if  (this.direction > 90) {
-            //     this.direction = -180 + (this.direction - 180) 
-            // }
-            // else if (this.direction < -90) {
-            //     this.direction = 180 - (this.direction + 180)
-            // }
-            // else if (this.direction > -90 && this.direction < 0 && this.vx < 0) {
-            //     this.direction = -180 + Math.abs(this.direction)
-            // }
-            // else if (this.direction < 90 && this.direction > 0 && this.vx < 0) {
-            //     this.direction = 180 - this.direction
-            // }
-            // else {
-            //     this.direction = Math.atan(this.vy/this.vx)*(180/Math.PI)
-            // }
-            //this works for every bounce with vx > 0
-            //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
-
-
-            //console.log(this.direction);
             _this7.x += _this7.vx;
             _this7.y += _this7.vy;
         };

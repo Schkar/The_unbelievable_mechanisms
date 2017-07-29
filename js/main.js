@@ -27,15 +27,15 @@ document.addEventListener('DOMContentLoaded',function(){
                 level2: [
                     {
                         name: "aBall",
-                        position: {x: 950, y: 200},
-                        data: {r: 10, color: "green", type: "kinetic"},
-                        motion: {speed: 2, vx: -2, vy: 1, isCollided: false}
+                        position: {x: 710, y: 200},
+                        data: {r: 10, color: "green", type: "kinetic", source: "../images/basketball.svg"},
+                        motion: {speed: 2, vx: 0, vy: 0, direction: 0, isCollided: false}
                     },
-                    // {
-                    //     name: "staticObject2",
-                    //     position: {x:100, y:300}, 
-                    //     data:{width:100, height:30, rotation: 45, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
-                    // }
+                    {
+                        name: "staticObject2",
+                        position: {x:705, y:300}, 
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
+                    }
                 ]
             }
 
@@ -145,7 +145,6 @@ document.addEventListener('DOMContentLoaded',function(){
                 constructor(level){
                     this.currentLevelNumber = level || 1;
                     this.currentLevelObjects = {};
-                    this.gravityValue = 0; //
                 }
 
                 createObjects = (objects) =>{
@@ -161,6 +160,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         }
                         let tempObject = new CanvasMovingObject(object);
                         tempObject.createCanvasObject()
+                        tempObject.countInitialVectors()
                         this.currentLevelObjects[object.name] = tempObject;
                     }); 
                 }
@@ -216,13 +216,19 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.y = object.position.y
                     this.color = object.data.color
                     this.type = object.data.type
+                    this.source = object.data.source
                 }
 
                 createCanvasObject = () =>{
+                    let image = new Image();
+                    image.src = this.source;
+                    let pattern = playfieldContext.createPattern(this.source,"no-repeat")
+
+                    //TODO: drawImage with a source in html is needed.
                     if (this.r !== undefined) {
                         playfieldContext.beginPath();
                         playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
-                        playfieldContext.fillStyle = this.color;
+                        playfieldContext.fillStyle = pattern;
                         playfieldContext.fill();
                         playfieldContext.closePath();
                         return;
@@ -231,7 +237,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         playfieldContext.save();
                         playfieldContext.translate(this.x,this.y);
                         playfieldContext.rotate(this.rotation*(Math.PI/180));
-                        playfieldContext.fillStyle=this.color;
+                        playfieldContext.fillStyle=pattern;
                         
                         playfieldContext.fillRect(-this.width,-this.height,this.width,this.height);
                         if (this.isDragged) {
@@ -254,7 +260,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                     // }
                     
-                    playfieldContext.fillStyle=this.color;
+                    playfieldContext.fillStyle=pattern;
                     playfieldContext.fillRect(this.x,this.y,this.width,this.height);
                 }
 
@@ -306,7 +312,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.redrawCanvasObject()
                 }
                 
-                //FIXME: this.isBeingRotated must be put somewhere. Don't know where. This function is commented - will maybe work later
+                //TODO: this.isBeingRotated must be put somewhere. Don't know where. This function is commented - will maybe work later
                 //Also, think about diffrent rotation method...
                 rotateMe = () => {
                     //         if (this.isDragged) {
@@ -357,15 +363,23 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.vx = object.motion.vx
                     this.vy = object.motion.vy
                     this.isCollided = object.motion.isCollided
+                    this.gravityValue = 0.01
+                }
+
+                countInitialVectors = () => {
+                    this.vx = Math.cos(this.direction*(Math.PI/180));
+                    this.vy = Math.sin(this.direction*(Math.PI/180));
                 }
 
                 movement = (time) => {
+                    this.speed = this.speed - 0.001 + this.gravityValue;
                     if (this.speed < 0) {
                         this.speed = 0
                     }
                     
+                    
                     this.x = this.x + (this.vx*this.speed);
-                    this.vy = this.vy + 0.01;
+                    this.vy = this.vy + this.gravityValue;
                     this.y = this.y + (this.vy*this.speed);
                     previousTime = time;
                 }
@@ -403,7 +417,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 collisionCheck = () => {
-                    //FIXME: Obliczyć faktyczny x kolizji - trzeba go przesunąć o kąt względem środka (o ileś na x i ileś na y). Jeżeli blok jest obrócony o 45 stopni, to jego prawy X podnosi się o 1/2 h, a jego lewy x opuszcza się o tę wysokość
+                    //FIXME: Nie działa na boczne ścianki! Dunno why.
 
 
                     
@@ -415,16 +429,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 
-                        // angle *= Math.PI / 180;
-
-                        // var x2 = x1 + length * Math.cos(angle),
-                        //     y2 = y1 + length * Math.sin(angle);
-
-                        // ctx.moveTo(x1, y1);
-                        // ctx.lineTo(x2, y2);
-                        // ctx.stroke();
-
-                        // return {x: x2, y: y2};
                         let rectX = colidee.x;
                         let rectY = colidee.y;
                         let rectXW2 = colidee.x + colidee.width/2
@@ -444,12 +448,14 @@ document.addEventListener('DOMContentLoaded',function(){
                         //is collision on X-axis?
                         if( dx > this.r+colidee.width/2 ){
                             this.isCollided = false;
+                            this.gravityValue = 0.01;
                             return; 
                         }
 
                         //is collision on Y-axis?
                         if( dy > this.r+colidee.height/2 ){
                             this.isCollided = false;
+                            this.gravityValue = 0.01;
                             return; 
                         }
 
@@ -457,6 +463,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         if( dx <= colidee.width ){
                             this.isCollided = true;
                             this.bouncer(colidee.rotation)
+                            this.gravityValue = 0;
                             return; 
                         }
 
@@ -464,6 +471,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         if( dy <= colidee.height ){
                             this.isCollided = true;
                             this.bouncer(colidee.rotation)
+                            this.gravityValue = 0;
                             return; 
                         }
 
@@ -474,68 +482,16 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 bouncer = (rotation) => {
-                    //console.log(rotation);
-                    // this.vx = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.cos(rotation*(Math.PI/180) - Math.PI/2);
 
-                    // this.vy = this.speed*Math.cos((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180))+this.speed*Math.sin((this.direction - rotation)*Math.PI/180)*Math.sin(rotation*(Math.PI/180) - Math.PI/2);
-                    let a = this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy));
-                    let b = this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy));
-                    let c = Math.cos(rotation*(Math.PI/180));
-                    let d = Math.sin(rotation*(Math.PI/180));
-                    let e = Math.cos(rotation*(Math.PI/180)-Math.PI/2);
-                    let f = Math.sin(rotation*(Math.PI/180)-Math.PI/2);
+                    this.vx = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation*(Math.PI/180)))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation*(Math.PI/180))))*(Math.cos(rotation*(Math.PI/180)))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation*(Math.PI/180)))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation*(Math.PI/180))))*(Math.cos(rotation*(Math.PI/180)-Math.PI/2));
 
-                    this.vx = this.speed*(a*c+b*d)*c+this.speed*(b*c-a*d)*e;
-                    this.vy = this.speed*(a*c+b*d)*d+this.speed*(b*c-a*d)*f + 0.01;
-                    //console.log(this.vx,this.vy);
-                    //FIXME:  arctan zwraca kąty tylko od -90 do 90. Nie zwróci kąta wyższego od tych wartości! Wymyśleć rozwiązanie! To samo jest dla movementu!!!!! Jeżeli vx jest ujemny, to leci w ćwiartkę od -90,0000001 do -179,9999999 i od 90,0000001 do 179,999999999
+                    this.vy = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation*(Math.PI/180)))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation*(Math.PI/180))))*(Math.sin(rotation*(Math.PI/180)))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation*(Math.PI/180)))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation*(Math.PI/180))))*(Math.sin(rotation*(Math.PI/180)-Math.PI/2)) + this.gravityValue;
 
-
-                    
-                    //TODO: Speed diffrence to do.
-                    // this.speed =  this.speed - this.speed/20;
-                    // if (this.speed < 0) {
-                    //     this.speed = 0;
-                    // }
-                    
-                    //console.log(this.vx,this.vy);
-                    // this changes the direction when rotation and direction are both multiply of 90. This stays.
-
-                    // if (Math.abs(this.vx) === 5 || Math.abs(this.vy) === 5) {
-                    //     // if (this.direction === 0) {
-                    //     //     this.direction = 180
-                    //     // }
-                    //     // else{
-                    //         this.direction = -(this.direction)
-                    //     // } 
-                    // }
-                    // if (this.direction === 0 && rotation % 90 === 0) {
-                    //     this.direction = 180
-                    // }
-                    // else if (this.direction % 90 === 0 && rotation % 90 === 0) {
-                    //     this.direction = -this.direction
-                    // }
-                    // else if  (this.direction > 90) {
-                    //     this.direction = -180 + (this.direction - 180) 
-                    // }
-                    // else if (this.direction < -90) {
-                    //     this.direction = 180 - (this.direction + 180)
-                    // }
-                    // else if (this.direction > -90 && this.direction < 0 && this.vx < 0) {
-                    //     this.direction = -180 + Math.abs(this.direction)
-                    // }
-                    // else if (this.direction < 90 && this.direction > 0 && this.vx < 0) {
-                    //     this.direction = 180 - this.direction
-                    // }
-                    // else {
-                    //     this.direction = Math.atan(this.vy/this.vx)*(180/Math.PI)
-                    // }
-                    //this works for every bounce with vx > 0
-                    //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
-
-                    
-
-                    //console.log(this.direction);
+                    this.speed -=  this.speed/20;
+                    if (this.speed < 0) {
+                        this.speed = 0;
+                    }
+                   
                     this.x += this.vx;
                     this.y += this.vy;
                 }                

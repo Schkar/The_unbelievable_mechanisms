@@ -29,13 +29,13 @@ document.addEventListener('DOMContentLoaded',function(){
                         name: "aBall",
                         position: {x: 500, y: 200},
                         data: {r: 10, color: "green", type: "kinetic"},
-                        motion: {speed: 1, direction: 5, vx: 0, vy:0, isCollided: false}
+                        motion: {speed: 5, direction: 13.5, vx: 0, vy:0, isCollided: false}
                     },
-                    {
-                        name: "staticObject2",
-                        position: {x:100, y:300}, 
-                        data:{width:100, height:30, rotation: 45, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
-                    }
+                    // {
+                    //     name: "staticObject2",
+                    //     position: {x:100, y:300}, 
+                    //     data:{width:100, height:30, rotation: 45, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
+                    // }
                 ]
             }
 
@@ -358,11 +358,15 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 movement = (time) => {
-
-                    this.vx = Math.cos(this.direction*(Math.PI/180));
-                    //this.vy = Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
-                    this.vy = Math.sin(this.direction*(Math.PI/180));
+                    if (this.speed < 0) {
+                        this.speed = 0
+                    }
+                    this.vx = this.speed*Math.cos(this.direction*(Math.PI/180));
+                    this.vy = this.speed*Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
+                    // this.vx = Math.cos(this.direction*(Math.PI/180));
+                    // this.vy = Math.sin(this.direction*(Math.PI/180));
                     //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
+                    //this.speed = this.speed - 0.001;
                     this.x = this.x + this.vx;
                     this.y = this.y + this.vy;
                 }
@@ -453,14 +457,12 @@ document.addEventListener('DOMContentLoaded',function(){
                         // collision on X-axis
                         if( dx <= colidee.width ){
                             this.isCollided = true;
-                            console.log("xcol");
                             this.bouncer(colidee.rotation)
                             return; 
                         }
 
                         // collision on Y-axis
                         if( dy <= colidee.height ){
-                            console.log("ycol");
                             this.isCollided = true;
                             this.bouncer(colidee.rotation)
                             return; 
@@ -486,7 +488,12 @@ document.addEventListener('DOMContentLoaded',function(){
                     // if (this.direction < ) {
                         
                     // }
-                    this.speed = this.speed/2
+
+                    //FIXME: Speed diffrence to do.
+                    // this.speed =  this.speed - this.speed/20;
+                    // if (this.speed < 0) {
+                    //     this.speed = 0;
+                    // }
                     if (this.vx < 0 && this.vy < 0) {
                         this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)+180
                     }
@@ -494,15 +501,18 @@ document.addEventListener('DOMContentLoaded',function(){
                         this.direction = -this.direction
                     }
                     else if (this.vx < 0 && this.vy > 0 && this.direction > 0) {
-                        this.direction = 180-(Math.atan(this.vy/this.vx))*(180/Math.PI)
+                        this.direction = 180-this.direction
                     }
                     else {
                         this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
                     }
-                    
-                    console.log(this.vx);
-                    console.log(this.direction);
-                    
+                    if (this.direction > 180) {
+                        this.direction = -(this.direction - 90);
+                    }
+                    if (this.direction < -180){
+                        this.direction = Math.abs(this.direction) - 90;
+                    }
+                    console.log(this.direction);              
 
                     this.x += this.vx;
                     this.y += this.vy;

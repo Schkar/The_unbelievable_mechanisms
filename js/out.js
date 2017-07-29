@@ -105,11 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
             name: "aBall",
             position: { x: 500, y: 200 },
             data: { r: 10, color: "green", type: "kinetic" },
-            motion: { speed: 1, direction: 5, vx: 0, vy: 0, isCollided: false }
-        }, {
-            name: "staticObject2",
-            position: { x: 100, y: 300 },
-            data: { width: 100, height: 30, rotation: 45, color: "red", type: "static", isMovable: true, isDragged: false, isBeingRotated: false }
+            motion: { speed: 5, direction: 13.5, vx: 0, vy: 0, isCollided: false }
         }]
 
         //Temporary dev functions
@@ -448,11 +444,15 @@ document.addEventListener('DOMContentLoaded', function () {
         var _this7 = this;
 
         this.movement = function (time) {
-
-            _this7.vx = Math.cos(_this7.direction * (Math.PI / 180));
-            //this.vy = Math.sin(this.direction*(Math.PI/180)) + testplayfield.gravityValue;
-            _this7.vy = Math.sin(_this7.direction * (Math.PI / 180));
+            if (_this7.speed < 0) {
+                _this7.speed = 0;
+            }
+            _this7.vx = _this7.speed * Math.cos(_this7.direction * (Math.PI / 180));
+            _this7.vy = _this7.speed * Math.sin(_this7.direction * (Math.PI / 180)) + testplayfield.gravityValue;
+            // this.vx = Math.cos(this.direction*(Math.PI/180));
+            // this.vy = Math.sin(this.direction*(Math.PI/180));
             //this.direction = (Math.atan(this.vy/this.vx))*(180/Math.PI)
+            //this.speed = this.speed - 0.001;
             _this7.x = _this7.x + _this7.vx;
             _this7.y = _this7.y + _this7.vy;
         };
@@ -540,14 +540,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 // collision on X-axis
                 if (dx <= colidee.width) {
                     _this7.isCollided = true;
-                    console.log("xcol");
                     _this7.bouncer(colidee.rotation);
                     return;
                 }
 
                 // collision on Y-axis
                 if (dy <= colidee.height) {
-                    console.log("ycol");
                     _this7.isCollided = true;
                     _this7.bouncer(colidee.rotation);
                     return;
@@ -573,18 +571,27 @@ document.addEventListener('DOMContentLoaded', function () {
             // if (this.direction < ) {
 
             // }
-            _this7.speed = _this7.speed / 2;
+
+            //FIXME: Speed diffrence to do.
+            // this.speed =  this.speed - this.speed/20;
+            // if (this.speed < 0) {
+            //     this.speed = 0;
+            // }
             if (_this7.vx < 0 && _this7.vy < 0) {
                 _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI) + 180;
             } else if (_this7.vx < 0 && _this7.vy > 0 && _this7.direction < 0) {
                 _this7.direction = -_this7.direction;
             } else if (_this7.vx < 0 && _this7.vy > 0 && _this7.direction > 0) {
-                _this7.direction = 180 - Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
+                _this7.direction = 180 - _this7.direction;
             } else {
                 _this7.direction = Math.atan(_this7.vy / _this7.vx) * (180 / Math.PI);
             }
-
-            console.log(_this7.vx);
+            if (_this7.direction > 180) {
+                _this7.direction = -(_this7.direction - 90);
+            }
+            if (_this7.direction < -180) {
+                _this7.direction = Math.abs(_this7.direction) - 90;
+            }
             console.log(_this7.direction);
 
             _this7.x += _this7.vx;

@@ -1,3 +1,6 @@
+Coś na mobilki
+
+
 Kulkadane: Wektor, X, Y, Wektor prędkości, współczynnik prędkości
 
 1. Obliczamy komponenty wektora predkości

@@ -56,6 +56,19 @@
             color: darkgreen;
         }
     }
+    .noMobile{
+        position: absolute;
+        text-align: center;
+        left: 50%;
+        transform: translate(-50%,0);
+        top: 45%;
+        width: 1000px;
+        height: 600px;
+        font-size: 2em;
+        display: none;
+        font-family: "orbitron";
+        color: red;
+    }
     .playfield{
        background: white;
        border: 2px solid black;

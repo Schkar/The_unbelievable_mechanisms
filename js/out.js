@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //     document.querySelector(".noMobile").style.display = "block";
     //     document.querySelector(".welcomeTextWrapper").style.display = "none";
     //     document.querySelector(".startLevelButton").disabled = true;
-    //     document.querySelector(".resetButton").disabled = true;
+    //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
 
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var _this7 = this;
 
         this.checkIfWin = function () {
-            console.log(engineID);
+            //console.log(engineID);
             var temp = currentLevel.currentLevelObjects["goal"];
             var goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width / 3;
             var goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height / 3;

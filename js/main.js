@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded',function(){
     //     document.querySelector(".noMobile").style.display = "block";
     //     document.querySelector(".welcomeTextWrapper").style.display = "none";
     //     document.querySelector(".startLevelButton").disabled = true;
-    //     document.querySelector(".resetButton").disabled = true;
+    //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
 
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 checkIfWin = () => {
-                    console.log(engineID);
+                    //console.log(engineID);
                     let temp = currentLevel.currentLevelObjects["goal"];
                     let goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width/3
                     let goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height/3

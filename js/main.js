@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded',function(){
     //Left-right-object collision
     //Gravity!
     //rotated collisions
-    
+
     console.log("DOM loaded. Script is working");
     // //No mobile function
     // let checkMobile = false;
@@ -293,7 +293,10 @@ document.addEventListener('DOMContentLoaded',function(){
                         // // playfieldContext.fillStyle = "black";
                         // // playfieldContext.fill();
                         // playfieldContext.closePath();
-                        playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                        image.addEventListener("load",function(e) {
+                            playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                        },true)
+                        
                         return;
                     }
                     if (this.rotation !== 0) {

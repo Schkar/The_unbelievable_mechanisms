@@ -353,7 +353,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 // // playfieldContext.fillStyle = "black";
                 // // playfieldContext.fill();
                 // playfieldContext.closePath();
-                playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
+                image.addEventListener("load", function (e) {
+                    playfieldContext.drawImage(image, this.x - this.r, this.y - this.r, 2 * this.r, 2 * this.r);
+                }, true);
+
                 return;
             }
             if (_this2.rotation !== 0) {

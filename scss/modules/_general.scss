@@ -3,6 +3,7 @@ body{
     margin: 0;
     padding: 0;
     .temporaryGodlyCreationButton{
+        display: none;
         background-color: red;
         border-radius: 50%;
         width: 80px;
@@ -13,6 +14,7 @@ body{
         font-size: 1.5em;
     }
     .temporaryDirectionChange{
+        display: none;
         position: fixed;
         top: 100px;
         left: 0;

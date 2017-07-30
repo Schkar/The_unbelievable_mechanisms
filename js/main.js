@@ -4,37 +4,52 @@ document.addEventListener('DOMContentLoaded',function(){
 
         //Temporary dev variables
             const creationButton = document.querySelector(".temporaryGodlyCreationButton");
-            let testplayfield = null;
+            //let currentLevel = null;
             const testLevel = {
+                // level1: [
+                //     {
+                //         name: "staticObject1",
+                //         position: {x:450, y:150},
+                //         data: {width:100, height:30, rotation: 0, color:"red", type:"static", isMovable: true},
+                //     },
+                //     {
+                //         name: "staticObject2",
+                //         position: {x:600, y:300}, 
+                //         data:{width:80, height:30, rotation: 0, color:"green", type:"static"},
+                //     },
+                //     {
+                //         name: "someCircle",
+                //         position:{x:442, y:15},
+                //         data:{r:10, color:"blue", type:"kinetic"},
+                //         motion: {speed: 0, vx: 0, vy:0, isCollided: false}
+                //     }
+                // ],
                 level1: [
                     {
-                        name: "staticObject1",
-                        position: {x:450, y:150},
-                        data: {width:100, height:30, rotation: 0, color:"red", type:"static", isMovable: true},
-                    },
-                    {
-                        name: "staticObject2",
-                        position: {x:600, y:300}, 
-                        data:{width:80, height:30, rotation: 0, color:"green", type:"static"},
-                    },
-                    {
-                        name: "someCircle",
-                        position:{x:442, y:15},
-                        data:{r:10, color:"blue", type:"kinetic"},
-                        motion: {speed: 0, vx: 0, vy:0, isCollided: false}
-                    }
-                ],
-                level2: [
-                    {
                         name: "aBall",
-                        position: {x: 710, y: 200},
-                        data: {r: 10, color: "green", type: "kinetic", source: "../images/basketball.svg"},
-                        motion: {speed: 2, vx: 0, vy: 0, direction: 0, isCollided: false}
+                        position: {x: 810, y: 200},
+                        data: {r: 30, color: "green", type: "kinetic", source: "../images/basketball.png"},
+                        motion: {speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false}
+                    },
+                    {
+                        name: "staticObject1",
+                        position: {x:505, y:250}, 
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/barrier.png"},
                     },
                     {
                         name: "staticObject2",
-                        position: {x:705, y:300}, 
-                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, isBeingRotated: false},
+                        position: {x:125, y:100}, 
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank1.png"},
+                    },
+                    {
+                        name: "staticObject3",
+                        position: {x:425, y:300}, 
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank2.png"},
+                    },
+                    {
+                        name: "goal",
+                        position: {x:700, y:290},
+                        data: {width: 200, height: 100, isMovable: false, source: "../images/wheelbarrow.png"}
                     }
                 ]
             }
@@ -46,17 +61,11 @@ document.addEventListener('DOMContentLoaded',function(){
             creationButton.addEventListener("click",function(e){
                 e.preventDefault()
 
-
-                
-                testplayfield = new Playfield(2)
-                testplayfield.createObjects(testLevel);
-                testplayfield.physicsEngineRun()
-                //testplayfield.logCurrentLevelObjects();
-                //testplayfield.physicsEngineRun();
                 
                 
-                //currentLevel.physicsEngineRun()
-                //requestAnimationFrame(currentLevel.physicsEngineRun)
+                currentLevel = new Playfield()
+                currentLevel.createObjects(testLevel);
+                currentLevel.physicsEngineRun()
             })
 
         //Buttons variables
@@ -76,6 +85,7 @@ document.addEventListener('DOMContentLoaded',function(){
         //Timer variables
 
             const timer = document.querySelector(".timer");
+            const winTimer = document.querySelector(".winTimer")
             let seconds = 0;
             let minutes = 0;
             let hours = 0;
@@ -84,14 +94,36 @@ document.addEventListener('DOMContentLoaded',function(){
         //AnimFrame IDs
             
             let engineID = null;
-            let draggerID = null;
 
         //Levels data
             
             const levelsInfo = {
                 level1: [
                     {
-                        
+                        name: "aBall",
+                        position: {x: 810, y: 200},
+                        data: {r: 30, color: "green", type: "kinetic", source: "../images/basketball.png"},
+                        motion: {speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false}
+                    },
+                    {
+                        name: "staticObject1",
+                        position: {x:705, y:250}, 
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/barrier.png"},
+                    },
+                    {
+                        name: "staticObject2",
+                        position: {x:125, y:100}, 
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank1.png"},
+                    },
+                    {
+                        name: "staticObject3",
+                        position: {x:425, y:300}, 
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank2.png"},
+                    },
+                    {
+                        name: "goal",
+                        position: {x:800, y:290},
+                        data: {width: 200, height: 100, rotation: 0, color:"red", type:"static", isMovable: false, source: "../images/wheelbarrow.png"}
                     }
                 ],
                 level2: [],
@@ -106,7 +138,7 @@ document.addEventListener('DOMContentLoaded',function(){
             };
 
             let currentLevel = null;
-
+            
         //Canvas variables
 
             const playfield = document.querySelector(".playfield");
@@ -123,13 +155,15 @@ document.addEventListener('DOMContentLoaded',function(){
             // let prevyMove = 0;
             let difTime = 0;
             let previousTime = 0;
+            let objectBeingDragged = "";
+            let levelWon = false;
 
         //Canvas functions
             
             playfield.addEventListener("mousedown",(e) => {
                 xClick = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2)*10)/10; //Formula for canvas click coords - works well
                 yClick = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
-                testplayfield.moveObject(e)
+                currentLevel.moveObject(e)
             })
 
             playfield.addEventListener("mousemove",(e) => {
@@ -194,6 +228,9 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 physicsEngineRun = (time) => {
+                    if (levelWon) {
+                        return;
+                    }
                     this.clearCanvas()
                     Object.keys(this.currentLevelObjects).forEach( (object) => {
                         if (this.currentLevelObjects[object].type === "static") {
@@ -202,6 +239,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         this.currentLevelObjects[object].movement(time)
                         this.currentLevelObjects[object].wallCollisionCheck()
                         this.currentLevelObjects[object].collisionCheck()
+                        this.currentLevelObjects[object].checkIfWin()
                     })
                     this.moveObject()
                     requestAnimationFrame(this.physicsEngineRun)
@@ -217,51 +255,57 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.color = object.data.color
                     this.type = object.data.type
                     this.source = object.data.source
+                    this.name = object.name
                 }
 
                 createCanvasObject = () =>{
                     let image = new Image();
                     image.src = this.source;
-                    let pattern = playfieldContext.createPattern(this.source,"no-repeat")
-
-                    //TODO: drawImage with a source in html is needed.
                     if (this.r !== undefined) {
-                        playfieldContext.beginPath();
-                        playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
-                        playfieldContext.fillStyle = pattern;
-                        playfieldContext.fill();
-                        playfieldContext.closePath();
+                        // image.addEventListener("load", function(e){
+                        //     playfieldContext.drawImage(this, object.x, object.y, object.r, object.r)
+                        // },true)
+                        
+                        // playfieldContext.beginPath();
+                        // playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
+                        // // playfieldContext.fillStyle = "black";
+                        // // playfieldContext.fill();
+                        // playfieldContext.closePath();
+                        playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
                         return;
                     }
                     if (this.rotation !== 0) {
                         playfieldContext.save();
                         playfieldContext.translate(this.x,this.y);
+                        playfieldContext.beginPath()
                         playfieldContext.rotate(this.rotation*(Math.PI/180));
-                        playfieldContext.fillStyle=pattern;
+                        playfieldContext.fillStyle=this.color;
                         
                         playfieldContext.fillRect(-this.width,-this.height,this.width,this.height);
                         if (this.isDragged) {
-                            playfieldContext.strokeStyle="green";
+                            playfieldContext.strokeStyle="black";
                             playfieldContext.lineWidth = 4;
                             playfieldContext.strokeRect(-this.width,-this.height,this.width,this.height); 
                         }
+                        playfieldContext.closePath()
                         playfieldContext.translate(this.x,this.y);
                         playfieldContext.restore();
                         return;
                     }
                     if (this.isDragged) {
-                        playfieldContext.strokeStyle="green";
+                        //playfieldContext.clearRect(this.x -1, this.y - 1,this.width + 2, this. height + 2)
+                        playfieldContext.beginPath()
+                        playfieldContext.strokeStyle="red";
                         playfieldContext.lineWidth = 4;
-                        playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
+                        playfieldContext.strokeRect(this.x,this.y,this.width,this.height);
+                        playfieldContext.closePath()
                     }
                     // if (this.isBeingRotated) {
                     //     playfieldContext.strokeStyle="blue";
                     //     playfieldContext.lineWidth = 4;
                     //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                     // }
-                    
-                    playfieldContext.fillStyle=pattern;
-                    playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+                    playfieldContext.drawImage(image, this.x, this.y, this.width, this.height)                    
                 }
 
                 redrawCanvasObject = () =>{
@@ -278,10 +322,13 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.rotation = object.data.rotation 
                     this.isMovable = object.data.isMovable
                     this.isDragged = object.data.isDragged
-                    this.isBeingRotated = object.data.isBeingRotated
+                    // this.isBeingRotated = object.data.isBeingRotated
                 }
 
                 moveMe = () => {
+                    if (objectBeingDragged !== "" && objectBeingDragged !== this.name) {
+                        return;
+                    }
                     if (this.isDragged && prevxClick === xClick && prevyClick === yClick) {
                         this.dragger()
                         return
@@ -293,6 +340,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         xClick = 0;
                         yClick = 0;
                         this.isDragged = false;
+                        objectBeingDragged = "";
                         //this.isBeingRotated = true;
                         return
                     }
@@ -301,12 +349,14 @@ document.addEventListener('DOMContentLoaded',function(){
                         this.isDragged = true;
                         prevxClick = xClick;
                         prevyClick = yClick;
+                        objectBeingDragged = this.name;
                         this.dragger()
                     }
                     
                 }
 
                 dragger = () => {
+                    //console.log(this.isDragged);
                     this.x = xMove - this.width/2;
                     this.y = yMove - this.height/2;
                     this.redrawCanvasObject()
@@ -366,21 +416,35 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.gravityValue = 0.01
                 }
 
+                checkIfWin = () => {
+                    console.log(engineID);
+                    let temp = currentLevel.currentLevelObjects["goal"];
+                    let goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width/3
+                    let goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height/3
+                    if (this.x >= goalX  && this.y >= goalY) {
+                        levelWon = true;
+                        window.cancelAnimationFrame(engineID);
+                        document.querySelector(".winScreen").style.display = "block";
+                        playfieldContext.clearRect(0,0,playfieldWidth,playfieldHeight);
+                    }
+                }
+
                 countInitialVectors = () => {
                     this.vx = Math.cos(this.direction*(Math.PI/180));
                     this.vy = Math.sin(this.direction*(Math.PI/180));
                 }
 
                 movement = (time) => {
-                    this.speed = this.speed - 0.001 + this.gravityValue;
+                    this.speed = this.speed - 0.001;
                     if (this.speed < 0) {
                         this.speed = 0
                     }
+                    //console.log(this.vx,this.vy, "movement");
                     
                     
-                    this.x = this.x + (this.vx*this.speed);
+                    this.x = this.x + (this.vx*this.speed*this.speed);
                     this.vy = this.vy + this.gravityValue;
-                    this.y = this.y + (this.vy*this.speed);
+                    this.y = this.y + (this.vy*this.speed*this.speed);
                     previousTime = time;
                 }
 
@@ -421,9 +485,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
                     
-                    Object.keys(testplayfield.currentLevelObjects).forEach( (object) => {
-                        let colidee = testplayfield.currentLevelObjects[object];
-                        if (colidee.name === "inventory" || colidee.name === this.name){
+                    Object.keys(currentLevel.currentLevelObjects).forEach( (object) => {
+                        let colidee = currentLevel.currentLevelObjects[object];
+                        if (colidee.name === "inventory" || colidee.name === this.name || colidee.name === "goal"){
                             return;
                         }
 
@@ -487,11 +551,11 @@ document.addEventListener('DOMContentLoaded',function(){
 
                     this.vy = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation*(Math.PI/180)))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation*(Math.PI/180))))*(Math.sin(rotation*(Math.PI/180)))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation*(Math.PI/180)))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation*(Math.PI/180))))*(Math.sin(rotation*(Math.PI/180)-Math.PI/2)) + this.gravityValue;
 
-                    this.speed -=  this.speed/20;
+                    this.speed = this.speed - this.speed*this.gravityValue;
                     if (this.speed < 0) {
                         this.speed = 0;
                     }
-                   
+                   //console.log(this.vx,this.vy, "bouncer");
                     this.x += this.vx;
                     this.y += this.vy;
                 }                
@@ -547,7 +611,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
         //Time functionality
             let timerInterval = setInterval( () => {
-                if (!start) {
+                if (!start || levelWon) {
                     return
                 }
                 if (seconds === 60) {
@@ -560,6 +624,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
                 let currentTime = (hours.toString().length < 2 ? "0"+hours : hours)+":"+(minutes.toString().length < 2 ? "0"+minutes : minutes)+":"+(seconds.toString().length < 2 ? "0"+seconds : seconds);
                 timer.innerText = currentTime;
+                winTimer.innerText = currentTime;
                 seconds++;
             },1000);       
 
@@ -581,6 +646,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 setTimeout(()=>{
                     welcomeScreen.style.display = "none";
                     currentLevel.physicsEngineRun();
+                    engineID = requestAnimationFrame(currentLevel.physicsEngineRun)
                 },5000)
                
             })

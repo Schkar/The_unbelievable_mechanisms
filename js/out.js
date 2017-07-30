@@ -85,31 +85,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Temporary dev variables
     var creationButton = document.querySelector(".temporaryGodlyCreationButton");
-    var testplayfield = null;
+    //let currentLevel = null;
     var testLevel = {
+        // level1: [
+        //     {
+        //         name: "staticObject1",
+        //         position: {x:450, y:150},
+        //         data: {width:100, height:30, rotation: 0, color:"red", type:"static", isMovable: true},
+        //     },
+        //     {
+        //         name: "staticObject2",
+        //         position: {x:600, y:300}, 
+        //         data:{width:80, height:30, rotation: 0, color:"green", type:"static"},
+        //     },
+        //     {
+        //         name: "someCircle",
+        //         position:{x:442, y:15},
+        //         data:{r:10, color:"blue", type:"kinetic"},
+        //         motion: {speed: 0, vx: 0, vy:0, isCollided: false}
+        //     }
+        // ],
         level1: [{
-            name: "staticObject1",
-            position: { x: 450, y: 150 },
-            data: { width: 100, height: 30, rotation: 0, color: "red", type: "static", isMovable: true }
-        }, {
-            name: "staticObject2",
-            position: { x: 600, y: 300 },
-            data: { width: 80, height: 30, rotation: 0, color: "green", type: "static" }
-        }, {
-            name: "someCircle",
-            position: { x: 442, y: 15 },
-            data: { r: 10, color: "blue", type: "kinetic" },
-            motion: { speed: 0, vx: 0, vy: 0, isCollided: false }
-        }],
-        level2: [{
             name: "aBall",
-            position: { x: 710, y: 200 },
-            data: { r: 10, color: "green", type: "kinetic", source: "../images/basketball.svg" },
-            motion: { speed: 2, vx: 0, vy: 0, direction: 0, isCollided: false }
+            position: { x: 810, y: 200 },
+            data: { r: 30, color: "green", type: "kinetic", source: "../images/basketball.png" },
+            motion: { speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false }
+        }, {
+            name: "staticObject1",
+            position: { x: 505, y: 250 },
+            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, source: "../images/barrier.png" }
         }, {
             name: "staticObject2",
-            position: { x: 705, y: 300 },
-            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, isBeingRotated: false }
+            position: { x: 125, y: 100 },
+            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, source: "../images/plank1.png" }
+        }, {
+            name: "staticObject3",
+            position: { x: 425, y: 300 },
+            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, source: "../images/plank2.png" }
+        }, {
+            name: "goal",
+            position: { x: 700, y: 290 },
+            data: { width: 200, height: 100, isMovable: false, source: "../images/wheelbarrow.png" }
         }]
 
         //Temporary dev functions
@@ -117,15 +133,9 @@ document.addEventListener('DOMContentLoaded', function () {
     };creationButton.addEventListener("click", function (e) {
         e.preventDefault();
 
-        testplayfield = new Playfield(2);
-        testplayfield.createObjects(testLevel);
-        testplayfield.physicsEngineRun();
-        //testplayfield.logCurrentLevelObjects();
-        //testplayfield.physicsEngineRun();
-
-
-        //currentLevel.physicsEngineRun()
-        //requestAnimationFrame(currentLevel.physicsEngineRun)
+        currentLevel = new Playfield();
+        currentLevel.createObjects(testLevel);
+        currentLevel.physicsEngineRun();
     });
 
     //Buttons variables
@@ -145,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Timer variables
 
     var timer = document.querySelector(".timer");
+    var winTimer = document.querySelector(".winTimer");
     var seconds = 0;
     var minutes = 0;
     var hours = 0;
@@ -153,12 +164,32 @@ document.addEventListener('DOMContentLoaded', function () {
     //AnimFrame IDs
 
     var engineID = null;
-    var draggerID = null;
 
     //Levels data
 
     var levelsInfo = {
-        level1: [{}],
+        level1: [{
+            name: "aBall",
+            position: { x: 810, y: 200 },
+            data: { r: 30, color: "green", type: "kinetic", source: "../images/basketball.png" },
+            motion: { speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false }
+        }, {
+            name: "staticObject1",
+            position: { x: 705, y: 250 },
+            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, source: "../images/barrier.png" }
+        }, {
+            name: "staticObject2",
+            position: { x: 125, y: 100 },
+            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, source: "../images/plank1.png" }
+        }, {
+            name: "staticObject3",
+            position: { x: 425, y: 300 },
+            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, source: "../images/plank2.png" }
+        }, {
+            name: "goal",
+            position: { x: 800, y: 290 },
+            data: { width: 200, height: 100, rotation: 0, color: "red", type: "static", isMovable: false, source: "../images/wheelbarrow.png" }
+        }],
         level2: [],
         level3: [],
         level4: [],
@@ -188,13 +219,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // let prevyMove = 0;
     var difTime = 0;
     var previousTime = 0;
+    var objectBeingDragged = "";
+    var levelWon = false;
 
     //Canvas functions
 
     playfield.addEventListener("mousedown", function (e) {
         xClick = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2) * 10) / 10; //Formula for canvas click coords - works well
         yClick = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2) * 10) / 10;
-        testplayfield.moveObject(e);
+        currentLevel.moveObject(e);
     });
 
     playfield.addEventListener("mousemove", function (e) {
@@ -257,6 +290,9 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.physicsEngineRun = function (time) {
+            if (levelWon) {
+                return;
+            }
             _this.clearCanvas();
             Object.keys(_this.currentLevelObjects).forEach(function (object) {
                 if (_this.currentLevelObjects[object].type === "static") {
@@ -265,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 _this.currentLevelObjects[object].movement(time);
                 _this.currentLevelObjects[object].wallCollisionCheck();
                 _this.currentLevelObjects[object].collisionCheck();
+                _this.currentLevelObjects[object].checkIfWin();
             });
             _this.moveObject();
             requestAnimationFrame(_this.physicsEngineRun);
@@ -285,46 +322,51 @@ document.addEventListener('DOMContentLoaded', function () {
         this.createCanvasObject = function () {
             var image = new Image();
             image.src = _this2.source;
-            var pattern = playfieldContext.createPattern(_this2.source, "no-repeat");
-
-            //TODO: drawImage with a source in html is needed.
             if (_this2.r !== undefined) {
-                playfieldContext.beginPath();
-                playfieldContext.arc(_this2.x, _this2.y, _this2.r, 0, 2 * Math.PI);
-                playfieldContext.fillStyle = pattern;
-                playfieldContext.fill();
-                playfieldContext.closePath();
+                // image.addEventListener("load", function(e){
+                //     playfieldContext.drawImage(this, object.x, object.y, object.r, object.r)
+                // },true)
+
+                // playfieldContext.beginPath();
+                // playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
+                // // playfieldContext.fillStyle = "black";
+                // // playfieldContext.fill();
+                // playfieldContext.closePath();
+                playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
                 return;
             }
             if (_this2.rotation !== 0) {
                 playfieldContext.save();
                 playfieldContext.translate(_this2.x, _this2.y);
+                playfieldContext.beginPath();
                 playfieldContext.rotate(_this2.rotation * (Math.PI / 180));
-                playfieldContext.fillStyle = pattern;
+                playfieldContext.fillStyle = _this2.color;
 
                 playfieldContext.fillRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
                 if (_this2.isDragged) {
-                    playfieldContext.strokeStyle = "green";
+                    playfieldContext.strokeStyle = "black";
                     playfieldContext.lineWidth = 4;
                     playfieldContext.strokeRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
                 }
+                playfieldContext.closePath();
                 playfieldContext.translate(_this2.x, _this2.y);
                 playfieldContext.restore();
                 return;
             }
             if (_this2.isDragged) {
-                playfieldContext.strokeStyle = "green";
+                //playfieldContext.clearRect(this.x -1, this.y - 1,this.width + 2, this. height + 2)
+                playfieldContext.beginPath();
+                playfieldContext.strokeStyle = "red";
                 playfieldContext.lineWidth = 4;
                 playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
+                playfieldContext.closePath();
             }
             // if (this.isBeingRotated) {
             //     playfieldContext.strokeStyle="blue";
             //     playfieldContext.lineWidth = 4;
             //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
             // }
-
-            playfieldContext.fillStyle = pattern;
-            playfieldContext.fillRect(_this2.x, _this2.y, _this2.width, _this2.height);
+            playfieldContext.drawImage(image, _this2.x, _this2.y, _this2.width, _this2.height);
         };
 
         this.redrawCanvasObject = function () {
@@ -337,6 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
         this.color = object.data.color;
         this.type = object.data.type;
         this.source = object.data.source;
+        this.name = object.name;
     };
 
     var CanvasStaticObject = function (_CanvasObject) {
@@ -348,6 +391,9 @@ document.addEventListener('DOMContentLoaded', function () {
             var _this3 = _possibleConstructorReturn(this, (CanvasStaticObject.__proto__ || Object.getPrototypeOf(CanvasStaticObject)).call(this, object));
 
             _this3.moveMe = function () {
+                if (objectBeingDragged !== "" && objectBeingDragged !== _this3.name) {
+                    return;
+                }
                 if (_this3.isDragged && prevxClick === xClick && prevyClick === yClick) {
                     _this3.dragger();
                     return;
@@ -357,6 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     xClick = 0;
                     yClick = 0;
                     _this3.isDragged = false;
+                    objectBeingDragged = "";
                     //this.isBeingRotated = true;
                     return;
                 }
@@ -365,11 +412,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     _this3.isDragged = true;
                     prevxClick = xClick;
                     prevyClick = yClick;
+                    objectBeingDragged = _this3.name;
                     _this3.dragger();
                 }
             };
 
             _this3.dragger = function () {
+                //console.log(this.isDragged);
                 _this3.x = xMove - _this3.width / 2;
                 _this3.y = yMove - _this3.height / 2;
                 _this3.redrawCanvasObject();
@@ -418,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function () {
             _this3.rotation = object.data.rotation;
             _this3.isMovable = object.data.isMovable;
             _this3.isDragged = object.data.isDragged;
-            _this3.isBeingRotated = object.data.isBeingRotated;
+            // this.isBeingRotated = object.data.isBeingRotated
             return _this3;
         }
 
@@ -456,20 +505,35 @@ document.addEventListener('DOMContentLoaded', function () {
     var _initialiseProps = function _initialiseProps() {
         var _this7 = this;
 
+        this.checkIfWin = function () {
+            console.log(engineID);
+            var temp = currentLevel.currentLevelObjects["goal"];
+            var goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width / 3;
+            var goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height / 3;
+            if (_this7.x >= goalX && _this7.y >= goalY) {
+                levelWon = true;
+                window.cancelAnimationFrame(engineID);
+                document.querySelector(".winScreen").style.display = "block";
+                playfieldContext.clearRect(0, 0, playfieldWidth, playfieldHeight);
+            }
+        };
+
         this.countInitialVectors = function () {
             _this7.vx = Math.cos(_this7.direction * (Math.PI / 180));
             _this7.vy = Math.sin(_this7.direction * (Math.PI / 180));
         };
 
         this.movement = function (time) {
-            _this7.speed = _this7.speed - 0.001 + _this7.gravityValue;
+            _this7.speed = _this7.speed - 0.001;
             if (_this7.speed < 0) {
                 _this7.speed = 0;
             }
+            //console.log(this.vx,this.vy, "movement");
 
-            _this7.x = _this7.x + _this7.vx * _this7.speed;
+
+            _this7.x = _this7.x + _this7.vx * _this7.speed * _this7.speed;
             _this7.vy = _this7.vy + _this7.gravityValue;
-            _this7.y = _this7.y + _this7.vy * _this7.speed;
+            _this7.y = _this7.y + _this7.vy * _this7.speed * _this7.speed;
             previousTime = time;
         };
 
@@ -509,9 +573,9 @@ document.addEventListener('DOMContentLoaded', function () {
             //FIXME: Nie działa na boczne ścianki! Dunno why.
 
 
-            Object.keys(testplayfield.currentLevelObjects).forEach(function (object) {
-                var colidee = testplayfield.currentLevelObjects[object];
-                if (colidee.name === "inventory" || colidee.name === _this7.name) {
+            Object.keys(currentLevel.currentLevelObjects).forEach(function (object) {
+                var colidee = currentLevel.currentLevelObjects[object];
+                if (colidee.name === "inventory" || colidee.name === _this7.name || colidee.name === "goal") {
                     return;
                 }
 
@@ -573,11 +637,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             _this7.vy = _this7.speed * (_this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) + _this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180)) + _this7.speed * (_this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) - _this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2) + _this7.gravityValue;
 
-            _this7.speed -= _this7.speed / 20;
+            _this7.speed = _this7.speed - _this7.speed * _this7.gravityValue;
             if (_this7.speed < 0) {
                 _this7.speed = 0;
             }
-
+            //console.log(this.vx,this.vy, "bouncer");
             _this7.x += _this7.vx;
             _this7.y += _this7.vy;
         };
@@ -642,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Time functionality
     var timerInterval = setInterval(function () {
-        if (!start) {
+        if (!start || levelWon) {
             return;
         }
         if (seconds === 60) {
@@ -655,6 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         var currentTime = (hours.toString().length < 2 ? "0" + hours : hours) + ":" + (minutes.toString().length < 2 ? "0" + minutes : minutes) + ":" + (seconds.toString().length < 2 ? "0" + seconds : seconds);
         timer.innerText = currentTime;
+        winTimer.innerText = currentTime;
         seconds++;
     }, 1000);
 
@@ -676,6 +741,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () {
             welcomeScreen.style.display = "none";
             currentLevel.physicsEngineRun();
+            engineID = requestAnimationFrame(currentLevel.physicsEngineRun);
         }, 5000);
     });
 

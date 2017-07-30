@@ -78,179 +78,7 @@ setInterval(function() {
   
 }, 1000 / fps);
 
-Dragging things on Canvas
-
-// Determine if a point is inside the shape's bounds
-Shape.prototype.contains = function(mx, my) {
-  // All we have to do is make sure the Mouse X,Y fall in the area between
-  // the shape's X and (X + Width) and its Y and (Y + Height)
-  return  (this.x <= mx) && (this.x + this.w >= mx) &&
-          (this.y <= my) && (this.y + this.h >= my);
-}
-
-
-  // **** Keep track of state! ****
-  
-  this.valid = false; // when set to false, the canvas will redraw everything
-  this.shapes = [];  // the collection of things to be drawn
-  this.dragging = false; // Keep track of when we are dragging
-  // the current selected object. In the future we could turn this into an array for multiple selection
-  this.selection = null;
-  this.dragoffx = 0; // See mousedown and mousemove events for explanation
-  this.dragoffy = 0;
-  
-  // **** Then events! ****
-  
-  // This is an example of a closure!
-  // Right here "this" means the CanvasState. But we are making events on the Canvas itself,
-  // and when the events are fired on the canvas the variable "this" is going to mean the canvas!
-  // Since we still want to use this particular CanvasState in the events we have to save a reference to it.
-  // This is our reference!
-  var myState = this;
-  
-  //fixes a problem where double clicking causes text to get selected on the canvas
-  canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
-  // Up, down, and move are for dragging
-  canvas.addEventListener('mousedown', function(e) {
-    var mouse = myState.getMouse(e);
-    var mx = mouse.x;
-    var my = mouse.y;
-    var shapes = myState.shapes;
-    var l = shapes.length;
-    for (var i = l-1; i >= 0; i--) {
-      if (shapes[i].contains(mx, my)) {
-        var mySel = shapes[i];
-        // Keep track of where in the object we clicked
-        // so we can move it smoothly (see mousemove)
-        myState.dragoffx = mx - mySel.x;
-        myState.dragoffy = my - mySel.y;
-        myState.dragging = true;
-        myState.selection = mySel;
-        myState.valid = false;
-        return;
-      }
-    }
-    // havent returned means we have failed to select anything.
-    // If there was an object selected, we deselect it
-    if (myState.selection) {
-      myState.selection = null;
-      myState.valid = false; // Need to clear the old selection border
-    }
-  }, true);
-  canvas.addEventListener('mousemove', function(e) {
-    if (myState.dragging){
-      var mouse = myState.getMouse(e);
-      // We don't want to drag the object by its top-left corner, we want to drag it
-      // from where we clicked. Thats why we saved the offset and use it here
-      myState.selection.x = mouse.x - myState.dragoffx;
-      myState.selection.y = mouse.y - myState.dragoffy;   
-      myState.valid = false; // Something's dragging so we must redraw
-    }
-  }, true);
-  canvas.addEventListener('mouseup', function(e) {
-    myState.dragging = false;
-  }, true);
-  // double click for making new shapes
-  canvas.addEventListener('dblclick', function(e) {
-    var mouse = myState.getMouse(e);
-    myState.addShape(new Shape(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0,255,0,.6)'));
-  }, true);
-  
-  // **** Options! ****
-  
-  this.selectionColor = '#CC0000';
-  this.selectionWidth = 2;  
-  this.interval = 30;
-  setInterval(function() { myState.draw(); }, myState.interval);
-}
-
-CanvasState.prototype.addShape = function(shape) {
-  this.shapes.push(shape);
-  this.valid = false;
-}
-
-CanvasState.prototype.clear = function() {
-  this.ctx.clearRect(0, 0, this.width, this.height);
-}
-
-// While draw is called as often as the INTERVAL variable demands,
-// It only ever does something if the canvas gets invalidated by our code
-CanvasState.prototype.draw = function() {
-  // if our state is invalid, redraw and validate!
-  if (!this.valid) {
-    var ctx = this.ctx;
-    var shapes = this.shapes;
-    this.clear();
-    
-    // ** Add stuff you want drawn in the background all the time here **
-    
-    // draw all shapes
-    var l = shapes.length;
-    for (var i = 0; i < l; i++) {
-      var shape = shapes[i];
-      // We can skip the drawing of elements that have moved off the screen:
-      if (shape.x > this.width || shape.y > this.height ||
-          shape.x + shape.w < 0 || shape.y + shape.h < 0) continue;
-      shapes[i].draw(ctx);
-    }
-    
-    // draw selection
-    // right now this is just a stroke along the edge of the selected Shape
-    if (this.selection != null) {
-      ctx.strokeStyle = this.selectionColor;
-      ctx.lineWidth = this.selectionWidth;
-      var mySel = this.selection;
-      ctx.strokeRect(mySel.x,mySel.y,mySel.w,mySel.h);
-    }
-    
-    // ** Add stuff you want drawn on top all the time here **
-    
-    this.valid = true;
-  }
-}
-
-
-// Creates an object with x and y defined, set to the mouse position relative to the state's canvas
-// If you wanna be super-correct this can be tricky, we have to worry about padding and borders
-CanvasState.prototype.getMouse = function(e) {
-  var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
-  
-  // Compute the total offset
-  if (element.offsetParent !== undefined) {
-    do {
-      offsetX += element.offsetLeft;
-      offsetY += element.offsetTop;
-    } while ((element = element.offsetParent));
-  }
-
-  // Add padding and border style widths to offset
-  // Also add the <html> offsets in case there's a position:fixed bar
-  offsetX += this.stylePaddingLeft + this.styleBorderLeft + this.htmlLeft;
-  offsetY += this.stylePaddingTop + this.styleBorderTop + this.htmlTop;
-
-  mx = e.pageX - offsetX;
-  my = e.pageY - offsetY;
-  
-  // We return a simple javascript object (a hash) with x and y defined
-  return {x: mx, y: my};
-}
-
-// If you dont want to use <body onLoad='init()'>
-// You could uncomment this init() reference and place the script reference inside the body tag
-//init();
-
-function init() {
-  var s = new CanvasState(document.getElementById('canvas1'));
-  s.addShape(new Shape(40,40,50,50)); // The default is gray
-  s.addShape(new Shape(60,140,40,60, 'lightskyblue'));
-  // Lets make some partially transparent
-  s.addShape(new Shape(80,150,60,30, 'rgba(127, 255, 212, .5)'));
-  s.addShape(new Shape(125,80,30,80, 'rgba(245, 222, 179, .7)'));
-}
-
-// Now go make something amazing!
-
-
+https://stackoverflow.com/questions/41469794/html-canvas-and-javascript-rotating-objects-with-collision-detection
 <script>
         var context = document.getElementById('pageCanvas').getContext('2d');
         var angle = 0;
@@ -282,3 +110,378 @@ function init() {
 
         setInterval(drawRandomlyColoredRectangle, 20);
     </script>
+
+    Move hit point to local space
+First an alternative
+
+There are many ways you can do it. The simplest way. When you calculate the cross product between a point and a line it will be negative if the point is right of the line and positive if left. If you then do each of the four sides in turn and they are all the same sign the point must be inside.
+
+To get the cross product of a line and a point
+
+//x1,y1,x2,y2   is a line
+// px,py is a point
+// first move line and point relative to the origin
+// so that the line and point is a vector
+px -= x1;
+py -= y1;
+x2 -= x1;
+y2 -= y1;
+var cross = x2 * py - y2 * px; 
+if(cross < 0){ 
+     // point left of line
+}else if(cross > 0) {
+    // point right of line
+}else {
+    // point on the line
+}
+
+A Quicker way.
+
+But that is a lot of math for each object and each bullet.
+
+The best way is to transform the bullet into the tanks local coordinate system then its just a simple matter of testing the bounds, left, right, top, bottom.
+
+To do that you need to invert the tanks transformation matrix. Unfortunately the easy way to do that is currently still behind browser flags/prefixes so you need to create and manipulate the transformations in javascript. (Should not be too long till ctx.getTransform() is implemented across the board and fill a very needed performance hole in the canvas 2d API)
+If ctx.getTransform is available
+
+So you have a tank at x,y and rotated r and you draw it with
+
+ctx.translate(x,y);
+ctx.rotate(r);
+// render the tank
+ctx.fillRect(-20,-10,40,20); // rotated about center
+
+The transform hold everything we need to do the calcs, all we need to do is invert it and then multiply the bullet with the inverted matrix
+
+var tankInvMatrix = ctx.getTransform().invertSelf(); // get the inverted matrix
+
+The bullet is at bx,by so create a DOMPoint
+
+var bullet = new DOMPoint(bx,by);
+
+Then for each tank transform the bullet with DOMMatrix.transformPoint
+
+var relBullet = tankInvMatrix.transformPoint(bullet); // transform the point 
+                                                      // returning the bullet 
+                                                      // relative to the tank
+
+Now just do the test in the tanks local coord space
+
+if(relBullet.x > -20 && relBullet.x < 20 && relBullet.x > -10 && relBullet.x < 10){
+      /// bullet has hit the tank
+}
+
+The Javascript way
+
+Well until the becomes the norm you have to do it the long way. Using the same x,y,r for tank, bx,by for bullet.
+
+// create a vector aligned to the tanks direction
+var xdx = Math.cos(r);
+var xdy = Math.sin(r);
+
+// set the 2D API to the tank location and rotation
+ctx.setTransform(xdx,xdy,-xdy,xdx,x,y);  // create the transform for the tank
+
+// draw the tank
+ctx.fillRect(-20,-10,40,20); // rotated about center
+
+// create inverted matrix for the tank 
+// Only invert the tank matrix once per frame
+
+var d =  xdx * xdx - xdy * -xdy;
+var xIx  = xdx / d;
+var xIy  = -xdy / d;
+// I am skipping c,d of the matrix as it is perpendicular to a,b
+// thus c = -b and d = a
+var ix = (-xdy * y - xdx * x) / d;
+var iy = -(xdx * y - xdy * x) / d;
+
+// For each bullet per tank
+// multiply the bullet with the inverted tank matrix
+// bullet local x & y
+var blx = bx * xIx - by * xIy + ix;
+var bly = bx * xIy + by * xIx + iy;
+
+// and you are done.
+if(blx > -20 && blx < 20 && bly > -10 && bly < 10){
+      // tank and bullet are one Kaaboommmm 
+}
+
+Test to make sure it works
+
+Too many negatives, xdx,xdy etc etc for me to be able to see if I got it correct (Turned out I put the wrong sign in the determinant) so here is a quick demo to show it in action and working.
+
+Use the mouse to move over the tank body and it will show that it is hit in red. You could extend it easily to also hit the tank moving parts. You just need the inverse transform of the turret to get the bullet in local space to do the test.
+
+Hide code snippet
+
+// some tanks
+var tanks = {
+    tanks : [], // array of tanks
+    drawTank(){  // draw tank function
+        this.r += this.dr;
+        this.tr += this.tdr;
+        if(Math.random() < 0.01){
+            this.dr = Math.random() * 0.02 - 0.01;
+        }
+        if(Math.random() < 0.01){
+            this.tdr = Math.random() * 0.02 - 0.01;
+        }
+        if(Math.random() < 0.01){
+            this.speed = Math.random() * 2 - 0.4;
+        }
+        var xdx = Math.cos(this.r);
+        var xdy = Math.sin(this.r);
+        
+        // move the tank forward
+        this.x += xdx * this.speed;
+        this.y += xdy * this.speed;
+        this.x = (this.x + canvas.width) % canvas.width;
+        this.y = (this.y + canvas.height) % canvas.height;
+
+        ctx.setTransform(xdx,xdy,-xdy,xdx,this.x,this.y);
+        ctx.lineWidth = 2;
+        ctx.fillStyle = "#F00";
+        ctx.strokeStyle = "#080";
+        if(this.hit){
+            ctx.fillRect(-this.w / 2, -this.h /2, this.w, this.h);
+            this.hit = false;
+        }
+        ctx.strokeRect(-this.w / 2, -this.h / 2, this.w, this.h);
+        ctx.translate(-this.w /4, 0)
+        ctx.rotate(this.tr);
+        ctx.strokeRect(this.w / 4, - 2, this.w * 0.8, 4);
+        ctx.strokeRect(-8, - 8, 16, 16);
+        // invert the tank matrix
+        var d =  (xdx * xdx) - xdy * -xdy;
+        this.invMat[0] = xdx / d;
+        this.invMat[1] = -xdy / d;
+        // I am skipping c,d of the matrix as it is perpendicular to a,b
+        // thus c = -b and d = a
+        this.invMat[2] = (-xdy * this.y - xdx * this.x) / d;
+        this.invMat[3] = -(xdx * this.y - xdy * this.x) / d;        
+    },
+    hitTest(x,y){ // test tank against x,y
+        var blx = x * this.invMat[0] - y * this.invMat[1] + this.invMat[2];
+        var bly = x * this.invMat[1] + y * this.invMat[0] + this.invMat[3];
+        if(blx > -this.w / 2 && blx < this.w / 2 && bly > -this.h / 2 && bly < this.h / 2){
+            this.hit = true;
+        }        
+    },
+    eachT(callback){ // iterator
+        for(var i = 0; i < this.tanks.length; i ++){ callback(this.tanks[i],i); }
+    },
+    addTank(x,y,r){  // guess what this does????
+        this.tanks.push({
+            x,y,r,
+            dr : 0,  // turn rate
+            tr : 0,  // gun direction
+            tdr : 0, // gun turn rate
+            speed : 0, // speed
+            w : 40,
+            h : 20,
+            invMat : [0,0,0,0],
+            hit : false,
+            hitTest : this.hitTest,
+            draw : this.drawTank,
+        })
+    },
+    drawTanks(){ this.eachT(tank => tank.draw()); },
+    testHit(x,y){ // test if point x,y has hit a tank
+        this.eachT(tank => tank.hitTest(x,y));
+    }
+}
+
+
+// this function is called from a requestAnimationFrame call back
+function display() { 
+    if(tanks.tanks.length === 0){
+        // create some random tanks
+        for(var i = 0; i < 100; i ++){
+            tanks.addTank(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height,
+                Math.random() * Math.PI * 2
+            );
+        }
+    }
+    
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
+    ctx.globalAlpha = 1; // reset alpha
+    ctx.clearRect(0, 0, w, h);
+    
+    // draw the mouse
+    ctx.fillStyle = "red";
+    ctx.strokeStyle = "#F80";
+    ctx.beginPath();
+    ctx.arc(mouse.x,mouse.y,3,0,Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+
+    // draw the tanks    
+    tanks.drawTanks();
+    // test for a hit (Note there should be a update, then test hit, then draw as is the tank is hit visiualy one frame late)
+    tanks.testHit(mouse.x,mouse.y);
+}
+
+
+
+//====================================================================================================
+// Boilerplate code not part of answer ignore all code from here down
+//====================================================================================================
+
+var w, h, cw, ch, canvas, ctx, mouse, globalTime = 0, firstRun = true;
+;(function(){
+    const RESIZE_DEBOUNCE_TIME = 100;
+    var  createCanvas, resizeCanvas, setGlobals, resizeCount = 0;
+    createCanvas = function () {
+        var c,cs;
+        cs = (c = document.createElement("canvas")).style;
+        cs.position = "absolute";
+        cs.top = cs.left = "0px";
+        cs.zIndex = 1000;
+        document.body.appendChild(c);
+        return c;
+    }
+    resizeCanvas = function () {
+        if (canvas === undefined) {
+            canvas = createCanvas();
+        }
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+        ctx = canvas.getContext("2d");
+        if (typeof setGlobals === "function") {
+            setGlobals();
+        }
+        if (typeof onResize === "function") {
+            if(firstRun){
+                onResize();
+                firstRun = false;
+            }else{
+                resizeCount += 1;
+                setTimeout(debounceResize, RESIZE_DEBOUNCE_TIME);
+            }
+        }
+    }
+    function debounceResize() {
+        resizeCount -= 1;
+        if (resizeCount <= 0) {
+            onResize();
+        }
+    }
+    setGlobals = function () {
+        cw = (w = canvas.width) / 2;
+        ch = (h = canvas.height) / 2;
+    }
+    mouse = (function () {
+        function preventDefault(e) {
+            e.preventDefault();
+        }
+        var mouse = {
+            x : 0,y : 0,w : 0,
+            alt : false,
+            shift : false,
+            ctrl : false,
+            buttonRaw : 0,
+            over : false,
+            bm : [1, 2, 4, 6, 5, 3],
+            active : false,
+            bounds : null,
+            crashRecover : null,
+            mouseEvents : "mousemove,mousedown,mouseup,mouseout,mouseover,mousewheel,DOMMouseScroll".split(",")
+        };
+        var m = mouse;
+        function mouseMove(e) {
+            var t = e.type;
+            m.bounds = m.element.getBoundingClientRect();
+            m.x = e.pageX - m.bounds.left + scrollX;
+            m.y = e.pageY - m.bounds.top + scrollY;
+            m.alt = e.altKey;
+            m.shift = e.shiftKey;
+            m.ctrl = e.ctrlKey;
+            if (t === "mousedown") {
+                m.buttonRaw |= m.bm[e.which - 1];
+            } else if (t === "mouseup") {
+                m.buttonRaw &= m.bm[e.which + 2];
+            } else if (t === "mouseout") {
+                m.buttonRaw = 0;
+                m.over = false;
+            } else if (t === "mouseover") {
+                m.over = true;
+            } else if (t === "mousewheel") {
+                m.w = e.wheelDelta;
+            } else if (t === "DOMMouseScroll") {
+                m.w = -e.detail;
+            }
+            if (m.callbacks) {
+                m.callbacks.forEach(c => c(e));
+            }
+            if ((m.buttonRaw & 2) && m.crashRecover !== null) {
+                if (typeof m.crashRecover === "function") {
+                    setTimeout(m.crashRecover, 0);
+                }
+            }
+            e.preventDefault();
+        }
+        m.addCallback = function (callback) {
+            if (typeof callback === "function") {
+                if (m.callbacks === undefined) {
+                    m.callbacks = [callback];
+                } else {
+                    m.callbacks.push(callback);
+                }
+            }
+        }
+        m.start = function (element) {
+            if (m.element !== undefined) {
+                m.removeMouse();
+            }
+            m.element = element === undefined ? document : element;
+            m.mouseEvents.forEach(n => {
+                m.element.addEventListener(n, mouseMove);
+            });
+            m.element.addEventListener("contextmenu", preventDefault, false);
+            m.active = true;
+        }
+        m.remove = function () {
+            if (m.element !== undefined) {
+                m.mouseEvents.forEach(n => {
+                    m.element.removeEventListener(n, mouseMove);
+                });
+                m.element.removeEventListener("contextmenu", preventDefault);
+                m.element = m.callbacks = undefined;
+                m.active = false;
+            }
+        }
+        return mouse;
+    })();
+    // Clean up. Used where the IDE is on the same page.
+    var done = function () {
+        window.removeEventListener("resize", resizeCanvas)
+        if(mouse !== undefined){
+            mouse.remove();
+        }
+        document.body.removeChild(canvas);
+        canvas = ctx = mouse = undefined;
+    }
+    function update(timer) { // Main update loop
+        if(ctx === undefined){
+            return;
+        }
+        globalTime = timer;
+        display(); // call demo code
+        //if (!(mouse.buttonRaw & 2)) {
+            requestAnimationFrame(update);
+        //} else {
+        //    done();
+        //}
+    }
+    setTimeout(function(){
+        resizeCanvas();
+        mouse.start(canvas, true);
+        mouse.crashRecover = done;
+        window.addEventListener("resize", resizeCanvas);
+        requestAnimationFrame(update);
+    },0);
+})();

@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "goal",
                         position: {x:700, y:290},
-                        data: {width: 200, height: 100, isMovable: false, source: "images/wheelbarrow.png"}
+                        data: {width: 200, height: 100, isMovable: false, source: "..images/wheelbarrow.png"}
                     }
                 ]
             }

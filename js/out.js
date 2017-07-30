@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
         level1: [{
             name: "aBall",
             position: { x: 810, y: 200 },
-            data: { r: 30, color: "green", type: "kinetic", source: "../images/basketball.png" },
+            data: { r: 30, color: "green", type: "kinetic", source: "images/basketball.png" },
             motion: { speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",

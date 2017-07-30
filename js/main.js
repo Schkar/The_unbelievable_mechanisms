@@ -293,10 +293,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         // // playfieldContext.fillStyle = "black";
                         // // playfieldContext.fill();
                         // playfieldContext.closePath();
-                        image.addEventListener("load",function(e) {
-                            playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
-                        },true)
-                        
+                        playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
                         return;
                     }
                     if (this.rotation !== 0) {

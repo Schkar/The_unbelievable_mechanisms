@@ -80,6 +80,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    //TODO: 
+    //Rotation
+    //Left-right-object collision
+    //Gravity!
+    //rotated collisions
+
     console.log("DOM loaded. Script is working");
     // //No mobile function
     // let checkMobile = false;

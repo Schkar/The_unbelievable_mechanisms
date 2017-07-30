@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded',function(){
+
+    //TODO: 
+    //Rotation
+    //Left-right-object collision
+    //Gravity!
+    //rotated collisions
+    
     console.log("DOM loaded. Script is working");
     // //No mobile function
     // let checkMobile = false;

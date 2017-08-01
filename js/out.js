@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Left-right-object collision
     //Gravity!
     //rotated collisions
+    //Inventory?
 
     console.log("DOM loaded. Script is working");
     // //No mobile function
@@ -106,17 +107,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Temporary dev variables
     var creationButton = document.querySelector(".temporaryGodlyCreationButton");
-    var currentLevel = null;
+    // let currentLevel = null;
 
     //Temporary dev functions
 
     creationButton.addEventListener("click", function (e) {
         e.preventDefault();
 
-        console.log("clicked");
         currentLevel = new Playfield();
         currentLevel.createObjects(levelsInfo);
-        console.log(currentLevel);
         //currentLevel.physicsEngineRun()
     });
 
@@ -153,24 +152,24 @@ document.addEventListener('DOMContentLoaded', function () {
         level1: [{
             name: "aBall",
             position: { x: 810, y: 200 },
-            data: { r: 30, color: "green", type: "kinetic", id: "basketball" },
+            data: { mass: 600, r: 30, color: "green", type: "kinetic", id: "basketball" },
             motion: { speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",
             position: { x: 705, y: 250 },
-            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "barrier" }
+            data: { mass: 2000, width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }, {
             name: "staticObject2",
             position: { x: 125, y: 100 },
-            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "plank1" }
+            data: { mass: 600, width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "plank1" }
         }, {
             name: "staticObject3",
             position: { x: 425, y: 300 },
-            data: { width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "plank2" }
+            data: { mass: 800, width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "plank2" }
         }, {
             name: "goal",
             position: { x: 800, y: 290 },
-            data: { width: 200, height: 100, rotation: 0, color: "red", type: "static", isMovable: false, id: "wheelbarrow" }
+            data: { mass: 3000, width: 200, height: 100, rotation: 0, color: "red", type: "static", isMovable: false, id: "wheelbarrow" }
         }],
         level2: [],
         level3: [],
@@ -183,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
         level10: []
     };
     //TODO: Uncomment this for final version
-    //let currentLevel = null;
+    var currentLevel = null;
 
     //Game variables
 
@@ -705,6 +704,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Start button functionality
     startLevelButton.addEventListener("click", function (e) {
+        console.log("working");
         e.preventDefault();
         welcomeScreen.style.opacity = 0;
         setTimeout(function () {

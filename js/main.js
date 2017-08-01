@@ -242,28 +242,8 @@ document.addEventListener('DOMContentLoaded',function(){
                 createCanvasObject = () =>{
                     
                     let image = document.getElementById(this.id);
-                    // let image = new Image()
-                    // image.src = this.source
-                    // console.log(image);
                     if (this.r !== undefined) {
-                        // image.addEventListener("load", function(e){
-                        //     playfieldContext.drawImage(this, object.x, object.y, object.r, object.r)
-                        // },true)
-                        
-                        // playfieldContext.beginPath();
-                        // playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
-                        // // playfieldContext.fillStyle = "black";
-                        // // playfieldContext.fill();
-                        // playfieldContext.closePath();
-                        // image.onload = function(){
-                        //     playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
-                        // }
-                        // image.addEventListener("load",function(){
-                        //     playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
-                        // },false)
                         playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
-                        // image.src = this.source
-                        // image.src = "../images/basketball.png"
                         return;
                     }
                     if (this.rotation !== 0) {
@@ -285,7 +265,6 @@ document.addEventListener('DOMContentLoaded',function(){
                         return;
                     }
                     if (this.isDragged) {
-                        //playfieldContext.clearRect(this.x -1, this.y - 1,this.width + 2, this. height + 2)
                         playfieldContext.beginPath()
                         playfieldContext.strokeStyle="red";
                         playfieldContext.lineWidth = 4;
@@ -297,14 +276,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     //     playfieldContext.lineWidth = 4;
                     //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                     // }
-                    // image.onload = function(){
                     playfieldContext.drawImage(image, this.x, this.y, this.width, this.height) 
-                    // }
-                    // image.src = this.source
-                    // image.addEventListener("load",function(){
-                    //     playfieldContext.drawImage(image, this.x, this.y, this.width, this.height)                    
-                    // },false)
-                    //playfieldContext.fillRect(10,10,100,100)
                 }
 
                 redrawCanvasObject = () =>{

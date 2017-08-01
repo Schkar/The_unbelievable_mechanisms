@@ -313,28 +313,8 @@ document.addEventListener('DOMContentLoaded', function () {
         this.createCanvasObject = function () {
 
             var image = document.getElementById(_this2.id);
-            // let image = new Image()
-            // image.src = this.source
-            // console.log(image);
             if (_this2.r !== undefined) {
-                // image.addEventListener("load", function(e){
-                //     playfieldContext.drawImage(this, object.x, object.y, object.r, object.r)
-                // },true)
-
-                // playfieldContext.beginPath();
-                // playfieldContext.arc(this.x,this.y,this.r,0,2*Math.PI);
-                // // playfieldContext.fillStyle = "black";
-                // // playfieldContext.fill();
-                // playfieldContext.closePath();
-                // image.onload = function(){
-                //     playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
-                // }
-                // image.addEventListener("load",function(){
-                //     playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
-                // },false)
                 playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
-                // image.src = this.source
-                // image.src = "../images/basketball.png"
                 return;
             }
             if (_this2.rotation !== 0) {
@@ -356,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             if (_this2.isDragged) {
-                //playfieldContext.clearRect(this.x -1, this.y - 1,this.width + 2, this. height + 2)
                 playfieldContext.beginPath();
                 playfieldContext.strokeStyle = "red";
                 playfieldContext.lineWidth = 4;
@@ -368,14 +347,7 @@ document.addEventListener('DOMContentLoaded', function () {
             //     playfieldContext.lineWidth = 4;
             //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
             // }
-            // image.onload = function(){
             playfieldContext.drawImage(image, _this2.x, _this2.y, _this2.width, _this2.height);
-            // }
-            // image.src = this.source
-            // image.addEventListener("load",function(){
-            //     playfieldContext.drawImage(image, this.x, this.y, this.width, this.height)                    
-            // },false)
-            //playfieldContext.fillRect(10,10,100,100)
         };
 
         this.redrawCanvasObject = function () {

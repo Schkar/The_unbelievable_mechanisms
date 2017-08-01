@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded',function(){
 
     //TODO: 
-    //Rotation
     //Left-right-object collision
     //Gravity!
     //rotated collisions
-    //Inventory?
+    //Inventory
+    //More objects
 
     console.log("DOM loaded. Script is working");
     // //No mobile function
@@ -250,7 +250,14 @@ document.addEventListener('DOMContentLoaded',function(){
                     
                     let image = document.getElementById(this.id);
                     if (this.r !== undefined) {
+                        //TODO: InnerRotation:
+                        // playfieldContext.save();
+                        // playfieldContext.translate(this.x,this.y+);
+                        // playfieldContext.beginPath()
+                        // playfieldContext.rotate(this.rotation*(Math.PI/180)); 
                         playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                        // playfieldContext.closePath()
+                        // playfieldContext.restore();
                         return;
                     }
                     if (this.rotation !== 0) {
@@ -379,6 +386,10 @@ document.addEventListener('DOMContentLoaded',function(){
                     //         this.redrawCanvasObject();
                     //         //playfieldContext.restore();
                     //         prevyMove = yMove;
+                }
+
+                innerRotation = () => { //Only for fan objects!
+                    
                 }
             }
             
@@ -538,7 +549,11 @@ document.addEventListener('DOMContentLoaded',function(){
                    //console.log(this.vx,this.vy, "bouncer");
                     this.x += this.vx;
                     this.y += this.vy;
-                }                
+                }
+                
+                innerRotation = () => {
+
+                }
             }
 
 

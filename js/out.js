@@ -82,11 +82,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 document.addEventListener('DOMContentLoaded', function () {
 
     //TODO: 
-    //Rotation
     //Left-right-object collision
     //Gravity!
     //rotated collisions
-    //Inventory?
+    //Inventory
+    //More objects
 
     console.log("DOM loaded. Script is working");
     // //No mobile function
@@ -159,24 +159,12 @@ document.addEventListener('DOMContentLoaded', function () {
         level1: [{
             name: "aBall",
             position: { x: 810, y: 200 },
-            data: { mass: 600, r: 30, type: "kinetic", id: "basketball" },
-            motion: { speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false }
+            data: { mass: 600, r: 14, type: "kinetic", id: "basketball" },
+            motion: { speed: 2.5, vx: 0, vy: 0, direction: 150, isCollided: false }
         }, {
             name: "staticObject1",
             position: { x: 705, y: 250 },
             data: { mass: 2000, width: 170, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "barrier" }
-        }, {
-            name: "staticObject2",
-            position: { x: 225, y: 100 },
-            data: { mass: 600, width: 170, height: 30, rotation: 0, type: "static", isMovable: true, isDragged: false, id: "plank1" }
-        }, {
-            name: "staticObject3",
-            position: { x: 425, y: 300 },
-            data: { mass: 800, width: 170, height: 30, rotation: 0, type: "static", isMovable: true, isDragged: false, id: "plank2" }
-        }, {
-            name: "goal",
-            position: { x: 800, y: 290 },
-            data: { mass: 3000, width: 200, height: 100, rotation: 0, type: "static", isMovable: false, id: "wheelbarrow" }
         }],
         level2: [],
         level3: [],
@@ -322,20 +310,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var image = document.getElementById(_this2.id);
             if (_this2.r !== undefined) {
+                //TODO: InnerRotation:
+                // playfieldContext.save();
+                // playfieldContext.translate(this.x,this.y+);
+                // playfieldContext.beginPath()
+                // playfieldContext.rotate(this.rotation*(Math.PI/180)); 
                 playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
+                // playfieldContext.closePath()
+                // playfieldContext.restore();
                 return;
             }
             if (_this2.rotation !== 0) {
                 playfieldContext.save();
-                playfieldContext.translate(_this2.x + _this2.width / 2, _this2.y + _this2.height / 2);
+                playfieldContext.translate(_this2.x, _this2.y);
                 playfieldContext.beginPath();
                 playfieldContext.rotate(_this2.rotation * (Math.PI / 180));
                 if (_this2.isDragged) {
                     playfieldContext.strokeStyle = "red";
                     playfieldContext.lineWidth = 4;
-                    playfieldContext.strokeRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
+                    playfieldContext.strokeRect(0, 0, _this2.width, _this2.height);
                 }
-                playfieldContext.drawImage(image, -_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
+                playfieldContext.drawImage(image, 0, 0, _this2.width, _this2.height); //After translation it must be 00
                 playfieldContext.closePath();
                 playfieldContext.restore();
                 //playfieldContext.translate(-this.x,-this.y);
@@ -396,8 +391,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     //this.isBeingRotated = true;
                     return;
                 }
-
-                if (_this3.x <= xClick && _this3.x + _this3.width >= xClick && _this3.y <= yClick && _this3.y + _this3.height >= yClick) {
+                // Tu są potrzebne 4 punkty prostokąta
+                if (_this3.rotation !== 0 || _this3.rotation % 360 !== 0) {
+                    if (_this3.x <= xClick && _this3.x + _this3.width * Math.cos(_this3.rotation * Math.PI / 180) >= xClick && _this3.y <= yClick && _this3.y + _this3.height * Math.sin(_this3.rotation * Math.PI / 180) >= yClick) {
+                        console.log("hejho");
+                        _this3.isDragged = true;
+                        prevxClick = xClick;
+                        prevyClick = yClick;
+                        objectBeingDragged = _this3.name;
+                        _this3.dragger();
+                        return;
+                    }
+                } else if (_this3.x <= xClick && _this3.x + _this3.width >= xClick && _this3.y <= yClick && _this3.y + _this3.height >= yClick) {
                     _this3.isDragged = true;
                     prevxClick = xClick;
                     prevyClick = yClick;
@@ -408,8 +413,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             _this3.dragger = function () {
                 //console.log(this.isDragged);
+                // if (this.rotation !== 0 || this.rotation % 360 !== 0) {
+                //     let rcpx = this.x + (this.width/2 * Math.cos(this.rotation*Math.PI/180))
+                //     let rcpy = this.y + (this.height/2 * Math.sin(this.rotation*Math.PI/180))
+                //     this.x = xMove - rcpx;
+                //     this.y = yMove - rcpy;
+                // }
+                // else {
                 _this3.x = xMove - _this3.width / 2;
                 _this3.y = yMove - _this3.height / 2;
+                // }
                 _this3.redrawCanvasObject();
             };
 
@@ -449,6 +462,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 //         this.redrawCanvasObject();
                 //         //playfieldContext.restore();
                 //         prevyMove = yMove;
+            };
+
+            _this3.innerRotation = function () {//Only for fan objects!
+
             };
 
             _this3.width = object.data.width;
@@ -496,6 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.checkIfWin = function () {
             //console.log(engineID);
+            return;
             var temp = currentLevel.currentLevelObjects["goal"];
             var goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width / 3;
             var goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height / 3;
@@ -559,8 +577,6 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.collisionCheck = function () {
-            //FIXME: Nie działa na boczne ścianki! Dunno why.
-
 
             Object.keys(currentLevel.currentLevelObjects).forEach(function (object) {
                 var colidee = currentLevel.currentLevelObjects[object];
@@ -568,27 +584,45 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                var rectX = colidee.x;
-                var rectY = colidee.y;
-                var rectXW2 = colidee.x + colidee.width / 2;
-                var rectYH2 = colidee.y + colidee.height / 2;
-                if (colidee.rotation !== 0) {
-                    console.log(colidee.x);
-                    rectX = colidee.x + colidee.width * Math.cos(colidee.rotation * Math.PI / 180);
-                    rectY = colidee.y + colidee.height * Math.sin(colidee.rotation * Math.PI / 180);
-                    rectXW2;
-                    rectYH2 = rectX + rectXW2;
+                var ccpx = _this6.x; //Circle Central Point X-coord
+                var ccpy = _this6.y; //Circle Central Point Y-coord
+                var rcpx = colidee.x + colidee.width / 2; //Rectangle Central Point X-coord if no rotation
+                var rcpy = colidee.y + colidee.height / 2; //Rectangle Central Point Y-coord if no rotation
+                if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
+                    rcpx = colidee.x + colidee.width / 2 * Math.cos(colidee.rotation * Math.PI / 180);
+                    // rcpy = colidee.y + colidee.height/2 + + (colidee.height * Math.sin(colidee.rotation*Math.PI/180))
+                    rcpy = colidee.y + colidee.height / 2 + colidee.width / 2 * Math.sin(colidee.rotation * Math.PI / 180);
                 }
+
+                // playfieldContext.moveTo(ccpx,ccpy);
+                // playfieldContext.lineTo(rcpx,rcpy);
+                // playfieldContext.stroke()
+
                 //console.log(rectX,rectY);
 
-                var dx = Math.abs(_this6.x - (rectX + colidee.width / 2));
-                var dy = Math.abs(_this6.y - (rectY + colidee.height / 2));
+                var newccpx = Math.cos(colidee.rotation * Math.PI / 180) * (_this6.x - colidee.x) - Math.sin(colidee.rotation * Math.PI / 180) * (_this6.y - colidee.y) + colidee.x;
+                var newccpy = Math.sin(colidee.rotation * Math.PI / 180) * (_this6.x - colidee.x) + Math.cos(colidee.rotation * Math.PI / 180) * (_this6.y - colidee.y) + colidee.y;
+
+                playfieldContext.fillRect(colidee.x, colidee.y, colidee.height, colidee.width);
+
+                var dx = Math.abs(newccpx - rcpx);
+                var dy = Math.abs(newccpy - rcpy);
+
+                // if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
+                //     // dx = Math.abs(ccpx - dx * Math.cos(colidee.rotation*Math.PI/180) * Math.cos(colidee.rotation*Math.PI/180))
+                //     // dy = Math.abs(ccpy - dx * Math.cos(colidee.rotation*Math.PI/180) * Math.sin(colidee.rotation*Math.PI/180))
+                //     dx = dx * Math.sin(colidee.rotation*Math.PI/180)
+                //     dy = dy * Math.cos(colidee.rotation*Math.PI/180)
+                // }
+
 
                 //Object collision check
                 //is collision on X-axis?
+
                 if (dx > _this6.r + colidee.width / 2) {
                     _this6.isCollided = false;
                     _this6.gravityValue = 0.01;
+                    //console.log("1");
                     return;
                 }
 
@@ -596,6 +630,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (dy > _this6.r + colidee.height / 2) {
                     _this6.isCollided = false;
                     _this6.gravityValue = 0.01;
+                    //console.log("2");
                     return;
                 }
 
@@ -604,6 +639,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     _this6.isCollided = true;
                     _this6.bouncer(colidee.rotation);
                     _this6.gravityValue = 0;
+                    //console.log("3");
                     return;
                 }
 
@@ -612,6 +648,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     _this6.isCollided = true;
                     _this6.bouncer(colidee.rotation);
                     _this6.gravityValue = 0;
+                    //console.log("4");
                     return;
                 }
 
@@ -635,6 +672,8 @@ document.addEventListener('DOMContentLoaded', function () {
             _this6.x += _this6.vx;
             _this6.y += _this6.vy;
         };
+
+        this.innerRotation = function () {};
     };
 
     var ItemInventory = function (_CanvasStaticObject) {

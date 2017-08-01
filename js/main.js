@@ -80,29 +80,29 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "aBall",
                         position: {x: 810, y: 200},
-                        data: {mass: 600, r: 30, type: "kinetic", id: "basketball"},
-                        motion: {speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false}
+                        data: {mass: 600, r: 14, type: "kinetic", id: "basketball"},
+                        motion: {speed: 2.5, vx: 0, vy: 0, direction: 150, isCollided: false}
                     },
                     {
                         name: "staticObject1",
                         position: {x:705, y:250}, 
                         data: {mass: 2000, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
-                    {
-                        name: "staticObject2",
-                        position: {x:225, y:100}, 
-                        data: {mass: 600, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank1"},
-                    },
-                    {
-                        name: "staticObject3",
-                        position: {x:425, y:300}, 
-                        data: {mass: 800, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank2"},
-                    },
-                    {
-                        name: "goal",
-                        position: {x:800, y:290},
-                        data: {mass: 3000, width: 200, height: 100, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
-                    }
+                    // {
+                    //     name: "staticObject2",
+                    //     position: {x:225, y:100}, 
+                    //     data: {mass: 600, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank1"},
+                    // },
+                    // {
+                    //     name: "staticObject3",
+                    //     position: {x:425, y:300}, 
+                    //     data: {mass: 800, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank2"},
+                    // },
+                    // {
+                    //     name: "goal",
+                    //     position: {x:800, y:290},
+                    //     data: {mass: 3000, width: 200, height: 100, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
+                    // }
                 ],
                 level2: [],
                 level3: [],
@@ -262,15 +262,15 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                     if (this.rotation !== 0) {
                         playfieldContext.save();
-                        playfieldContext.translate(this.x+this.width/2,this.y+this.height/2);
+                        playfieldContext.translate(this.x,this.y);
                         playfieldContext.beginPath()
                         playfieldContext.rotate(this.rotation*(Math.PI/180));                        
                         if (this.isDragged) {
                             playfieldContext.strokeStyle="red";
                             playfieldContext.lineWidth = 4;
-                            playfieldContext.strokeRect(-this.width,-this.height,this.width,this.height); 
+                            playfieldContext.strokeRect(0,0,this.width,this.height); 
                         }
-                        playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height)
+                        playfieldContext.drawImage(image,0,0,this.width,this.height) //After translation it must be 00
                         playfieldContext.closePath()
                         playfieldContext.restore();
                         //playfieldContext.translate(-this.x,-this.y);
@@ -330,21 +330,39 @@ document.addEventListener('DOMContentLoaded',function(){
                         //this.isBeingRotated = true;
                         return
                     }
-
-                    if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)) {
+                    // Tu są potrzebne 4 punkty prostokąta
+                    if (this.rotation !== 0 || this.rotation % 360 !== 0) {
+                        if ((this.x <= xClick && this.x + (this.width * Math.cos(this.rotation*Math.PI/180)) >= xClick)&& (this.y <= yClick && this.y + (this.height * Math.sin(this.rotation*Math.PI/180)) >= yClick)){
+                            console.log("hejho");
+                            this.isDragged = true;
+                            prevxClick = xClick;
+                            prevyClick = yClick;
+                            objectBeingDragged = this.name;
+                            this.dragger()
+                            return;
+                        }
+                    }
+                    else if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)) {
                         this.isDragged = true;
                         prevxClick = xClick;
                         prevyClick = yClick;
                         objectBeingDragged = this.name;
                         this.dragger()
                     }
-                    
                 }
 
                 dragger = () => {
                     //console.log(this.isDragged);
-                    this.x = xMove - this.width/2;
-                    this.y = yMove - this.height/2;
+                    // if (this.rotation !== 0 || this.rotation % 360 !== 0) {
+                    //     let rcpx = this.x + (this.width/2 * Math.cos(this.rotation*Math.PI/180))
+                    //     let rcpy = this.y + (this.height/2 * Math.sin(this.rotation*Math.PI/180))
+                    //     this.x = xMove - rcpx;
+                    //     this.y = yMove - rcpy;
+                    // }
+                    // else {
+                        this.x = xMove - this.width/2;
+                        this.y = yMove - this.height/2;
+                    // }
                     this.redrawCanvasObject()
                 }
                 
@@ -408,6 +426,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 checkIfWin = () => {
                     //console.log(engineID);
+                    return
                     let temp = currentLevel.currentLevelObjects["goal"];
                     let goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width/3
                     let goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height/3
@@ -471,7 +490,6 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 collisionCheck = () => {
-                    //FIXME: Nie działa na boczne ścianki! Dunno why.
 
 
                     
@@ -482,28 +500,45 @@ document.addEventListener('DOMContentLoaded',function(){
                         }
 
 
-
-                        let rectX = colidee.x;
-                        let rectY = colidee.y;
-                        let rectXW2 = colidee.x + colidee.width/2
-                        let rectYH2 = colidee.y + colidee.height/2
-                        if (colidee.rotation !== 0) {
-                            console.log(colidee.x);
-                            rectX = colidee.x + (colidee.width * Math.cos(colidee.rotation*Math.PI/180))
-                            rectY = colidee.y + (colidee.height * Math.sin(colidee.rotation*Math.PI/180))
-                            rectXW2
-                            rectYH2 = rectX + rectXW2
+                        let ccpx = this.x; //Circle Central Point X-coord
+                        let ccpy = this.y; //Circle Central Point Y-coord
+                        let rcpx = colidee.x + colidee.width/2; //Rectangle Central Point X-coord if no rotation
+                        let rcpy = colidee.y + colidee.height/2; //Rectangle Central Point Y-coord if no rotation
+                        if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
+                            rcpx = colidee.x + (colidee.width/2 * Math.cos(colidee.rotation*Math.PI/180))
+                            // rcpy = colidee.y + colidee.height/2 + + (colidee.height * Math.sin(colidee.rotation*Math.PI/180))
+                            rcpy = colidee.y + colidee.height/2 + (colidee.width/2 * Math.sin(colidee.rotation*Math.PI/180))
                         }
+
+                        // playfieldContext.moveTo(ccpx,ccpy);
+                        // playfieldContext.lineTo(rcpx,rcpy);
+                        // playfieldContext.stroke()
+
                         //console.log(rectX,rectY);
 
-                        let dx=Math.abs(this.x-(rectX+colidee.width/2));
-                        let dy=Math.abs(this.y-(rectY+colidee.height/2));
+                        let newccpx = Math.cos(colidee.rotation*Math.PI/180) * (this.x - colidee.x) - Math.sin(colidee.rotation*Math.PI/180) * (this.y - colidee.y) + colidee.x
+                        let newccpy = Math.sin(colidee.rotation*Math.PI/180) * (this.x - colidee.x) + Math.cos(colidee.rotation*Math.PI/180) * (this.y - colidee.y) + colidee.y
+
+                        playfieldContext.fillRect(colidee.x,colidee.y,colidee.height,colidee.width)
+
+                        let dx=Math.abs(newccpx-rcpx);
+                        let dy=Math.abs(newccpy-rcpy);
+
+                        // if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
+                        //     // dx = Math.abs(ccpx - dx * Math.cos(colidee.rotation*Math.PI/180) * Math.cos(colidee.rotation*Math.PI/180))
+                        //     // dy = Math.abs(ccpy - dx * Math.cos(colidee.rotation*Math.PI/180) * Math.sin(colidee.rotation*Math.PI/180))
+                        //     dx = dx * Math.sin(colidee.rotation*Math.PI/180)
+                        //     dy = dy * Math.cos(colidee.rotation*Math.PI/180)
+                        // }
+                        
 
                         //Object collision check
                         //is collision on X-axis?
+
                         if( dx > this.r+colidee.width/2 ){
                             this.isCollided = false;
                             this.gravityValue = 0.01;
+                            //console.log("1");
                             return; 
                         }
 
@@ -511,6 +546,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         if( dy > this.r+colidee.height/2 ){
                             this.isCollided = false;
                             this.gravityValue = 0.01;
+                            //console.log("2");
                             return; 
                         }
 
@@ -519,6 +555,7 @@ document.addEventListener('DOMContentLoaded',function(){
                             this.isCollided = true;
                             this.bouncer(colidee.rotation)
                             this.gravityValue = 0;
+                            //console.log("3");
                             return; 
                         }
 
@@ -527,6 +564,7 @@ document.addEventListener('DOMContentLoaded',function(){
                             this.isCollided = true;
                             this.bouncer(colidee.rotation)
                             this.gravityValue = 0;
+                            //console.log("4");
                             return; 
                         }
 

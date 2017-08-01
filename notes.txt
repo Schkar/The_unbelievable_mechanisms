@@ -488,3 +488,759 @@ var w, h, cw, ch, canvas, ctx, mouse, globalTime = 0, firstRun = true;
         requestAnimationFrame(update);
     },0);
 })();
+
+/**
+  * Vector.js
+  */
+
+function Vector(x, y) {
+	this.x = Number(x) || 0;
+	this.y = Number(y) || 0;
+}
+
+Vector.arrow = function(start, dir, mag, ctx, lineCol) {
+	if(mag === 0)
+		return;
+	
+	var p1x = 5 * dir.y;
+	var p1y = -5 * dir.x;
+	
+	var p2x = -5 * dir.y;
+	var p2y = 5 * dir.x;
+	
+	var p0x = dir.x*mag - dir.x*5;
+	var p0y = dir.y*mag - dir.y*5;
+	
+	ctx.save();
+		ctx.lineWidth = 2;
+		
+		ctx.beginPath();
+		ctx.moveTo(start.x, start.y);
+		ctx.lineTo(start.x + p0x, start.y + p0y);
+		ctx.lineTo(start.x + p0x + p1x, start.y + p0y + p1y);
+		ctx.lineTo(start.x + dir.x*mag, start.y + dir.y*mag);
+		ctx.lineTo(start.x + p0x + p2x, start.y + p0y + p2y);
+		ctx.lineTo(start.x + p0x, start.y + p0y);
+		ctx.closePath();
+	
+		ctx.strokeStyle = lineCol;
+		ctx.stroke();
+	ctx.restore();
+};
+
+Vector.prototype.set = function(x, y) {
+	if(x instanceof Vector) {
+		this.x = x.x;
+		this.y = x.y;
+	}
+	else {
+		this.x = Number(x) || this.x;
+		this.y = Number(y) || this.y;
+	}
+	
+	return this;
+};
+
+Vector.prototype.setAngle = function(ang) {
+	var o = this.angle();
+	this.rotate(-1*o);
+	this.rotate(ang);
+	return this;
+};
+
+Vector.prototype.scale = function(s) {
+	s = Number(s) || 1;
+	this.x *= s;
+	this.y *= s;
+	return this;
+};
+
+Vector.prototype.add = function(b, s) {
+	s = Number(s) || 1;
+	this.x += b.x*s;
+	this.y += b.y*s;
+	return this;
+};
+
+Vector.prototype.subtract = function(b, s) {
+	s = Number(s) || 1;
+	this.x -= b.x*s;
+	this.y -= b.y*s;
+	return this;
+};
+
+Vector.prototype.dot = function(b) {
+	return (this.x*b.x + this.y*b.y);
+};
+
+Vector.prototype.magnitude = function() {
+	return Math.sqrt(this.x*this.x + this.y*this.y);
+};
+
+Vector.prototype.rotate = function(ang) {
+	var x = this.x*Math.cos(ang) + this.y*Math.sin(ang);
+	var y = this.x*Math.sin(ang) - this.y*Math.cos(ang);
+	
+	this.x = x;
+	this.y = -y;
+	
+	return this;
+};
+
+Vector.prototype.angle = function() {
+	return Math.atan2(-this.y, this.x);
+};
+
+Vector.prototype.invert = function() {
+	this.x = -this.x;
+	this.y = -this.y;
+	return this;
+};
+
+Vector.prototype.isNear = function(x, y, r) {
+	var a = (this.x - x);
+	var b = (this.y - y);
+	var m = a*a + b*b;
+	
+	if(m <= r*r)
+		return true;
+	
+	return false;
+};
+
+/**
+  * Box.js
+  */
+
+function Box(position, width, height, ori, color) {
+	this.position = position || new Vector();
+	this.width = Number(width) || 1;
+	this.height = Number(height) || 1;
+	
+	this.axes = new Array(2);
+	this.axes[0] = new Vector(1, 0);
+	this.axes[1] = new Vector(0, -1);
+	
+	if(Number(ori))
+		this.rotate(ori);
+		
+	this.color = color || '240, 240, 240';
+}
+
+Box.prototype.move = function(vec) {
+	if(vec instanceof Vector) {
+		this.position.add(vec);
+	}
+};
+
+Box.prototype.rotate = function(ang) {
+	this.axes[0].rotate(ang);
+	this.axes[1].rotate(ang);
+};
+
+Box.prototype.setAngle = function(ang) {
+	this.axes[0].setAngle(ang);
+	this.axes[1].setAngle(ang);
+};
+
+Box.prototype.isColliding = function(b) {
+	var t = new Vector(b.position.x, b.position.y);
+	t.subtract(this.position);
+	var s1 = new Vector(t.dot(this.axes[0]), t.dot(this.axes[1]));
+	t.set(this.position);
+	t.subtract(b.position);
+	var s2 = new Vector(t.dot(b.axes[0]), t.dot(b.axes[1]));
+	
+	var d = new Array(4);
+	d[0] = this.axes[0].dot(b.axes[0]);
+	d[1] = this.axes[0].dot(b.axes[1]);
+	d[2] = this.axes[1].dot(b.axes[0]);
+	d[3] = this.axes[1].dot(b.axes[1]);
+	
+	var ra = 0, rb = 0;
+	
+	ra = this.width * 0.5;
+	rb = Math.abs(d[0])*b.width*0.5 + Math.abs(d[1])*b.height*0.5;
+	if(Math.abs(s1.x) > ra+rb) {
+		//delete t;
+		//delete s1;
+		//delete s2;
+		//delete d;
+		return 1;
+	}
+	
+	ra = this.height * 0.5;
+	rb = Math.abs(d[2])*b.width*0.5 + Math.abs(d[3])*b.height*0.5;
+	if(Math.abs(s1.y) > ra+rb) {
+		//delete t;
+		//delete s1;
+		//delete s2;
+		//delete d;
+		return 2;
+	}
+	
+	ra = Math.abs(d[0])*this.width*0.5 + Math.abs(d[2])*this.height*0.5;
+	rb = b.width*0.5;
+	if(Math.abs(s2.x) > ra+rb) {
+		//delete t;
+		//delete s1;
+		//delete s2;
+		//delete d;
+		return 3;
+	}
+	
+	ra = Math.abs(d[1])*this.width*0.5 + Math.abs(d[3])*this.height*0.5;
+	rb = b.height*0.5;
+	if(Math.abs(s2.y) > ra+rb) {
+		//delete t;
+		//delete s1;
+		//delete s2;
+		//delete d;
+		return 4;
+	}
+	
+	//delete t;
+	//delete s1;
+	//delete s2;
+	//delete d;
+	return 0;
+};
+
+Box.prototype.updateCorners = function() {
+	this.p1 = this.p1 ? this.p1.set(this.position) : new Vector(this.position.x, this.position.y);
+	this.p2 = this.p2 ? this.p2.set(this.position) : new Vector(this.position.x, this.position.y);
+	this.p3 = this.p3 ? this.p3.set(this.position) : new Vector(this.position.x, this.position.y);
+	this.p4 = this.p4 ? this.p4.set(this.position) : new Vector(this.position.x, this.position.y);
+	
+	this.p1.subtract(this.axes[0], this.width * 0.5);
+	this.p1.add(this.axes[1], this.height * 0.5);
+	
+	this.p2.add(this.axes[0], this.width * 0.5);
+	this.p2.add(this.axes[1], this.height * 0.5);
+	
+	this.p3.add(this.axes[0], this.width * 0.5);
+	this.p3.subtract(this.axes[1], this.height * 0.5);
+	
+	this.p4.subtract(this.axes[0], this.width * 0.5);
+	this.p4.subtract(this.axes[1], this.height * 0.5);
+};
+
+Box.prototype.render = function(ctx) {
+	this.updateCorners();
+	
+	ctx.save();
+		ctx.beginPath();
+		ctx.moveTo(this.p1.x, this.p1.y);
+		ctx.lineTo(this.p2.x, this.p2.y);
+		ctx.lineTo(this.p3.x, this.p3.y);
+		ctx.lineTo(this.p4.x, this.p4.y);
+		ctx.closePath();
+		
+		ctx.fillStyle = 'rgba(' + this.color + ', 0.5)';
+		ctx.fill();
+	ctx.restore();
+};
+
+Box.prototype.renderAxes = function(ctx) {
+	Vector.arrow(this.position, this.axes[0], this.width * 0.5, ctx, 'rgba(126, 25, 24, 1.0)');
+		
+	Vector.arrow(this.position, this.axes[1], this.height * 0.5, ctx, 'rgba(126, 250, 65, 1.0)');
+};
+
+Box.prototype.renderWithRespect = function(b, ctx) {
+	this.s1 = this.s1 ? this.s1.set(this.position) : new Vector(this.position.x, this.position.y);
+	this.s2 = this.s2 ? this.s2.set(this.position) : new Vector(this.position.x, this.position.y);
+	this.s3 = this.s3 ? this.s3.set(this.position) : new Vector(this.position.x, this.position.y);
+	this.s4 = this.s4 ? this.s4.set(this.position) : new Vector(this.position.x, this.position.y);
+	
+	var wf = b.axes[0].dot(this.axes[0])*this.width*0.5 + b.axes[0].dot(this.axes[1])*this.height*0.5;
+	var hf = b.axes[1].dot(this.axes[0])*this.width*0.5 + b.axes[1].dot(this.axes[1])*this.height*0.5;
+	
+	this.s1.subtract(b.axes[0], wf);
+	this.s1.add(b.axes[1], hf);
+	
+	this.s2.add(b.axes[0], wf);
+	this.s2.add(b.axes[1], hf);
+	
+	this.s3.add(b.axes[0], wf);
+	this.s3.subtract(b.axes[1], hf);
+	
+	this.s4.subtract(b.axes[0], wf);
+	this.s4.subtract(b.axes[1], hf);
+	
+	ctx.save();
+		ctx.beginPath();
+		ctx.moveTo(this.s1.x, this.s1.y);
+		ctx.lineTo(this.s2.x, this.s2.y);
+		ctx.lineTo(this.s3.x, this.s3.y);
+		ctx.lineTo(this.s4.x, this.s4.y);
+		ctx.closePath();
+		
+		ctx.fillStyle = 'rgba(' + b.color + ', 0.1)';
+		ctx.fill();
+	ctx.restore();
+};
+
+
+/** 
+  * Main.js
+  */
+
+function init() {
+	canvas = document.createElement('canvas');
+	canvas.id = 'display';
+	canvas.width = 500;
+	canvas.height = 500;
+	document.getElementById('stage').appendChild(canvas);
+	
+	ctx = canvas.getContext('2d');
+	
+	box1 = new Box(new Vector(100, 66), 50, 100, Math.PI/5, '0, 120, 180');
+	box2 = new Box(new Vector(250, 250), 150, 60, 5*Math.PI/6, '199, 2, 230');
+		
+	dragging = false;
+	rotating = false;
+	dOff = new Vector();
+	selected = null;
+		 
+	canvas.addEventListener('mousedown', mouseDown, false);
+	canvas.addEventListener('mousemove', mouseMove, false);
+	canvas.addEventListener('mouseup', mouseUp, false);
+}
+
+function getMouse(e) {
+	var el = canvas, oX = 0, oY = 0;
+	
+	if(el.offsetParent !== undefined) {
+		do {
+			oX += el.offsetLeft;
+			oY += el.offsetTop;
+            el = el.offsetParent;
+		} while(el !== null);
+	}
+	
+	var mx = e.pageX - oX;
+	var my = e.pageY - oY;
+	
+	return {x: mx, y: my};
+}
+
+function mouseDown(e) {
+	var m = getMouse(e);
+	var mx = m.x;
+	var my = m.y;
+	
+	box1.updateCorners();
+	box2.updateCorners();
+	
+	if( box1.p1.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box1.p1);
+		dOff.subtract(box1.position);
+		selected = box1;
+		return;
+	}
+	
+	if( box1.p2.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box1.p2);
+		dOff.subtract(box1.position);
+		selected = box1;
+		return;
+	}
+	
+	if( box1.p3.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box1.p3);
+		dOff.subtract(box1.position);
+		selected = box1;
+		return;
+	}
+	
+	if( box1.p4.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box1.p4);
+		dOff.subtract(box1.position);
+		selected = box1;
+		return;
+	}
+	
+	if( box1.position.isNear(mx, my, box1.width < box1.height? box1.width/2 : box1.height/2 ) ) {
+		dragging = true;
+		dOff.set(mx, my);
+		dOff.subtract(box1.position);
+		selected = box1;
+		return;
+	}
+	
+	if( box2.p1.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box2.p1);
+		dOff.subtract(box2.position);
+		selected = box2;
+		return;
+	}
+	
+	if( box2.p2.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box2.p2);
+		dOff.subtract(box2.position);
+		selected = box2;
+		return;
+	}
+	
+	if( box2.p3.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box2.p3);
+		dOff.subtract(box2.position);
+		selected = box2;
+		return;
+	}
+	
+	if( box2.p4.isNear(mx, my, 10) ) {
+		rotating = true;
+		dOff.set(box2.p4);
+		dOff.subtract(box2.position);
+		selected = box2;
+		return;
+	}
+	
+	if(  box2.position.isNear(mx, my, box2.width < box2.height? box2.width/2 : box2.height/2 ) ) {
+		dragging = true;
+		dOff.set(mx, my);
+		dOff.subtract(box2.position);
+		selected = box2;
+		return;
+	}
+	
+	if(selected) {
+		selected = null;
+	}
+}
+
+function mouseMove(e) {
+	var m = getMouse(e);
+	var mx = m.x;
+	var my = m.y;
+		
+	if(rotating) {
+		var n = new Vector(mx - selected.position.x, my - selected.position.y);
+		var a1 = dOff.angle();
+		var a2 = n.angle();
+		
+		selected.rotate(a2 - a1);
+		
+		dOff.set(n);
+		
+		//delete n;
+	}
+	else if(dragging) {
+		selected.position.x = mx;
+		selected.position.y = my;
+	}
+}
+
+function mouseUp(e) {
+	dragging = false;
+	rotating = false;
+	dOff.set(0, 0);
+}
+
+function update() {
+	b1msg = '';
+	b2msg = '';
+	
+	switch(box1.isColliding(box2)) {
+		case 0:	b1msg = 'Blue collides with Pink!';
+				break;
+		case 1: b1msg = 'Separated by local X of Blue';
+				break;
+		case 2: b1msg = 'Separated by local Y of Blue';
+				break;
+		case 3: b1msg = 'Separated by local X of Pink';
+				break;
+		case 4: b1msg = 'Separated by local Y of Pink';
+				break;
+	}
+	
+	switch(box2.isColliding(box1)) {
+		case 0:	b2msg = 'Pink collides with Blue!';
+				break;
+		case 1: b2msg = 'Separated by local X of Pink';
+				break;
+		case 2: b2msg = 'Separated by local Y of Pink';
+				break;
+		case 3: b2msg = 'Separated by local X of Blue';
+				break;
+		case 4: b2msg = 'Separated by local Y of Blue';
+				break;
+	}
+}
+
+function renderTranslation() {
+	var t = new Vector(box2.position.x, box2.position.y);
+	t.subtract(box1.position);
+	var s1 = new Vector(t.dot(box1.axes[0]), t.dot(box1.axes[1]));
+	t.set(box1.position);
+	t.subtract(box2.position);
+	var s2 = new Vector(t.dot(box2.axes[0]), t.dot(box2.axes[1]));
+	
+	var v1 = new Vector(box1.axes[0].x, box1.axes[0].y);
+	var v2 = new Vector(box1.axes[1].x, box1.axes[1].y);
+	var v3 = new Vector(box2.axes[0].x, box2.axes[0].y);
+	var v4 = new Vector(box2.axes[1].x, box2.axes[1].y);
+	
+	if(s1.x < 0)
+		v1.invert();
+		
+	if(s1.y < 0)
+		v2.invert();
+		
+	if(s2.x < 0)
+		v3.invert();
+		
+	if(s2.y < 0)
+		v4.invert();
+		
+	ctx.save();
+		ctx.lineWidth = 3;
+		
+		ctx.beginPath();
+		ctx.moveTo(box1.position.x, box1.position.y);
+		ctx.lineTo(box2.position.x, box2.position.y);
+		ctx.closePath();
+		
+		ctx.strokeStyle = '#303030';
+		ctx.stroke();
+	ctx.restore();
+	
+	Vector.arrow(box1.position, v1, Math.abs(s1.x), ctx, 'rgba(255, 78, 0, 0.4)');
+	Vector.arrow(box1.position, v2, Math.abs(s1.y), ctx, 'rgba(255, 78, 0, 0.4)');
+	Vector.arrow(box2.position, v3, Math.abs(s2.x), ctx, 'rgba(250, 165, 115, 0.4)');
+	Vector.arrow(box2.position, v4, Math.abs(s2.y), ctx, 'rgba(250, 165, 115, 0.4)');	
+}
+
+function renderOverlap() {
+	var t = new Vector(box2.position.x, box2.position.y);
+	t.subtract(box1.position);
+	var s1 = new Vector(t.dot(box1.axes[0]), t.dot(box1.axes[1]));
+	t.set(box1.position);
+	t.subtract(box2.position);
+	var s2 = new Vector(t.dot(box2.axes[0]), t.dot(box2.axes[1]));
+	
+	var v1 = new Vector(box1.axes[0].x, box1.axes[0].y);
+	var v2 = new Vector(box1.axes[1].x, box1.axes[1].y);
+	var v3 = new Vector(box2.axes[0].x, box2.axes[0].y);
+	var v4 = new Vector(box2.axes[1].x, box2.axes[1].y);
+	
+	if(s1.x < 0)
+		v1.invert();
+		
+	if(s1.y < 0)
+		v2.invert();
+		
+	if(s2.x < 0)
+		v3.invert();
+		
+	if(s2.y < 0)
+		v4.invert();
+	
+	var v1sf1 = box1.width * 0.5;
+	var v1sf2 = Math.abs(box1.axes[0].dot(box2.axes[0]))*box2.width*0.5 + Math.abs(box1.axes[0].dot(box2.axes[1]))*box2.height*0.5;
+	
+	var v2sf1 = box1.height * 0.5;
+	var v2sf2 = Math.abs(box1.axes[1].dot(box2.axes[0]))*box2.width*0.5 + Math.abs(box1.axes[1].dot(box2.axes[1]))*box2.height*0.5;
+	
+	var v3sf1 = Math.abs(box2.axes[0].dot(box1.axes[0]))*box1.width*0.5 + Math.abs(box2.axes[0].dot(box1.axes[1]))*box1.height*0.5;
+	var v3sf2 = box2.width * 0.5;
+	
+	var v4sf1 = Math.abs(box2.axes[1].dot(box1.axes[0]))*box1.width*0.5 + Math.abs(box2.axes[1].dot(box1.axes[1]))*box1.height*0.5;
+	var v4sf2 = box2.height * 0.5;
+	
+	var sx, sy;
+	
+	ctx.save();
+		
+		ctx.lineWidth = 4;
+		
+		sx = box1.position.x;
+		sy = box1.position.y;
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v1.x*v1sf1), sy + (v1.y*v1sf1));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box1.color + ', 0.9)';
+		ctx.stroke();
+		
+		sx = box1.position.x + v1.x*Math.abs(s1.x);
+		sy = box1.position.y + v1.y*Math.abs(s1.x);
+		v1.invert();
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v1.x*v1sf2), sy + (v1.y*v1sf2));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box2.color + ', 0.9)';
+		ctx.stroke();
+		
+		sx = box1.position.x;
+		sy = box1.position.y;
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v2.x*v2sf1), sy + (v2.y*v2sf1));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box1.color + ', 0.9)';
+		ctx.stroke();
+		
+		sx = box1.position.x + v2.x*Math.abs(s1.y);
+		sy = box1.position.y + v2.y*Math.abs(s1.y);
+		v2.invert();
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v2.x*v2sf2), sy + (v2.y*v2sf2));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box2.color + ', 0.9)';
+		ctx.stroke();
+		
+		sx = box2.position.x;
+		sy = box2.position.y;
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v3.x*v3sf2), sy + (v3.y*v3sf2));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box2.color + ', 0.9)';
+		ctx.stroke();
+		
+		sx = box2.position.x + v3.x*Math.abs(s2.x);
+		sy = box2.position.y + v3.y*Math.abs(s2.x);
+		v3.invert();
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v3.x*v3sf1), sy + (v3.y*v3sf1));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box1.color + ', 0.9)';
+		ctx.stroke();
+		
+		sx = box2.position.x;
+		sy = box2.position.y;
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v4.x*v4sf2), sy + (v4.y*v4sf2));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box2.color + ', 0.9)';
+		ctx.stroke();
+		
+		sx = box2.position.x + v4.x*Math.abs(s2.y);
+		sy = box2.position.y + v4.y*Math.abs(s2.y);
+		v4.invert();
+		ctx.beginPath();
+		ctx.moveTo(sx, sy);
+		ctx.lineTo(sx + (v4.x*v4sf1), sy + (v4.y*v4sf1));
+		ctx.closePath();
+		ctx.strokeStyle = 'rgba(' + box1.color + ', 0.9)';
+		ctx.stroke();
+		
+	ctx.restore();
+}
+
+
+
+	{
+		private var box1:SimpleSquare;
+		private var c:Circle;
+		private var t:TextField;
+		
+		public function DemoSAT5() {
+			makeBoxes();
+			t = new TextField(); addChild(t);
+			t.autoSize = TextFieldAutoSize.LEFT
+		}
+		
+		private function makeBoxes():void {
+			box1 = new SimpleSquare(); addChild(box1);
+			box1.prepareBox(
+				new Point(200, 200), 
+				new Point( 0, -50), 
+				new Point( 50, 0), 
+				new Point( 0, 50), 
+				new Point( -50, 0)
+			)
+			box1.drawBox();
+			box1.addEventListener(MouseEvent.MOUSE_DOWN, move);
+			box1.addEventListener(MouseEvent.MOUSE_UP, move);
+			
+			c = new Circle(20); addChild(c); c.x = 100; c.y = 200
+			c.addEventListener(MouseEvent.MOUSE_DOWN, move2);
+			c.addEventListener(MouseEvent.MOUSE_UP, move2);
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, rotate);
+		}
+		
+		private function move (e:MouseEvent):void {
+			if (e.type == "mouseDown") {
+				e.target.parent.startDrag();
+				e.target.addEventListener(Event.ENTER_FRAME, update);
+			}
+			else if (e.type == "mouseUp") {
+				e.target.parent.stopDrag();
+				e.target.removeEventListener(Event.ENTER_FRAME, update);
+			}
+		}
+		
+		private function move2 (e:MouseEvent):void {
+			if (e.type == "mouseDown") {
+				e.target.startDrag();
+				e.target.addEventListener(Event.ENTER_FRAME, update);
+			}
+			else if (e.type == "mouseUp") {
+				e.target.stopDrag();
+				e.target.removeEventListener(Event.ENTER_FRAME, update);
+			}
+		}
+		
+		private function update(e:Event):void {
+			refresh()
+		}
+		
+		private function rotate (e:KeyboardEvent):void {
+			if (e.keyCode == Keyboard.R) {
+				box1.addAngle(0.2); refresh()
+			}
+		}
+		
+		private function refresh():void {
+			//prepare the vectors
+			var v:Vector2d;
+			var current_box_corner:Point;
+			var center_box:Point = box1.getDot(0);
+			
+			var max:Number = Number.NEGATIVE_INFINITY;
+			var box2circle:Vector2d = new Vector2d(c.x - center_box.x, c.y - center_box.y)
+			var box2circle_normalised:Vector2d = box2circle.unitVector
+			
+			//get the maximum
+			for (var i:int = 1; i < 5; i++) 
+			{
+				current_box_corner = box1.getDot(i)
+				v = new Vector2d(
+					current_box_corner.x - center_box.x , 
+					current_box_corner.y - center_box.y);
+				var current_proj:Number = v.dotProduct(box2circle_normalised)
+				
+				if (max < current_proj) max = current_proj;
+			}
+			trace(box2circle.magnitude, max, c.radius);
+			trace(box2circle.magnitude - max - c.radius )
+			if (box2circle.magnitude - max - c.radius > 0 && box2circle.magnitude > 0) t.text = "No Collision"
+			else t.text = "Collision"
+		}
+	}
+
+}
+
+
+Thanks, great tutorial !
+
+I think the last part is wrong though... If your circle is close to your square, a collision can be detected when there actually is none (and that's logical considering your code). I think that collision detection between circle and square is in fact not so simple using SAT. =]
+
+Edit: It should work if you test your circle for each normal of your box and with each axis binding the center of your circle with one vertex of your box. So SAT algorithm seems to be more expensive when using circles/spheres after all. ;p
+
+    You are right, I also found this mistake and I correct it by tesing the distance from box center to circle center from each normal of the box.

@@ -102,6 +102,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
+    //FIXME: Dragger must take rotation into consideration and collision checker.
+
 
     //Variables section
 
@@ -116,7 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         currentLevel = new Playfield();
         currentLevel.createObjects(levelsInfo);
-        //currentLevel.physicsEngineRun()
+        currentLevel.physicsEngineRun();
+        //currentLevel.logCurrentLevelObjects()
     });
 
     //Buttons variables
@@ -147,29 +150,33 @@ document.addEventListener('DOMContentLoaded', function () {
     var engineID = null;
 
     //Levels data
-
+    var inventory = {
+        name: "inventory",
+        position: { x: 0, y: 0 },
+        data: { width: 200, height: 400, color: "darkgrey", type: "static", isMovable: false }
+    };
     var levelsInfo = {
         level1: [{
             name: "aBall",
             position: { x: 810, y: 200 },
-            data: { mass: 600, r: 30, color: "green", type: "kinetic", id: "basketball" },
+            data: { mass: 600, r: 30, type: "kinetic", id: "basketball" },
             motion: { speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",
             position: { x: 705, y: 250 },
-            data: { mass: 2000, width: 170, height: 30, rotation: 45, color: "red", type: "static", isMovable: true, isDragged: false, id: "barrier" }
+            data: { mass: 2000, width: 170, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }, {
             name: "staticObject2",
-            position: { x: 125, y: 100 },
-            data: { mass: 600, width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "plank1" }
+            position: { x: 225, y: 100 },
+            data: { mass: 600, width: 170, height: 30, rotation: 0, type: "static", isMovable: true, isDragged: false, id: "plank1" }
         }, {
             name: "staticObject3",
             position: { x: 425, y: 300 },
-            data: { mass: 800, width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "plank2" }
+            data: { mass: 800, width: 170, height: 30, rotation: 0, type: "static", isMovable: true, isDragged: false, id: "plank2" }
         }, {
             name: "goal",
             position: { x: 800, y: 290 },
-            data: { mass: 3000, width: 200, height: 100, rotation: 0, color: "red", type: "static", isMovable: false, id: "wheelbarrow" }
+            data: { mass: 3000, width: 200, height: 100, rotation: 0, type: "static", isMovable: false, id: "wheelbarrow" }
         }],
         level2: [],
         level3: [],
@@ -234,9 +241,10 @@ document.addEventListener('DOMContentLoaded', function () {
         _classCallCheck(this, Playfield);
 
         this.createObjects = function (objects) {
-            // let inventory = new ItemInventory;
-            // inventory.createCanvasObject();
-            // this.currentLevelObjects["inventory"] = inventory;
+            var currentInventory = new ItemInventory(inventory);
+            currentInventory.createCanvasObject();
+            _this.currentLevelObjects["inventory"] = currentInventory;
+
             objects["level" + _this.currentLevelNumber].forEach(function (object) {
                 if (object.data.type === "static") {
                     var _tempObject = new CanvasStaticObject(object);
@@ -244,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     _this.currentLevelObjects[object.name] = _tempObject;
                     return;
                 }
+
                 var tempObject = new CanvasMovingObject(object);
                 tempObject.createCanvasObject();
                 tempObject.countInitialVectors();
@@ -318,20 +327,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (_this2.rotation !== 0) {
                 playfieldContext.save();
-                playfieldContext.translate(_this2.x, _this2.y);
+                playfieldContext.translate(_this2.x + _this2.width / 2, _this2.y + _this2.height / 2);
                 playfieldContext.beginPath();
                 playfieldContext.rotate(_this2.rotation * (Math.PI / 180));
-                playfieldContext.fillStyle = _this2.color;
-
-                playfieldContext.fillRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
                 if (_this2.isDragged) {
-                    playfieldContext.strokeStyle = "black";
+                    playfieldContext.strokeStyle = "red";
                     playfieldContext.lineWidth = 4;
                     playfieldContext.strokeRect(-_this2.width, -_this2.height, _this2.width, _this2.height);
                 }
+                playfieldContext.drawImage(image, -_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
                 playfieldContext.closePath();
-                playfieldContext.translate(_this2.x, _this2.y);
                 playfieldContext.restore();
+                //playfieldContext.translate(-this.x,-this.y);
+                playfieldContext.strokeStyle = "blue";
+                playfieldContext.lineWidth = 2;
+                playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
                 return;
             }
             if (_this2.isDragged) {
@@ -482,14 +492,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }(CanvasObject);
 
     var _initialiseProps = function _initialiseProps() {
-        var _this7 = this;
+        var _this6 = this;
 
         this.checkIfWin = function () {
             //console.log(engineID);
             var temp = currentLevel.currentLevelObjects["goal"];
             var goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width / 3;
             var goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height / 3;
-            if (_this7.x >= goalX && _this7.y >= goalY) {
+            if (_this6.x >= goalX && _this6.y >= goalY) {
                 levelWon = true;
                 window.cancelAnimationFrame(engineID);
                 document.querySelector(".winScreen").style.display = "block";
@@ -498,21 +508,21 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.countInitialVectors = function () {
-            _this7.vx = Math.cos(_this7.direction * (Math.PI / 180));
-            _this7.vy = Math.sin(_this7.direction * (Math.PI / 180));
+            _this6.vx = Math.cos(_this6.direction * (Math.PI / 180));
+            _this6.vy = Math.sin(_this6.direction * (Math.PI / 180));
         };
 
         this.movement = function (time) {
-            _this7.speed = _this7.speed - 0.001;
-            if (_this7.speed < 0) {
-                _this7.speed = 0;
+            _this6.speed = _this6.speed - 0.001;
+            if (_this6.speed < 0) {
+                _this6.speed = 0;
             }
             //console.log(this.vx,this.vy, "movement");
 
 
-            _this7.x = _this7.x + _this7.vx * _this7.speed * _this7.speed;
-            _this7.vy = _this7.vy + _this7.gravityValue;
-            _this7.y = _this7.y + _this7.vy * _this7.speed * _this7.speed;
+            _this6.x = _this6.x + _this6.vx * _this6.speed * _this6.speed;
+            _this6.vy = _this6.vy + _this6.gravityValue;
+            _this6.y = _this6.y + _this6.vy * _this6.speed * _this6.speed;
             previousTime = time;
         };
 
@@ -520,31 +530,31 @@ document.addEventListener('DOMContentLoaded', function () {
             //FIXME: Check them - it sticks to left and right wall... probably because degrees
             // Wall collision check: 
             // Left wall
-            if (_this7.x - _this7.r <= 0) {
+            if (_this6.x - _this6.r <= 200) {
                 //  console.log("lw");
                 //this.x = 0 + this.r;
-                _this7.bouncer(90);
+                _this6.bouncer(90);
             }
 
             // Right wall
-            if (_this7.x + _this7.r >= 1000) {
+            if (_this6.x + _this6.r >= 1000) {
                 // console.log("rw");
                 //this.x = 1000 - this.r;
-                _this7.bouncer(90);
+                _this6.bouncer(90);
             }
 
             // Ceiling
-            if (_this7.y - _this7.r <= 0) {
+            if (_this6.y - _this6.r <= 0) {
                 // console.log("cl");
                 //this.y = 0 + this.r;
-                _this7.bouncer(0);
+                _this6.bouncer(0);
             }
 
             // Floor
-            if (_this7.y + _this7.r >= 400) {
+            if (_this6.y + _this6.r >= 400) {
                 // console.log("fl");
-                _this7.y = 400 - _this7.r;
-                _this7.bouncer(0);
+                _this6.y = 400 - _this6.r;
+                _this6.bouncer(0);
             }
         };
 
@@ -554,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             Object.keys(currentLevel.currentLevelObjects).forEach(function (object) {
                 var colidee = currentLevel.currentLevelObjects[object];
-                if (colidee.name === "inventory" || colidee.name === _this7.name || colidee.name === "goal") {
+                if (colidee.name === "inventory" || colidee.name === _this6.name || colidee.name === "goal") {
                     return;
                 }
 
@@ -563,6 +573,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var rectXW2 = colidee.x + colidee.width / 2;
                 var rectYH2 = colidee.y + colidee.height / 2;
                 if (colidee.rotation !== 0) {
+                    console.log(colidee.x);
                     rectX = colidee.x + colidee.width * Math.cos(colidee.rotation * Math.PI / 180);
                     rectY = colidee.y + colidee.height * Math.sin(colidee.rotation * Math.PI / 180);
                     rectXW2;
@@ -570,89 +581,82 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 //console.log(rectX,rectY);
 
-                var dx = Math.abs(_this7.x - (rectX + colidee.width / 2));
-                var dy = Math.abs(_this7.y - (rectY + colidee.height / 2));
+                var dx = Math.abs(_this6.x - (rectX + colidee.width / 2));
+                var dy = Math.abs(_this6.y - (rectY + colidee.height / 2));
 
                 //Object collision check
                 //is collision on X-axis?
-                if (dx > _this7.r + colidee.width / 2) {
-                    _this7.isCollided = false;
-                    _this7.gravityValue = 0.01;
+                if (dx > _this6.r + colidee.width / 2) {
+                    _this6.isCollided = false;
+                    _this6.gravityValue = 0.01;
                     return;
                 }
 
                 //is collision on Y-axis?
-                if (dy > _this7.r + colidee.height / 2) {
-                    _this7.isCollided = false;
-                    _this7.gravityValue = 0.01;
+                if (dy > _this6.r + colidee.height / 2) {
+                    _this6.isCollided = false;
+                    _this6.gravityValue = 0.01;
                     return;
                 }
 
                 // collision on X-axis
                 if (dx <= colidee.width) {
-                    _this7.isCollided = true;
-                    _this7.bouncer(colidee.rotation);
-                    _this7.gravityValue = 0;
+                    _this6.isCollided = true;
+                    _this6.bouncer(colidee.rotation);
+                    _this6.gravityValue = 0;
                     return;
                 }
 
                 // collision on Y-axis
                 if (dy <= colidee.height) {
-                    _this7.isCollided = true;
-                    _this7.bouncer(colidee.rotation);
-                    _this7.gravityValue = 0;
+                    _this6.isCollided = true;
+                    _this6.bouncer(colidee.rotation);
+                    _this6.gravityValue = 0;
                     return;
                 }
 
                 dx = dx - colidee.width;
                 dy = dy - colidee.height;
-                return dx * dx + dy * dy <= _this7.r * _this7.r;
+                return dx * dx + dy * dy <= _this6.r * _this6.r;
             });
         };
 
         this.bouncer = function (rotation) {
 
-            _this7.vx = _this7.speed * (_this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) + _this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180)) + _this7.speed * (_this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) - _this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
+            _this6.vx = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180)) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
 
-            _this7.vy = _this7.speed * (_this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) + _this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180)) + _this7.speed * (_this7.vy / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.cos(rotation * (Math.PI / 180)) - _this7.vx / Math.sqrt(_this7.vx * _this7.vx + _this7.vy * _this7.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2) + _this7.gravityValue;
+            _this6.vy = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180)) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2) + _this6.gravityValue;
 
-            _this7.speed = _this7.speed - _this7.speed * _this7.gravityValue;
-            if (_this7.speed < 0) {
-                _this7.speed = 0;
+            _this6.speed = _this6.speed - _this6.speed * _this6.gravityValue;
+            if (_this6.speed < 0) {
+                _this6.speed = 0;
             }
             //console.log(this.vx,this.vy, "bouncer");
-            _this7.x += _this7.vx;
-            _this7.y += _this7.vy;
+            _this6.x += _this6.vx;
+            _this6.y += _this6.vy;
         };
     };
 
-    var CanvasMovableObject = function (_CanvasStaticObject) {
-        _inherits(CanvasMovableObject, _CanvasStaticObject);
+    var ItemInventory = function (_CanvasStaticObject) {
+        _inherits(ItemInventory, _CanvasStaticObject);
 
-        function CanvasMovableObject(object) {
-            _classCallCheck(this, CanvasMovableObject);
-
-            return _possibleConstructorReturn(this, (CanvasMovableObject.__proto__ || Object.getPrototypeOf(CanvasMovableObject)).call(this, object));
-        }
-
-        return CanvasMovableObject;
-    }(CanvasStaticObject);
-
-    var ItemInventory = function (_CanvasStaticObject2) {
-        _inherits(ItemInventory, _CanvasStaticObject2);
-
-        function ItemInventory() {
+        function ItemInventory(object) {
             _classCallCheck(this, ItemInventory);
 
-            var _this6 = _possibleConstructorReturn(this, (ItemInventory.__proto__ || Object.getPrototypeOf(ItemInventory)).call(this));
+            var _this5 = _possibleConstructorReturn(this, (ItemInventory.__proto__ || Object.getPrototypeOf(ItemInventory)).call(this, object));
 
-            _this6.addItem = function () {
+            _this5.createCanvasObject = function () {
+                playfieldContext.fillStyle = _this5.color;
+                playfieldContext.fillRect(_this5.x, _this5.y, _this5.width, _this5.height);
+            };
+
+            _this5.addItem = function () {
                 console.log("Maybe i will need it");
                 //TODO: Think about this function.
             };
 
-            _this6.removeItem = function (itemID) {
-                var itemToRemove = _this6.objectsInInventory.filter(function (p) {
+            _this5.removeItem = function (itemID) {
+                var itemToRemove = _this5.objectsInInventory.filter(function (p) {
                     if (p === itemID) {
                         return p;
                     }
@@ -660,15 +664,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 return itemToRemove;
             };
 
-            _this6.x = 0;
-            _this6.y = 0;
-            //this.r = null;
-            _this6.width = 200;
-            _this6.height = playfieldHeight;
-            _this6.fill = "darkgrey";
-            _this6.objectsInInventory = [];
-            _this6.type = "static";
-            return _this6;
+            _this5.x = object.position.x;
+            _this5.y = object.position.y;
+            _this5.width = object.data.width;
+            _this5.height = object.data.height;
+            _this5.color = "darkgrey";
+            _this5.objectsInInventory = [];
+            _this5.type = "static";
+            return _this5;
         }
 
         return ItemInventory;

@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded',function(){
     //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
+    //FIXME: Dragger must take rotation into consideration and collision checker.
 
 
     //Variables section
@@ -37,7 +38,8 @@ document.addEventListener('DOMContentLoaded',function(){
                 
                 currentLevel = new Playfield()
                 currentLevel.createObjects(levelsInfo);
-                //currentLevel.physicsEngineRun()
+                currentLevel.physicsEngineRun()
+                //currentLevel.logCurrentLevelObjects()
             })
 
         //Buttons variables
@@ -68,34 +70,38 @@ document.addEventListener('DOMContentLoaded',function(){
             let engineID = null;
 
         //Levels data
-            
+            const inventory = {
+                name: "inventory",
+                position: {x: 0, y: 0},
+                data: {width: 200, height: 400, color: "darkgrey", type: "static", isMovable: false}
+            }
             const levelsInfo = {
                 level1: [
                     {
                         name: "aBall",
                         position: {x: 810, y: 200},
-                        data: {mass: 600, r: 30, color: "green", type: "kinetic", id: "basketball"},
+                        data: {mass: 600, r: 30, type: "kinetic", id: "basketball"},
                         motion: {speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false}
                     },
                     {
                         name: "staticObject1",
                         position: {x:705, y:250}, 
-                        data: {mass: 2000, width:170, height:30, rotation: 45, color:"red", type:"static", isMovable: true, isDragged: false, id: "barrier"},
+                        data: {mass: 2000, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     {
                         name: "staticObject2",
-                        position: {x:125, y:100}, 
-                        data: {mass: 600, width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, id: "plank1"},
+                        position: {x:225, y:100}, 
+                        data: {mass: 600, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank1"},
                     },
                     {
                         name: "staticObject3",
                         position: {x:425, y:300}, 
-                        data: {mass: 800, width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, id: "plank2"},
+                        data: {mass: 800, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank2"},
                     },
                     {
                         name: "goal",
                         position: {x:800, y:290},
-                        data: {mass: 3000, width: 200, height: 100, rotation: 0, color:"red", type:"static", isMovable: false, id: "wheelbarrow"}
+                        data: {mass: 3000, width: 200, height: 100, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
                     }
                 ],
                 level2: [],
@@ -163,9 +169,10 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 createObjects = (objects) =>{
-                    // let inventory = new ItemInventory;
-                    // inventory.createCanvasObject();
-                    // this.currentLevelObjects["inventory"] = inventory;
+                    let currentInventory = new ItemInventory(inventory);
+                    currentInventory.createCanvasObject();
+                    this.currentLevelObjects["inventory"] = currentInventory;
+
                     objects["level"+this.currentLevelNumber].forEach( (object) => {
                         if (object.data.type === "static") {
                             let tempObject = new CanvasStaticObject(object);
@@ -173,6 +180,7 @@ document.addEventListener('DOMContentLoaded',function(){
                             this.currentLevelObjects[object.name] = tempObject;
                             return;
                         }
+
                         let tempObject = new CanvasMovingObject(object);
                         tempObject.createCanvasObject()
                         tempObject.countInitialVectors()
@@ -247,20 +255,21 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                     if (this.rotation !== 0) {
                         playfieldContext.save();
-                        playfieldContext.translate(this.x,this.y);
+                        playfieldContext.translate(this.x+this.width/2,this.y+this.height/2);
                         playfieldContext.beginPath()
-                        playfieldContext.rotate(this.rotation*(Math.PI/180));
-                        playfieldContext.fillStyle=this.color;
-                        
-                        playfieldContext.fillRect(-this.width,-this.height,this.width,this.height);
+                        playfieldContext.rotate(this.rotation*(Math.PI/180));                        
                         if (this.isDragged) {
-                            playfieldContext.strokeStyle="black";
+                            playfieldContext.strokeStyle="red";
                             playfieldContext.lineWidth = 4;
                             playfieldContext.strokeRect(-this.width,-this.height,this.width,this.height); 
                         }
+                        playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height)
                         playfieldContext.closePath()
-                        playfieldContext.translate(this.x,this.y);
                         playfieldContext.restore();
+                        //playfieldContext.translate(-this.x,-this.y);
+                        playfieldContext.strokeStyle="blue";
+                        playfieldContext.lineWidth = 2;
+                        playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                         return;
                     }
                     if (this.isDragged) {
@@ -422,7 +431,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     //FIXME: Check them - it sticks to left and right wall... probably because degrees
                         // Wall collision check: 
                         // Left wall
-                        if (this.x - this.r <= 0) {
+                        if (this.x - this.r <= 200) {
                             //  console.log("lw");
                             //this.x = 0 + this.r;
                             this.bouncer(90);
@@ -468,6 +477,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         let rectXW2 = colidee.x + colidee.width/2
                         let rectYH2 = colidee.y + colidee.height/2
                         if (colidee.rotation !== 0) {
+                            console.log(colidee.x);
                             rectX = colidee.x + (colidee.width * Math.cos(colidee.rotation*Math.PI/180))
                             rectY = colidee.y + (colidee.height * Math.sin(colidee.rotation*Math.PI/180))
                             rectXW2
@@ -531,29 +541,23 @@ document.addEventListener('DOMContentLoaded',function(){
                 }                
             }
 
-            
-
-            class CanvasMovableObject extends CanvasStaticObject {
-                constructor(object) {
-                    super(object)
-                }
-
-
-                
-            }
-
 
         class ItemInventory extends CanvasStaticObject {
-            constructor() {
-                super()
-                this.x = 0;
-                this.y = 0;
-                //this.r = null;
-                this.width = 200;
-                this.height = playfieldHeight;
-                this.fill = "darkgrey";
+            constructor(object) {
+                super(object)
+                this.x = object.position.x;
+                this.y = object.position.y;
+                this.width = object.data.width;
+                this.height = object.data.height;
+                this.color = "darkgrey";
                 this.objectsInInventory = [];
                 this.type = "static";
+            }
+
+            createCanvasObject = () => {
+                playfieldContext.fillStyle = this.color
+                playfieldContext.fillRect(this.x,this.y,this.width,this.height);
+                
             }
 
             addItem = () => {

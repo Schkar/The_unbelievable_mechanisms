@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, {
             name: "staticObject1",
             position: { x: 705, y: 250 },
-            data: { mass: 2000, width: 170, height: 30, rotation: 0, color: "red", type: "static", isMovable: true, isDragged: false, id: "barrier" }
+            data: { mass: 2000, width: 170, height: 30, rotation: 45, color: "red", type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }, {
             name: "staticObject2",
             position: { x: 125, y: 100 },

@@ -4,7 +4,7 @@ Simple "The incredible machines"-like game made entirely in HTML (Canvas) with J
 
 Project in moderate stage of development (v.0.8.5). 
 <br>
-<br>https://schkar.github.io/The_unbelievable_mechanisms/
+<!-- <br>https://schkar.github.io/The_unbelievable_mechanisms/ -->
 
 <br>There is only one playable "level" with basic functionalities. More to come:
 <br>

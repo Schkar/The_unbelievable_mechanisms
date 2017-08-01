@@ -26,57 +26,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
         //Temporary dev variables
             const creationButton = document.querySelector(".temporaryGodlyCreationButton");
-            //let currentLevel = null;
-            const testLevel = {
-                // level1: [
-                //     {
-                //         name: "staticObject1",
-                //         position: {x:450, y:150},
-                //         data: {width:100, height:30, rotation: 0, color:"red", type:"static", isMovable: true},
-                //     },
-                //     {
-                //         name: "staticObject2",
-                //         position: {x:600, y:300}, 
-                //         data:{width:80, height:30, rotation: 0, color:"green", type:"static"},
-                //     },
-                //     {
-                //         name: "someCircle",
-                //         position:{x:442, y:15},
-                //         data:{r:10, color:"blue", type:"kinetic"},
-                //         motion: {speed: 0, vx: 0, vy:0, isCollided: false}
-                //     }
-                // ],
-                level1: [
-                    {
-                        name: "aBall",
-                        position: {x: 810, y: 200},
-                        data: {r: 30, color: "green", type: "kinetic", source: "images/basketball.png"},
-                        motion: {speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false}
-                    },
-                    {
-                        name: "staticObject1",
-                        position: {x:505, y:250}, 
-                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/barrier.png"},
-                    },
-                    {
-                        name: "staticObject2",
-                        position: {x:125, y:100}, 
-                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank1.png"},
-                    },
-                    {
-                        name: "staticObject3",
-                        position: {x:425, y:300}, 
-                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank2.png"},
-                    },
-                    {
-                        name: "goal",
-                        position: {x:700, y:290},
-                        data: {width: 200, height: 100, isMovable: false, source: "..images/wheelbarrow.png"}
-                    }
-                ]
-            }
-
-
+            let currentLevel = null;
             
         //Temporary dev functions
 
@@ -84,10 +34,11 @@ document.addEventListener('DOMContentLoaded',function(){
                 e.preventDefault()
 
                 
-                
+                console.log("clicked");
                 currentLevel = new Playfield()
-                currentLevel.createObjects(testLevel);
-                currentLevel.physicsEngineRun()
+                currentLevel.createObjects(levelsInfo);
+                console.log(currentLevel);
+                //currentLevel.physicsEngineRun()
             })
 
         //Buttons variables
@@ -124,28 +75,28 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "aBall",
                         position: {x: 810, y: 200},
-                        data: {r: 30, color: "green", type: "kinetic", source: "../images/basketball.png"},
+                        data: {r: 30, color: "green", type: "kinetic", id: "basketball"},
                         motion: {speed: 2, vx: 0, vy: 0, direction: 135, isCollided: false}
                     },
                     {
                         name: "staticObject1",
                         position: {x:705, y:250}, 
-                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/barrier.png"},
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     {
                         name: "staticObject2",
                         position: {x:125, y:100}, 
-                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank1.png"},
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, id: "plank1"},
                     },
                     {
                         name: "staticObject3",
                         position: {x:425, y:300}, 
-                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, source: "../images/plank2.png"},
+                        data: {width:170, height:30, rotation: 0, color:"red", type:"static", isMovable: true, isDragged: false, id: "plank2"},
                     },
                     {
                         name: "goal",
                         position: {x:800, y:290},
-                        data: {width: 200, height: 100, rotation: 0, color:"red", type:"static", isMovable: false, source: "../images/wheelbarrow.png"}
+                        data: {width: 200, height: 100, rotation: 0, color:"red", type:"static", isMovable: false, id: "wheelbarrow"}
                     }
                 ],
                 level2: [],
@@ -158,27 +109,36 @@ document.addEventListener('DOMContentLoaded',function(){
                 level9: [],
                 level10: [],
             };
-
-            let currentLevel = null;
+            //TODO: Uncomment this for final version
+            //let currentLevel = null;
             
-        //Canvas variables
+        //Game variables
 
-            const playfield = document.querySelector(".playfield");
-            const playfieldContext = playfield.getContext("2d");
-            const playfieldWidth = playfield.width;
-            const playfieldHeight = playfield.height;
-            let xClick = 0;
-            let yClick = 0;
-            let prevxClick = 0;
-            let prevyClick = 0;
-            let xMove = 0;
-            let yMove = 0;
-            // let prevxMove = 0;
-            // let prevyMove = 0;
-            let difTime = 0;
-            let previousTime = 0;
-            let objectBeingDragged = "";
-            let levelWon = false;
+            //Canvas definitions
+                const playfield = document.querySelector(".playfield");
+                const playfieldContext = playfield.getContext("2d");
+                const playfieldWidth = playfield.width;
+                const playfieldHeight = playfield.height;
+
+            //Click recognition variables
+                let xClick = 0;
+                let yClick = 0;
+
+            //Another click variable for removing drag status
+                let prevxClick = 0;
+                let prevyClick = 0;
+
+            //Move coords variables for dragging function
+                let xMove = 0;
+                let yMove = 0;
+
+            //Time variables for physics functions
+                let difTime = 0;
+                let previousTime = 0;
+
+            //Misc variables
+                let objectBeingDragged = "";
+                let levelWon = false;
 
         //Canvas functions
             
@@ -274,15 +234,17 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.object = object
                     this.x = object.position.x
                     this.y = object.position.y
-                    this.color = object.data.color
                     this.type = object.data.type
-                    this.source = object.data.source
                     this.name = object.name
+                    this.id = object.data.id
                 }
 
                 createCanvasObject = () =>{
-                    let image = new Image();
-                    image.src = this.source;
+                    
+                    let image = document.getElementById(this.id);
+                    // let image = new Image()
+                    // image.src = this.source
+                    // console.log(image);
                     if (this.r !== undefined) {
                         // image.addEventListener("load", function(e){
                         //     playfieldContext.drawImage(this, object.x, object.y, object.r, object.r)
@@ -293,7 +255,15 @@ document.addEventListener('DOMContentLoaded',function(){
                         // // playfieldContext.fillStyle = "black";
                         // // playfieldContext.fill();
                         // playfieldContext.closePath();
+                        // image.onload = function(){
+                        //     playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                        // }
+                        // image.addEventListener("load",function(){
+                        //     playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                        // },false)
                         playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                        // image.src = this.source
+                        // image.src = "../images/basketball.png"
                         return;
                     }
                     if (this.rotation !== 0) {
@@ -327,7 +297,14 @@ document.addEventListener('DOMContentLoaded',function(){
                     //     playfieldContext.lineWidth = 4;
                     //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                     // }
-                    playfieldContext.drawImage(image, this.x, this.y, this.width, this.height)                    
+                    // image.onload = function(){
+                    playfieldContext.drawImage(image, this.x, this.y, this.width, this.height) 
+                    // }
+                    // image.src = this.source
+                    // image.addEventListener("load",function(){
+                    //     playfieldContext.drawImage(image, this.x, this.y, this.width, this.height)                    
+                    // },false)
+                    //playfieldContext.fillRect(10,10,100,100)
                 }
 
                 redrawCanvasObject = () =>{

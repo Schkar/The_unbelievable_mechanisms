@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded',function(){
     //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
-    //FIXME: Dragger and collision checker must take rotation into consideration .
+    //FIXME: collision checker must take rotation into consideration .
 
 
     //Variables section
@@ -82,12 +82,12 @@ document.addEventListener('DOMContentLoaded',function(){
                         name: "aBall",
                         position: {x: 810, y: 200},
                         data: {mass: 600, r: 14, type: "kinetic", id: "basketball"},
-                        motion: {speed: 2.5, vx: 0, vy: 0, direction: 150, isCollided: false}
+                        motion: {speed: 1.5, vx: 0, vy: 0, direction: 150, isCollided: false}
                     },
                     {
                         name: "staticObject1",
-                        position: {x:705, y:250}, 
-                        data: {mass: 2000, width:170, height:30, rotation: 15, type:"static", isMovable: true, isDragged: false, id: "barrier"},
+                        position: {x:505, y:250}, 
+                        data: {mass: 2000, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
                     //     name: "staticObject2",
@@ -270,18 +270,18 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                     if (this.rotation !== 0) {
                         playfieldContext.save();
-                        //playfieldContext.translate(this.x+this.width/2,this.y+this.height/2);
-                        playfieldContext.translate(this.x,this.y);
+                        playfieldContext.translate(this.x+this.width/2,this.y+this.height/2);
+                        // playfieldContext.translate(this.x,this.y);
                         playfieldContext.beginPath()
                         playfieldContext.rotate(this.rotationInRadians);                        
                         if (this.isDragged) {
                             playfieldContext.strokeStyle="red";
                             playfieldContext.lineWidth = 4;
-                            //playfieldContext.strokeRect(-this.width/2,-this.height/2,this.width,this.height); 
-                            playfieldContext.strokeRect(0,0,this.width,this.height); 
+                            playfieldContext.strokeRect(-this.width/2,-this.height/2,this.width,this.height); 
+                            // playfieldContext.strokeRect(0,0,this.width,this.height); 
                         }
-                        //playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height) //After translation it must be 00 if translation point is x,y
-                        playfieldContext.drawImage(image,0,0,this.width,this.height)
+                        playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height) //After translation it must be 00 if translation point is x,y
+                        // playfieldContext.drawImage(image,0,0,this.width,this.height)
                         playfieldContext.closePath()
                         playfieldContext.restore();
                         playfieldContext.strokeStyle="blue";
@@ -341,47 +341,21 @@ document.addEventListener('DOMContentLoaded',function(){
                         //this.isBeingRotated = true;
                         return
                     }
-                    // Tu są potrzebne 4 punkty prostokąta
-                    /*
-                    var originX = this.x + this.w/2, originY = this.y + this.h/2, r = -this.r;
-
-                    // Perform origin translation
-                    mouseX -= originX, mouseY -= originY;
-                    // Rotate mouse coordinates by opposite of rectangle rotation
-                    mouseX = mouseX * Math.cos(r) - mouseY * Math.sin(r);
-                    mouseY = mouseY * Math.cos(r) + mouseX * Math.sin(r);
-                    // Reverse translation
-                    mouseX += originX, mouseY += originY;
-
-                    // Bounds Check
-                    if ((this.x <= mouseX) && (this.x + this.w >= mouseX) && (this.y <= mouseY) && (this.y + this.h >= mouseY)){
-                        return true;
-                    }
-                    // translate mouse point values to origin
-                    var dx = mouseX - originX, dy = mouseY - originY;
-                    // distance between the point and the center of the rectangle
-                    var h1 = Math.sqrt(dx*dx + dy*dy);
-                    var currA = Math.atan2(dy,dx);
-                    // Angle of point rotated around origin of rectangle in opposition
-                    var newA = currA - this.r;
-                    // New position of mouse point when rotated
-                    var x2 = Math.cos(newA) * h1;
-                    var y2 = Math.sin(newA) * h1;
-                    // Check relative to center of rectangle
-                    if (x2 > -0.5 * this.w && x2 < 0.5 * this.w && y2 > -0.5 * this.h && y2 < 0.5 * this.h){
-                        return true;
-                    }
-                    */
-                    if (this.rotation !== 0 || this.rotation % 360 !== 0) {
+                    
+                    if (this.rotation !== 0 || this.rotation % 360 !== 0 || this.rotation % 90 !== 0) {
                         //This works. Thank you unknown guy on Stack
-                        let originX = this.x, originY = this.y, r = this.rotationInRadians;
+                        let originX = this.x + this.width/2, originY = this.y + this.height/2, r = this.rotationInRadians;
+                        playfieldContext.moveTo(0,0);
+                        playfieldContext.strokeStyle = "red"
+                        playfieldContext.lineTo(originX,originY);
+                        playfieldContext.stroke()
                         let dx = xClick - originX, dy = yClick - originY;
                         let h1 = Math.sqrt(dx*dx + dy*dy)
                         let currA = Math.atan2(dy,dx);
                         let newA = currA - r;
                         let x2 = Math.cos(newA) * h1;
                         let y2 = Math.sin(newA) * h1;
-                        if (x2 > -this.width && x2 < this.width && y2 > -this.height && y2 < this.height){
+                        if (x2 > -0.5*this.width && x2 < 0.5*this.width && y2 > -0.5*this.height && y2 < 0.5*this.height){
                             this.isDragged = true;
                             prevxClick = xClick;
                             prevyClick = yClick;
@@ -399,14 +373,14 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 dragger = () => {
-                    if (this.rotation !== 0 || this.rotation % 360 !== 0) {
-                        this.x = xMove - this.width/2 * Math.cos(this.rotationInRadians);
-                        this.y = yMove - this.height/2 + (this.width/2 * Math.sin(this.rotationInRadians));
-                    }
-                    else {
+                    // if (this.rotation !== 0 || this.rotation % 360 !== 0 || this.rotation % 90 !== 0) {
+                    //     this.x = xMove - this.width/2 * Math.cos(this.rotationInRadians);
+                    //     this.y = yMove - this.height/2 + (this.width/2 * Math.sin(this.rotationInRadians));
+                    // }
+                    // else {
                         this.x = xMove - this.width/2;
                         this.y = yMove - this.height/2;
-                    }
+                    // }
                     this.redrawCanvasObject()
                 }
                 
@@ -534,102 +508,62 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 collisionCheck = () => {
-
-
-                    
+                   
                     Object.keys(currentLevel.currentLevelObjects).forEach( (object) => {
                         let colidee = currentLevel.currentLevelObjects[object];
                         if (colidee.name === "inventory" || colidee.name === this.name || colidee.name === "goal"){
                             return;
                         }
 
+                        let rectCenterX = colidee.x + colidee.width/2;
+	                    let rectCenterY = colidee.y + colidee.height/2;
 
-                        let ccpx = this.x; //Circle Central Point X-coord
-                        let ccpy = this.y; //Circle Central Point Y-coord
-                        let rcpx = colidee.x + colidee.width/2; //Rectangle Central Point X-coord if no rotation
-                        let rcpy = colidee.y + colidee.height/2; //Rectangle Central Point Y-coord if no rotation
-                        if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
-                            rcpx = colidee.x + (colidee.width/2 * Math.cos(colidee.rotationInRadians))
-                            // rcpy = colidee.y + colidee.height/2 + (colidee.height * Math.sin(colidee.rotationInRadians))
-                            rcpy = colidee.y + colidee.height/2 + (colidee.width/2 * Math.sin(colidee.rotationInRadians))
+	                    let rectX = colidee.x;
+	                    let rectY = colidee.y;
+
+                        let rectReferenceX = rectX;
+                        let rectReferenceY = rectY;
+	
+                        // Rotate circle's center point back
+                        let unrotatedCircleX = Math.cos( -colidee.rotationInRadians ) * ( this.x - rectCenterX ) - Math.sin( -colidee.rotationInRadians ) * ( this.y - rectCenterY ) + rectCenterX;
+                        let unrotatedCircleY = Math.sin( -colidee.rotationInRadians ) * ( this.x - rectCenterX ) + Math.cos( -colidee.rotationInRadians ) * ( this.y - rectCenterY ) + rectCenterY;
+
+                        // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
+                        let closestX, closestY;
+
+                        // Find the unrotated closest x point from center of unrotated circle
+                        if ( unrotatedCircleX < rectReferenceX ) {
+                            closestX = rectReferenceX;
+                        } else if ( unrotatedCircleX > rectReferenceX + colidee.width ) {
+                            closestX = rectReferenceX + colidee.width;
+                        } else {
+                            closestX = unrotatedCircleX;
                         }
-
-                        //playfieldContext.moveTo(ccpx,ccpy);
-                        //playfieldContext.lineTo(rcpx,rcpy);
-                        //playfieldContext.stroke()
-
-                        //console.log(rectX,rectY);
-
-                        // let newccpx = Math.cos(colidee.rotationInRadians) * (this.x - colidee.x) - Math.sin(colidee.rotationInRadians) * (this.y - colidee.y) + colidee.x
-                        // let newccpy = Math.sin(colidee.rotationInRadians) * (this.x - colidee.x) + Math.cos(colidee.rotationInRadians) * (this.y - colidee.y) + colidee.y
-                        // playfieldContext.fillStyle = "red";
-                        // playfieldContext.fillRect(rcpx-colidee.width/2,rcpy,colidee.width,colidee.height);
+ 
+                        // Find the unrotated closest y point from center of unrotated circle
+                        if ( unrotatedCircleY < rectReferenceY ) {
+                            closestY = rectReferenceY;
+                        } else if ( unrotatedCircleY > rectReferenceY + colidee.height ) {
+                            closestY = rectReferenceY + colidee.height;
+                        } else {
+                            closestY = unrotatedCircleY;
+                        }
+ 
+                        // Determine collision
+                        let collision = false;
+                        let dX = Math.abs( unrotatedCircleX - closestX );
+	                    let dY = Math.abs( unrotatedCircleY - closestY );
+                        let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
-
-                        let dx=Math.abs(ccpx-rcpx);
-                        let dy=Math.abs(ccpy-rcpy);
-
-                        // if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
-                        //     // dx = Math.abs(ccpx - dx * Math.cos(colidee.rotationInRadians) * Math.cos(colidee.rotationInRadians))
-                        //     // dy = Math.abs(ccpy - dx * Math.cos(colidee.rotationInRadians) * Math.sin(colidee.rotationInRadians))
-                        //     dx = dx * Math.sin(colidee.rotationInRadians)
-                        //     dy = dy * Math.cos(colidee.rotationInRadians)
-                        // }
-                        
-                        playfieldContext.moveTo(ccpx,ccpy);
-                        playfieldContext.lineTo(rcpx,rcpy);
-                        playfieldContext.stroke()
-                        playfieldContext.moveTo(ccpx,ccpy);
-                        playfieldContext.lineTo(colidee.x,colidee.y);
-                        playfieldContext.stroke()
-                        //playfieldContext.moveTo(ccpx,ccpy);
-                        //playfieldContext.lineTo(colidee.x + width,colidee.y + colidee.height/2 + (colidee.width/2 * Math.sin(colidee.rotationInRadians)));
-                        // playfieldContext.lineTo(rcpx,rcpy);
-                        // playfieldContext.lineTo(rcpx,rcpy);
-                        // playfieldContext.lineTo(rcpx,rcpy);
-                        //playfieldContext.stroke()
-
-                        //Object collision check
-                        //is collision on X-axis?
-
-
-
-                        if( dx > this.r+colidee.width/2 ){
-                            this.isCollided = false;
-                            this.gravityValue = 0.01;
-                            //console.log("1");
-                            return; 
-                        }
-
-                        //is collision on Y-axis?
-                        if( dy > this.r+colidee.height/2 ){
-                            this.isCollided = false;
-                            this.gravityValue = 0.01;
-                            //console.log("2");
-                            return; 
-                        }
-
-                        // collision on X-axis
-                        if( dx <= colidee.width ){
-                            this.isCollided = true;
+                        if ( distance < this.r ) {
                             this.bouncer(colidee.rotation)
-                            this.gravityValue = 0;
-                            //console.log("3");
-                            return; 
+                            collision = true;
+                        }
+                        else {
+                            collision = false;
                         }
 
-                        // collision on Y-axis
-                        if( dy <= colidee.height ){
-                            this.isCollided = true;
-                            this.bouncer(colidee.rotation)
-                            this.gravityValue = 0;
-                            //console.log("4");
-                            return; 
-                        }
-
-                        dx=dx-colidee.width;
-                        dy=dy-colidee.height;
-                        return(dx*dx+dy*dy<=this.r*this.r);
+                        return collision;
                     })
                 }
 

@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, {
             name: "staticObject1",
             position: { x: 705, y: 250 },
-            data: { mass: 2000, width: 170, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "barrier" }
+            data: { mass: 2000, width: 170, height: 30, rotation: 15, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
         level3: [],
@@ -470,10 +470,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             _this3.dragger = function () {
                 if (_this3.rotation !== 0 || _this3.rotation % 360 !== 0) {
-                    var rcpx = _this3.x + _this3.width / 2 * Math.cos(_this3.rotationInRadians);
-                    var rcpy = _this3.y + _this3.height / 2 * Math.sin(_this3.rotationInRadians);
-                    _this3.x = xMove - rcpx;
-                    _this3.y = yMove - rcpy;
+                    _this3.x = xMove - _this3.width / 2 * Math.cos(_this3.rotationInRadians);
+                    _this3.y = yMove - _this3.height / 2 + _this3.width / 2 * Math.sin(_this3.rotationInRadians);
                 } else {
                     _this3.x = xMove - _this3.width / 2;
                     _this3.y = yMove - _this3.height / 2;

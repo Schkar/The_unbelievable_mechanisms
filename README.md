@@ -2,6 +2,8 @@
 Final project for Coder's lab course.<br>
 Simple "The incredible machines"-like game made entirely in HTML (Canvas) with JS and CSS (SASS) <br>
 
+Whole application is written by me, including physics engine (no external libraries used!)
+
 Project in moderate stage of development (v.0.8.5). 
 <br>
 <!-- <br>https://schkar.github.io/The_unbelievable_mechanisms/ -->

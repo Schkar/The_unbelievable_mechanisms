@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "staticObject1",
                         position: {x:705, y:250}, 
-                        data: {mass: 2000, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "barrier"},
+                        data: {mass: 2000, width:170, height:30, rotation: 15, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
                     //     name: "staticObject2",
@@ -400,10 +400,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 dragger = () => {
                     if (this.rotation !== 0 || this.rotation % 360 !== 0) {
-                        let rcpx = this.x + (this.width/2 * Math.cos(this.rotationInRadians))
-                        let rcpy = this.y + (this.height/2 * Math.sin(this.rotationInRadians))
-                        this.x = xMove - rcpx;
-                        this.y = yMove - rcpy;
+                        this.x = xMove - this.width/2 * Math.cos(this.rotationInRadians);
+                        this.y = yMove - this.height/2 + (this.width/2 * Math.sin(this.rotationInRadians));
                     }
                     else {
                         this.x = xMove - this.width/2;

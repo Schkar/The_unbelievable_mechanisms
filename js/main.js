@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "staticObject1",
                         position: {x:505, y:250}, 
-                        data: {mass: 2000, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "barrier"},
+                        data: {mass: 2000, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
                     //     name: "staticObject2",
@@ -550,20 +550,13 @@ document.addEventListener('DOMContentLoaded',function(){
                         }
  
                         // Determine collision
-                        let collision = false;
                         let dX = Math.abs( unrotatedCircleX - closestX );
 	                    let dY = Math.abs( unrotatedCircleY - closestY );
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
                             this.bouncer(colidee.rotation)
-                            collision = true;
                         }
-                        else {
-                            collision = false;
-                        }
-
-                        return collision;
                     })
                 }
 

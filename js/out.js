@@ -73,6 +73,8 @@
 "use strict";
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
@@ -102,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
-    //FIXME: Dragger must take rotation into consideration and collision checker.
+    //FIXME: Dragger and collision checker must take rotation into consideration .
 
 
     //Variables section
@@ -127,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var resetConfirmButton = document.querySelector(".resetConfirmButton");
     var resetDeclineButton = document.querySelector(".resetDeclineButton");
     var startLevelButton = document.querySelector(".startLevelButton");
+    var nextLevelButton = document.querySelector(".nextLevelButton");
 
     //Welcome screen variable
 
@@ -176,8 +179,6 @@ document.addEventListener('DOMContentLoaded', function () {
         level9: [],
         level10: []
     };
-    //TODO: Uncomment this for final version
-    var currentLevel = null;
 
     //Game variables
 
@@ -206,6 +207,9 @@ document.addEventListener('DOMContentLoaded', function () {
     //Misc variables
     var objectBeingDragged = "";
     var levelWon = false;
+    var levelNumber = 1;
+    //TODO: Uncomment this for final version
+    var currentLevel = null;
 
     //Canvas functions
 
@@ -301,70 +305,84 @@ document.addEventListener('DOMContentLoaded', function () {
     //Arch-class - object prototype
 
 
-    var CanvasObject = function CanvasObject(object) {
-        var _this2 = this;
+    var CanvasObject = function () {
+        function CanvasObject(object) {
+            var _this2 = this;
 
-        _classCallCheck(this, CanvasObject);
+            _classCallCheck(this, CanvasObject);
 
-        this.createCanvasObject = function () {
+            this.createCanvasObject = function () {
 
-            var image = document.getElementById(_this2.id);
-            if (_this2.r !== undefined) {
-                //TODO: InnerRotation:
-                // playfieldContext.save();
-                // playfieldContext.translate(this.x,this.y+);
-                // playfieldContext.beginPath()
-                // playfieldContext.rotate(this.rotation*(Math.PI/180)); 
-                playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
-                // playfieldContext.closePath()
-                // playfieldContext.restore();
-                return;
-            }
-            if (_this2.rotation !== 0) {
-                playfieldContext.save();
-                playfieldContext.translate(_this2.x, _this2.y);
-                playfieldContext.beginPath();
-                playfieldContext.rotate(_this2.rotation * (Math.PI / 180));
+                var image = document.getElementById(_this2.id);
+                if (_this2.r !== undefined) {
+                    //TODO: InnerRotation:
+                    // playfieldContext.save();
+                    // playfieldContext.translate(this.x,this.y+);
+                    // playfieldContext.beginPath()
+                    // playfieldContext.rotate(this.rotationInRadians); 
+                    playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
+                    // playfieldContext.closePath()
+                    // playfieldContext.restore();
+                    return;
+                }
+                if (_this2.rotation !== 0) {
+                    playfieldContext.save();
+                    playfieldContext.translate(_this2.x, _this2.y);
+                    playfieldContext.beginPath();
+                    playfieldContext.rotate(_this2.rotationInRadians);
+                    if (_this2.isDragged) {
+                        playfieldContext.strokeStyle = "red";
+                        playfieldContext.lineWidth = 4;
+                        playfieldContext.strokeRect(0, 0, _this2.width, _this2.height);
+                    }
+                    playfieldContext.drawImage(image, 0, 0, _this2.width, _this2.height); //After translation it must be 00
+                    playfieldContext.closePath();
+                    playfieldContext.restore();
+                    //playfieldContext.translate(-this.x,-this.y);
+                    playfieldContext.strokeStyle = "blue";
+                    playfieldContext.lineWidth = 2;
+                    playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
+                    return;
+                }
                 if (_this2.isDragged) {
+                    playfieldContext.beginPath();
                     playfieldContext.strokeStyle = "red";
                     playfieldContext.lineWidth = 4;
-                    playfieldContext.strokeRect(0, 0, _this2.width, _this2.height);
+                    playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
+                    playfieldContext.closePath();
                 }
-                playfieldContext.drawImage(image, 0, 0, _this2.width, _this2.height); //After translation it must be 00
-                playfieldContext.closePath();
-                playfieldContext.restore();
-                //playfieldContext.translate(-this.x,-this.y);
-                playfieldContext.strokeStyle = "blue";
-                playfieldContext.lineWidth = 2;
-                playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
-                return;
-            }
-            if (_this2.isDragged) {
-                playfieldContext.beginPath();
-                playfieldContext.strokeStyle = "red";
-                playfieldContext.lineWidth = 4;
-                playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
-                playfieldContext.closePath();
-            }
-            // if (this.isBeingRotated) {
-            //     playfieldContext.strokeStyle="blue";
-            //     playfieldContext.lineWidth = 4;
-            //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
-            // }
-            playfieldContext.drawImage(image, _this2.x, _this2.y, _this2.width, _this2.height);
-        };
+                // if (this.isBeingRotated) {
+                //     playfieldContext.strokeStyle="blue";
+                //     playfieldContext.lineWidth = 4;
+                //     playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
+                // }
+                playfieldContext.drawImage(image, _this2.x, _this2.y, _this2.width, _this2.height);
+            };
 
-        this.redrawCanvasObject = function () {
-            _this2.createCanvasObject();
-        };
+            this.redrawCanvasObject = function () {
+                _this2.createCanvasObject();
+            };
 
-        this.object = object;
-        this.x = object.position.x;
-        this.y = object.position.y;
-        this.type = object.data.type;
-        this.name = object.name;
-        this.id = object.data.id;
-    };
+            this.object = object;
+            this.x = object.position.x;
+            this.y = object.position.y;
+            this.type = object.data.type;
+            this.name = object.name;
+            this.id = object.data.id;
+        }
+
+        _createClass(CanvasObject, [{
+            key: "rotationInRadians",
+            get: function get() {
+                return this.rotation * Math.PI / 180;
+            }
+        }]);
+
+        return CanvasObject;
+    }();
+
+    //Extended Objects
+
 
     var CanvasStaticObject = function (_CanvasObject) {
         _inherits(CanvasStaticObject, _CanvasObject);
@@ -392,15 +410,47 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 // Tu są potrzebne 4 punkty prostokąta
+                /*
+                var originX = this.x + this.w/2, originY = this.y + this.h/2, r = -this.r;
+                  // Perform origin translation
+                mouseX -= originX, mouseY -= originY;
+                // Rotate mouse coordinates by opposite of rectangle rotation
+                mouseX = mouseX * Math.cos(r) - mouseY * Math.sin(r);
+                mouseY = mouseY * Math.cos(r) + mouseX * Math.sin(r);
+                // Reverse translation
+                mouseX += originX, mouseY += originY;
+                  // Bounds Check
+                if ((this.x <= mouseX) && (this.x + this.w >= mouseX) && (this.y <= mouseY) && (this.y + this.h >= mouseY)){
+                    return true;
+                }
+                // translate mouse point values to origin
+                var dx = mouseX - originX, dy = mouseY - originY;
+                // distance between the point and the center of the rectangle
+                var h1 = Math.sqrt(dx*dx + dy*dy);
+                var currA = Math.atan2(dy,dx);
+                // Angle of point rotated around origin of rectangle in opposition
+                var newA = currA - this.r;
+                // New position of mouse point when rotated
+                var x2 = Math.cos(newA) * h1;
+                var y2 = Math.sin(newA) * h1;
+                // Check relative to center of rectangle
+                if (x2 > -0.5 * this.w && x2 < 0.5 * this.w && y2 > -0.5 * this.h && y2 < 0.5 * this.h){
+                    return true;
+                }
+                */
                 if (_this3.rotation !== 0 || _this3.rotation % 360 !== 0) {
-                    if (_this3.x <= xClick && _this3.x + _this3.width * Math.cos(_this3.rotation * Math.PI / 180) >= xClick && _this3.y <= yClick && _this3.y + _this3.height * Math.sin(_this3.rotation * Math.PI / 180) >= yClick) {
-                        console.log("hejho");
-                        _this3.isDragged = true;
-                        prevxClick = xClick;
-                        prevyClick = yClick;
-                        objectBeingDragged = _this3.name;
-                        _this3.dragger();
-                        return;
+                    var originX = _this3.x,
+                        originY = _this3.y,
+                        r = -_this3.rotationInRadians;
+                    var dx = xClick - originX,
+                        dy = yClick - originY;
+                    var h1 = Math.sqrt(dx * dx + dy * dy);
+                    var currA = Math.atan2(dy, dx);
+                    var newA = currA - _this3.r;
+                    var x2 = Math.cos(newA) * h1;
+                    var y2 = Math.sin(newA) * h1;
+                    if (x2 > _this3.w && x2 < _this3.w && y2 > _this3.h && y2 < _this3.h) {
+                        console.log("dziasbasda");;
                     }
                 } else if (_this3.x <= xClick && _this3.x + _this3.width >= xClick && _this3.y <= yClick && _this3.y + _this3.height >= yClick) {
                     _this3.isDragged = true;
@@ -414,8 +464,8 @@ document.addEventListener('DOMContentLoaded', function () {
             _this3.dragger = function () {
                 //console.log(this.isDragged);
                 // if (this.rotation !== 0 || this.rotation % 360 !== 0) {
-                //     let rcpx = this.x + (this.width/2 * Math.cos(this.rotation*Math.PI/180))
-                //     let rcpy = this.y + (this.height/2 * Math.sin(this.rotation*Math.PI/180))
+                //     let rcpx = this.x + (this.width/2 * Math.cos(this.rotationInRadians))
+                //     let rcpy = this.y + (this.height/2 * Math.sin(this.rotationInRadians))
                 //     this.x = xMove - rcpx;
                 //     this.y = yMove - rcpy;
                 // }
@@ -454,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 //         }
                 //         // playfieldContext.save();
                 //         playfieldContext.translate(this.x + this.width/2,this.y + this.height/2);
-                //         playfieldContext.rotate(this.rotation*(Math.PI/180));
+                //         playfieldContext.rotate(this.rotationInRadians);
                 //         // console.log(this.x,this.y);
                 //         // playfieldContext.fillStyle=this.color;
                 //         // playfieldContext.fillRect(this.x,this.y,this.width,this.height);
@@ -507,6 +557,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return CanvasMovingObject;
     }(CanvasObject);
+
+    //Inventory object
+
 
     var _initialiseProps = function _initialiseProps() {
         var _this6 = this;
@@ -589,35 +642,49 @@ document.addEventListener('DOMContentLoaded', function () {
                 var rcpx = colidee.x + colidee.width / 2; //Rectangle Central Point X-coord if no rotation
                 var rcpy = colidee.y + colidee.height / 2; //Rectangle Central Point Y-coord if no rotation
                 if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
-                    rcpx = colidee.x + colidee.width / 2 * Math.cos(colidee.rotation * Math.PI / 180);
-                    // rcpy = colidee.y + colidee.height/2 + + (colidee.height * Math.sin(colidee.rotation*Math.PI/180))
-                    rcpy = colidee.y + colidee.height / 2 + colidee.width / 2 * Math.sin(colidee.rotation * Math.PI / 180);
+                    rcpx = colidee.x + colidee.width / 2 * Math.cos(colidee.rotationInRadians);
+                    // rcpy = colidee.y + colidee.height/2 + (colidee.height * Math.sin(colidee.rotationInRadians))
+                    rcpy = colidee.y + colidee.height / 2 + colidee.width / 2 * Math.sin(colidee.rotationInRadians);
                 }
 
-                // playfieldContext.moveTo(ccpx,ccpy);
-                // playfieldContext.lineTo(rcpx,rcpy);
-                // playfieldContext.stroke()
+                //playfieldContext.moveTo(ccpx,ccpy);
+                //playfieldContext.lineTo(rcpx,rcpy);
+                //playfieldContext.stroke()
 
                 //console.log(rectX,rectY);
 
-                var newccpx = Math.cos(colidee.rotation * Math.PI / 180) * (_this6.x - colidee.x) - Math.sin(colidee.rotation * Math.PI / 180) * (_this6.y - colidee.y) + colidee.x;
-                var newccpy = Math.sin(colidee.rotation * Math.PI / 180) * (_this6.x - colidee.x) + Math.cos(colidee.rotation * Math.PI / 180) * (_this6.y - colidee.y) + colidee.y;
+                // let newccpx = Math.cos(colidee.rotationInRadians) * (this.x - colidee.x) - Math.sin(colidee.rotationInRadians) * (this.y - colidee.y) + colidee.x
+                // let newccpy = Math.sin(colidee.rotationInRadians) * (this.x - colidee.x) + Math.cos(colidee.rotationInRadians) * (this.y - colidee.y) + colidee.y
+                // playfieldContext.fillStyle = "red";
+                // playfieldContext.fillRect(rcpx-colidee.width/2,rcpy,colidee.width,colidee.height);
 
-                playfieldContext.fillRect(colidee.x, colidee.y, colidee.height, colidee.width);
 
-                var dx = Math.abs(newccpx - rcpx);
-                var dy = Math.abs(newccpy - rcpy);
+                var dx = Math.abs(ccpx - rcpx);
+                var dy = Math.abs(ccpy - rcpy);
 
                 // if (colidee.rotation !== 0 && colidee.rotation % 360 !== 0) {
-                //     // dx = Math.abs(ccpx - dx * Math.cos(colidee.rotation*Math.PI/180) * Math.cos(colidee.rotation*Math.PI/180))
-                //     // dy = Math.abs(ccpy - dx * Math.cos(colidee.rotation*Math.PI/180) * Math.sin(colidee.rotation*Math.PI/180))
-                //     dx = dx * Math.sin(colidee.rotation*Math.PI/180)
-                //     dy = dy * Math.cos(colidee.rotation*Math.PI/180)
+                //     // dx = Math.abs(ccpx - dx * Math.cos(colidee.rotationInRadians) * Math.cos(colidee.rotationInRadians))
+                //     // dy = Math.abs(ccpy - dx * Math.cos(colidee.rotationInRadians) * Math.sin(colidee.rotationInRadians))
+                //     dx = dx * Math.sin(colidee.rotationInRadians)
+                //     dy = dy * Math.cos(colidee.rotationInRadians)
                 // }
 
+                playfieldContext.moveTo(ccpx, ccpy);
+                playfieldContext.lineTo(rcpx, rcpy);
+                playfieldContext.stroke();
+                playfieldContext.moveTo(ccpx, ccpy);
+                playfieldContext.lineTo(colidee.x, colidee.y);
+                playfieldContext.stroke();
+                //playfieldContext.moveTo(ccpx,ccpy);
+                //playfieldContext.lineTo(colidee.x + width,colidee.y + colidee.height/2 + (colidee.width/2 * Math.sin(colidee.rotationInRadians)));
+                // playfieldContext.lineTo(rcpx,rcpy);
+                // playfieldContext.lineTo(rcpx,rcpy);
+                // playfieldContext.lineTo(rcpx,rcpy);
+                //playfieldContext.stroke()
 
                 //Object collision check
                 //is collision on X-axis?
+
 
                 if (dx > _this6.r + colidee.width / 2) {
                     _this6.isCollided = false;
@@ -659,10 +726,10 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.bouncer = function (rotation) {
+            rotation = rotation * Math.PI / 180;
+            _this6.vx = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2);
 
-            _this6.vx = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180)) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.cos(rotation * (Math.PI / 180) - Math.PI / 2);
-
-            _this6.vy = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180)) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation * (Math.PI / 180)) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation * (Math.PI / 180))) * Math.sin(rotation * (Math.PI / 180) - Math.PI / 2) + _this6.gravityValue;
+            _this6.vy = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2) + _this6.gravityValue;
 
             _this6.speed = _this6.speed - _this6.speed * _this6.gravityValue;
             if (_this6.speed < 0) {
@@ -725,6 +792,28 @@ document.addEventListener('DOMContentLoaded', function () {
         resetConfirmScreen.style.display = "block";
     });
 
+    //Next Level Button functionality
+    nextLevelButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        document.querySelector(".winScreen").style.opacity = 0;
+        levelNumber++;
+        setTimeout(function () {
+            document.querySelector(".winScreen").style.display = "none";
+            currentLevel = new Playfield(levelNumber);
+            currentLevel.createObjects(levelsInfo);
+        }, 1000);
+        setTimeout(function () {
+            document.querySelector(".level").innerText = "Level: " + levelNumber;
+            levelWon = false;
+            start = true;
+            seconds = 0;
+            minutes = 0;
+            hours = 0;
+            currentLevel.physicsEngineRun();
+            engineID = requestAnimationFrame(currentLevel.physicsEngineRun);
+        }, 1500);
+    });
+
     //Time functionality
     var timerInterval = setInterval(function () {
         if (!start || levelWon) {
@@ -746,7 +835,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Start button functionality
     startLevelButton.addEventListener("click", function (e) {
-        console.log("working");
         e.preventDefault();
         welcomeScreen.style.opacity = 0;
         setTimeout(function () {
@@ -757,7 +845,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () {
             welcomeScreen.style.opacity = 0;
             start = true;
-            currentLevel = new Playfield(1);
+            currentLevel = new Playfield(levelNumber);
             currentLevel.createObjects(levelsInfo);
         }, 4000);
         setTimeout(function () {

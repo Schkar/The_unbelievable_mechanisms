@@ -32,28 +32,34 @@
         text-align: center;
         left: 50%;
         transform: translate(-50%,0);
-        top: 20px;
+        top: 22vh;
         width: 1000px;
         height: 600px;
         font-size: 2em;
         display: none;
+        transition: opacity 0.5s;
+        color: darkgreen;
         .winText{
             //padding-top: 150px;
-            font-size: 4em;
-            color: darkgreen;
-            margin-bottom: 0;
+            font-size: 3em;
+            margin: 0 auto;
             background-color: white;
         }
         .winTextTime{
             margin: 10px auto;
-            font-size: 2em;
-            color: darkgreen;
         }
         .winTimer{
             font-family: "orbitron";
             margin-top: 0;
-            font-size: 2em;
-            color: darkgreen;
+        }
+        .nextLevel{
+            font-size: 1.5em;
+            margin: 10px auto;
+        }
+        .nextLevelButton{
+            border-radius: 25px;
+            font-size: 1.5em;
+            background-color: lightseagreen;
         }
     }
     .noMobile{

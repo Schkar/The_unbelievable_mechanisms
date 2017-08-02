@@ -12,6 +12,7 @@
         height: 600px;
         font-size: 2em;
         transition: opacity 0.5s;
+        padding: 0;
         &.goodLuck{
             transition: opacity 1s;
             padding-top: 150px;
@@ -19,6 +20,7 @@
             color: darkgreen;
         }
         .welcomeText{
+            margin-top: 0;
             .welcomeTitle{
                 display: block;
                 margin: 20px 0;
@@ -61,6 +63,20 @@
             font-size: 1.5em;
             background-color: lightseagreen;
         }
+    }
+    .noMoreLevels{
+        position: absolute;
+        text-align: center;
+        left: 50%;
+        transform: translate(-50%,0);
+        top: 10vh;
+        width: 1000px;
+        height: 600px;
+        font-size: 3em;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s;
+        color: darkgreen;
     }
     .noMobile{
         position: absolute;

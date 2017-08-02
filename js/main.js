@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded',function(){
             //Misc variables
                 let objectBeingDragged = "";
                 let levelWon = false;
-                let levelNumber = 1;
+                let levelNumber = 10;
                 //TODO: Uncomment this for final version
                 let currentLevel = null;
 
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
             }
 
-        //Arch-class - object prototype
+        //Object prototype
             class CanvasObject {
                 constructor(object) {
                     this.object = object
@@ -270,18 +270,20 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                     if (this.rotation !== 0) {
                         playfieldContext.save();
+                        //playfieldContext.translate(this.x+this.width/2,this.y+this.height/2);
                         playfieldContext.translate(this.x,this.y);
                         playfieldContext.beginPath()
                         playfieldContext.rotate(this.rotationInRadians);                        
                         if (this.isDragged) {
                             playfieldContext.strokeStyle="red";
                             playfieldContext.lineWidth = 4;
+                            //playfieldContext.strokeRect(-this.width/2,-this.height/2,this.width,this.height); 
                             playfieldContext.strokeRect(0,0,this.width,this.height); 
                         }
-                        playfieldContext.drawImage(image,0,0,this.width,this.height) //After translation it must be 00
+                        //playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height) //After translation it must be 00 if translation point is x,y
+                        playfieldContext.drawImage(image,0,0,this.width,this.height)
                         playfieldContext.closePath()
                         playfieldContext.restore();
-                        //playfieldContext.translate(-this.x,-this.y);
                         playfieldContext.strokeStyle="blue";
                         playfieldContext.lineWidth = 2;
                         playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
@@ -371,15 +373,20 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                     */
                     if (this.rotation !== 0 || this.rotation % 360 !== 0) {
-                        let originX = this.x, originY = this.y, r = -this.rotationInRadians;
+                        //This works. Thank you unknown guy on Stack
+                        let originX = this.x, originY = this.y, r = this.rotationInRadians;
                         let dx = xClick - originX, dy = yClick - originY;
                         let h1 = Math.sqrt(dx*dx + dy*dy)
                         let currA = Math.atan2(dy,dx);
-                        let newA = currA - this.r;
+                        let newA = currA - r;
                         let x2 = Math.cos(newA) * h1;
                         let y2 = Math.sin(newA) * h1;
-                        if (x2 > this.w && x2 < this.w && y2 >this.h && y2 < this.h){
-                            console.log("dziasbasda");;
+                        if (x2 > -this.width && x2 < this.width && y2 > -this.height && y2 < this.height){
+                            this.isDragged = true;
+                            prevxClick = xClick;
+                            prevyClick = yClick;
+                            objectBeingDragged = this.name;
+                            this.dragger()
                         }
                     }
                     else if ((this.x <= xClick && this.x + this.width >= xClick)&&(this.y <= yClick && this.y + this.height >= yClick)) {
@@ -392,17 +399,16 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 dragger = () => {
-                    //console.log(this.isDragged);
-                    // if (this.rotation !== 0 || this.rotation % 360 !== 0) {
-                    //     let rcpx = this.x + (this.width/2 * Math.cos(this.rotationInRadians))
-                    //     let rcpy = this.y + (this.height/2 * Math.sin(this.rotationInRadians))
-                    //     this.x = xMove - rcpx;
-                    //     this.y = yMove - rcpy;
-                    // }
-                    // else {
+                    if (this.rotation !== 0 || this.rotation % 360 !== 0) {
+                        let rcpx = this.x + (this.width/2 * Math.cos(this.rotationInRadians))
+                        let rcpy = this.y + (this.height/2 * Math.sin(this.rotationInRadians))
+                        this.x = xMove - rcpx;
+                        this.y = yMove - rcpy;
+                    }
+                    else {
                         this.x = xMove - this.width/2;
                         this.y = yMove - this.height/2;
-                    // }
+                    }
                     this.redrawCanvasObject()
                 }
                 
@@ -695,6 +701,11 @@ document.addEventListener('DOMContentLoaded',function(){
                 e.preventDefault();
                 document.querySelector(".winScreen").style.opacity = 0;
                 levelNumber++
+                if (levelNumber > 10) {
+                    document.querySelector(".noMoreLevels").style.display = "block";
+                    document.querySelector(".noMoreLevels").style.opacity = 1;
+                    return;
+                }
                 setTimeout(()=>{
                     document.querySelector(".winScreen").style.display = "none";
                     currentLevel = new Playfield(levelNumber)

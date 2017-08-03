@@ -161,13 +161,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 810, y: 200 },
-            data: { mass: 600, r: 14, type: "kinetic", id: "basketball" },
-            motion: { speed: 1.5, vx: 0, vy: 0, direction: 150, isCollided: false }
+            position: { x: 860, y: 20 },
+            data: { mass: 0.6, r: 14, type: "kinetic", id: "basketball" },
+            motion: { speed: 10, vx: 0, vy: 0, direction: 45, isCollided: false }
         }, {
             name: "staticObject1",
             position: { x: 505, y: 250 },
-            data: { mass: 2000, width: 170, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "barrier" }
+            data: { mass: 5, width: 170, height: 30, rotation: 15.5, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
         level3: [],
@@ -203,6 +203,11 @@ document.addEventListener('DOMContentLoaded', function () {
     //Time variables for physics functions
     var difTime = 0;
     var previousTime = 0;
+
+    //Physics variables
+    var gravityValue = 9.81; // m/s^2
+    var ppm = 2; //Pixels-per-meter
+    var wallMass = 5.9722 * Math.pow(10, 24); //mass of Earth
 
     //Misc variables
     var objectBeingDragged = "";
@@ -371,6 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
             this.type = object.data.type;
             this.name = object.name;
             this.id = object.data.id;
+            this.mass = object.data.mass;
         }
 
         _createClass(CanvasObject, [{
@@ -531,7 +537,6 @@ document.addEventListener('DOMContentLoaded', function () {
             _this4.vx = object.motion.vx;
             _this4.vy = object.motion.vy;
             _this4.isCollided = object.motion.isCollided;
-            _this4.gravityValue = 0.01;
             return _this4;
         }
 
@@ -561,20 +566,27 @@ document.addEventListener('DOMContentLoaded', function () {
         this.countInitialVectors = function () {
             _this6.vx = Math.cos(_this6.direction * (Math.PI / 180));
             _this6.vy = Math.sin(_this6.direction * (Math.PI / 180));
+            //console.log(this.vx,this.vy);
         };
 
         this.movement = function (time) {
-            _this6.speed = _this6.speed - 0.001;
-            if (_this6.speed < 0) {
-                _this6.speed = 0;
+            //this.speed = this.speed - 0.001;
+            // if (this.speed < 0) {
+            //     this.speed = 0
+            // }
+            var dt = (time - previousTime) / 1000;
+            if (time === undefined) {
+                dt = 0;
             }
-            //console.log(this.vx,this.vy, "movement");
-
-
-            _this6.x = _this6.x + _this6.vx * _this6.speed * _this6.speed;
-            _this6.vy = _this6.vy + _this6.gravityValue;
-            _this6.y = _this6.y + _this6.vy * _this6.speed * _this6.speed;
-            previousTime = time;
+            //this.vx = this.speed * Math.cos(this.direction*(Math.PI/180));
+            //this.vy = this.speed * Math.sin(this.direction*(Math.PI/180));
+            console.log(gravityValue * dt);
+            _this6.vy = _this6.vy + gravityValue * dt;
+            _this6.y += _this6.vy * ppm * dt;
+            _this6.x += _this6.vx * ppm * dt;
+            if (time !== undefined) {
+                previousTime = time;
+            }
         };
 
         this.wallCollisionCheck = function () {
@@ -630,6 +642,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var unrotatedCircleX = Math.cos(-colidee.rotationInRadians) * (_this6.x - rectCenterX) - Math.sin(-colidee.rotationInRadians) * (_this6.y - rectCenterY) + rectCenterX;
                 var unrotatedCircleY = Math.sin(-colidee.rotationInRadians) * (_this6.x - rectCenterX) + Math.cos(-colidee.rotationInRadians) * (_this6.y - rectCenterY) + rectCenterY;
 
+                // console.log(unrotatedCircleX,unrotatedCircleY);
                 // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
                 var closestX = void 0,
                     closestY = void 0;
@@ -658,18 +671,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 var distance = Math.sqrt(dX * dX + dY * dY);
 
                 if (distance < _this6.r) {
-                    _this6.bouncer(colidee.rotation);
+                    console.log("true");
+                    _this6.bouncer(colidee.rotation, colidee.mass);
                 }
             });
         };
 
-        this.bouncer = function (rotation) {
+        this.bouncer = function (rotation, mass) {
             rotation = rotation * Math.PI / 180;
-            _this6.vx = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2);
+            // this.vx = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2));
 
-            _this6.vy = _this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2) + _this6.gravityValue;
+            // this.vy = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2));
 
-            _this6.speed = _this6.speed - _this6.speed * _this6.gravityValue;
+            var a = _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy + _this6.vy);
+            var b = _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy);
+            var c = a * Math.cos(rotation) + b * Math.sin(rotation);
+
+            var d = b * Math.cos(rotation) - a * Math.sin(rotation);
+
+            console.log(a, b, c, d);
+
+            _this6.vx = _this6.speed * c * ((_this6.mass - mass) / (_this6.mass + mass)) * Math.cos(rotation) + _this6.speed * d * Math.cos(rotation + Math.PI / 2);
+
+            _this6.vy = _this6.speed * c * ((_this6.mass - mass) / (_this6.mass + mass)) * Math.sin(rotation) + _this6.speed * d * Math.sin(rotation + Math.PI / 2);
+
+            console.log(_this6.vx, _this6.vy);
+
+            _this6.speed = _this6.speed - _this6.speed * gravityValue;
             if (_this6.speed < 0) {
                 _this6.speed = 0;
             }
@@ -677,8 +705,6 @@ document.addEventListener('DOMContentLoaded', function () {
             _this6.x += _this6.vx;
             _this6.y += _this6.vy;
         };
-
-        this.innerRotation = function () {};
     };
 
     var ItemInventory = function (_CanvasStaticObject) {

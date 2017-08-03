@@ -80,14 +80,14 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {
                         name: "aBall",
-                        position: {x: 810, y: 200},
-                        data: {mass: 600, r: 14, type: "kinetic", id: "basketball"},
-                        motion: {speed: 1.5, vx: 0, vy: 0, direction: 150, isCollided: false}
+                        position: {x: 860, y: 20},
+                        data: {mass: 0.6, r: 14, type: "kinetic", id: "basketball"},
+                        motion: {speed: 10, vx: 0, vy: 0, direction: 45, isCollided: false}
                     },
                     {
                         name: "staticObject1",
                         position: {x:505, y:250}, 
-                        data: {mass: 2000, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "barrier"},
+                        data: {mass: 5, width:170, height:30, rotation: 15.5, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
                     //     name: "staticObject2",
@@ -140,13 +140,17 @@ document.addEventListener('DOMContentLoaded',function(){
                 let difTime = 0;
                 let previousTime = 0;
 
+            //Physics variables
+                let gravityValue = 9.81; // m/s^2
+                let ppm = 2; //Pixels-per-meter
+                let wallMass = 5.9722 * Math.pow(10, 24) //mass of Earth
+
             //Misc variables
                 let objectBeingDragged = "";
                 let levelWon = false;
                 let levelNumber = 10;
                 //TODO: Uncomment this for final version
                 let currentLevel = null;
-
 
 
         //Canvas functions
@@ -248,6 +252,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.type = object.data.type
                     this.name = object.name
                     this.id = object.data.id
+                    this.mass = object.data.mass
                 }
 
                 get rotationInRadians() {
@@ -439,7 +444,6 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.vx = object.motion.vx
                     this.vy = object.motion.vy
                     this.isCollided = object.motion.isCollided
-                    this.gravityValue = 0.01
                 }
 
                 checkIfWin = () => {
@@ -459,20 +463,28 @@ document.addEventListener('DOMContentLoaded',function(){
                 countInitialVectors = () => {
                     this.vx = Math.cos(this.direction*(Math.PI/180));
                     this.vy = Math.sin(this.direction*(Math.PI/180));
+                    //console.log(this.vx,this.vy);
                 }
 
                 movement = (time) => {
-                    this.speed = this.speed - 0.001;
-                    if (this.speed < 0) {
-                        this.speed = 0
+                    //this.speed = this.speed - 0.001;
+                    // if (this.speed < 0) {
+                    //     this.speed = 0
+                    // }
+                    let dt = (time - previousTime)/1000;
+                    if (time === undefined) {
+                        dt = 0;
                     }
-                    //console.log(this.vx,this.vy, "movement");
+                    //this.vx = this.speed * Math.cos(this.direction*(Math.PI/180));
+                    //this.vy = this.speed * Math.sin(this.direction*(Math.PI/180));
+                    console.log(gravityValue * dt);
+                    this.vy = this.vy + (gravityValue * dt);
+                    this.y += this.vy * ppm * dt;
+                    this.x += this.vx * ppm * dt;
+                    if (time !== undefined) {
+                        previousTime = time;
+                    }
                     
-                    
-                    this.x = this.x + (this.vx*this.speed*this.speed);
-                    this.vy = this.vy + this.gravityValue;
-                    this.y = this.y + (this.vy*this.speed*this.speed);
-                    previousTime = time;
                 }
 
                 wallCollisionCheck = () => {
@@ -528,6 +540,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         let unrotatedCircleX = Math.cos( -colidee.rotationInRadians ) * ( this.x - rectCenterX ) - Math.sin( -colidee.rotationInRadians ) * ( this.y - rectCenterY ) + rectCenterX;
                         let unrotatedCircleY = Math.sin( -colidee.rotationInRadians ) * ( this.x - rectCenterX ) + Math.cos( -colidee.rotationInRadians ) * ( this.y - rectCenterY ) + rectCenterY;
 
+                        // console.log(unrotatedCircleX,unrotatedCircleY);
                         // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
                         let closestX, closestY;
 
@@ -555,28 +568,39 @@ document.addEventListener('DOMContentLoaded',function(){
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
-                            this.bouncer(colidee.rotation)
+                            console.log("true");
+                            this.bouncer(colidee.rotation,colidee.mass)
                         }
                     })
                 }
 
-                bouncer = (rotation) => {
+                bouncer = (rotation,mass) => {
                     rotation = rotation * Math.PI/180;
-                    this.vx = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2));
+                    // this.vx = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2));
 
-                    this.vy = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)) + this.gravityValue;
+                    // this.vy = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2));
 
-                    this.speed = this.speed - this.speed*this.gravityValue;
+                    let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy+this.vy);
+                    let b = this.vy/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
+                    let c = (a * Math.cos(rotation) + b * Math.sin(rotation));
+
+                    let d = (b * Math.cos(rotation) - a * Math.sin(rotation));
+
+                    console.log(a,b,c,d);
+
+                    this.vx = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + this.speed * d * Math.cos(rotation + Math.PI/2);
+
+                    this.vy = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + this.speed * d * Math.sin(rotation + Math.PI/2);
+                    
+                    console.log(this.vx,this.vy);
+
+                    this.speed = this.speed - this.speed*gravityValue;
                     if (this.speed < 0) {
                         this.speed = 0;
                     }
                    //console.log(this.vx,this.vy, "bouncer");
                     this.x += this.vx;
                     this.y += this.vy;
-                }
-                
-                innerRotation = () => {
-
                 }
             }
 

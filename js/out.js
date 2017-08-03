@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
             name: "aBall",
             position: { x: 860, y: 20 },
             data: { mass: 0.6, r: 14, type: "kinetic", id: "basketball" },
-            motion: { speed: 10, vx: 0, vy: 0, direction: 45, isCollided: false }
+            motion: { speed: 10, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",
             position: { x: 505, y: 250 },
@@ -580,8 +580,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             //this.vx = this.speed * Math.cos(this.direction*(Math.PI/180));
             //this.vy = this.speed * Math.sin(this.direction*(Math.PI/180));
-            console.log(gravityValue * dt);
-            _this6.vy = _this6.vy + gravityValue * dt;
+            //console.log(gravityValue * dt);
+            _this6.vy = _this6.vy * _this6.speed + gravityValue * dt * ppm;
+            _this6.vx = _this6.vx * _this6.speed;
             _this6.y += _this6.vy * ppm * dt;
             _this6.x += _this6.vx * ppm * dt;
             if (time !== undefined) {

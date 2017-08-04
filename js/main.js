@@ -21,9 +21,6 @@ document.addEventListener('DOMContentLoaded',function(){
     //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
-    //FIXME: collision checker must take rotation into consideration .
-
-
     //Variables section
 
         //Temporary dev variables
@@ -81,12 +78,12 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "aBall",
                         position: {x: 860, y: 20},
-                        data: {mass: 0.6, r: 15, type: "kinetic", id: "basketball"},
-                        motion: {speed: 1, vx: 0, vy: 0, direction: 135, isCollided: false}
+                        data: {mass: 0.6 /*in kg*/, elasticity: -0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
+                        motion: {f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false}
                     },
                     {
                         name: "staticObject1",
-                        position: {x:505, y:250}, 
+                        position: {x:605, y:250}, 
                         data: {mass: 5, width:170, height:30, rotation: 15.5, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
@@ -137,13 +134,13 @@ document.addEventListener('DOMContentLoaded',function(){
                 let yMove = 0;
 
             //Time variables for physics functions
-                let dt = 0;
-                let previousTime = 0;
+                const frameRate = 1/40;
 
             //Physics variables
                 const gravityValue = 9.81; // m/s^2
                 const ppm = 100; //Pixels-per-meter - width: 800px - 1px = 1cm 800px = 800cm = 8m
                 const wallMass = 5.9722 * Math.pow(10, 24) //mass of Earth
+                const rho = 1.22 // density of air kg/m3
 
             //Misc variables
                 let objectBeingDragged = "";
@@ -266,9 +263,9 @@ document.addEventListener('DOMContentLoaded',function(){
                     if (this.r !== undefined) {
                         //TODO: InnerRotation:
                         // playfieldContext.save();
-                        // playfieldContext.translate(this.x,this.y+);
+                        // playfieldContext.translate(this.x,this.y);
                         // playfieldContext.beginPath()
-                        // playfieldContext.rotate(this.rotationInRadians); 
+                        // playfieldContext.rotate(this.vx*Math.PI/180); 
                         playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
                         // playfieldContext.closePath()
                         // playfieldContext.restore();
@@ -424,11 +421,15 @@ document.addEventListener('DOMContentLoaded',function(){
                     super(object)
                     this.name = object.name
                     this.r = object.data.r
-                    this.speed = object.motion.speed
+                    this.f = object.motion.f
+                    this.fx = object.motion.fx
+                    this.fy = object.motion.fy
                     this.direction = object.motion.direction
                     this.vx = object.motion.vx
                     this.vy = object.motion.vy
                     this.isCollided = object.motion.isCollided
+                    this.cd = object.data.cd
+                    this.elasticity = object.data.elasticity
                 }
 
                 checkIfWin = () => {
@@ -448,80 +449,55 @@ document.addEventListener('DOMContentLoaded',function(){
                 countInitialVectors = () => {
                     // this.vx = Math.cos(this.direction*(Math.PI/180));
                     // this.vy = Math.sin(this.direction*(Math.PI/180));
-                    this.vx = Math.cos(this.direction*(Math.PI/180)) * this.speed * ppm;
-                    this.vy = Math.sin(this.direction*(Math.PI/180)) * this.speed * ppm;
+                    this.vx = Math.cos(this.direction*(Math.PI/180)) * this.f;
+                    this.vy = Math.sin(this.direction*(Math.PI/180)) * this.f;
+                    //this.vx = (this.fx/this.mass * frameRate);
+                    //this.vy = (this.fy/this.mass * frameRate);
+                    //console.log(this.fx,this.fy);
+                    //throw new Error
                     //console.log(this.vx,this.vy);
                 }
 
                 movement = (time) => {
-                    //this.speed = this.speed - 0.001;
-                    // if (this.speed < 0) {
-                    //     this.speed = 0
-                    // }
-                    dt = (time - previousTime)/1000;
-                    if (time === undefined || dt > 1) {
-                        dt = 0.015;
-                    }
-                    //console.log(time,previousTime,dt);
-                    //console.log(dt);
-                    let vg = gravityValue * dt;
+                   
+                    let a = Math.PI * this.r * this.r / (10000)
 
-                    let fy = (this.vy / dt) * this.mass / ppm;
-                    let fg = gravityValue * this.mass;
-                    let c = (fy + fg) / fy;
-                    console.log(fy,fg,c);
-                    //throw Error
-                    this.vy *= c;
-                    // this.vy += vg;
-                    this.x += this.vx * dt;
-                    this.y += this.vy * dt;
-                    // if (dt !== 0) {
-                    //     throw new Error
-                    // }
-                    
-                    //console.log(this.x,this.y);
-                    //debugger
-                    
-                    //this.vy = this.vy * this.speed;
-                    //this.vy = this.vy + (gravityValue * dt)
-                    //this.vx = this.vx * this.speed;
-                    // this.y += this.vy * ppm * dt;
-                    // this.x += this.vx * ppm * dt;
-                    if (time !== undefined) {
-                        previousTime = time;
-                    }
-                    
+                    this.fx = -0.5 * this.cd * a * rho * this.vx * this.vx * this.vx / Math.abs(this.vx);  
+                    this.fy = -0.5 * this.cd * a * rho * this.vy * this.vy * this.vy / Math.abs(this.vy);
+
+                    this.fx = (isNaN(this.fx) ? 0 : this.fx);  
+                    this.fy = (isNaN(this.fy) ? 0 : this.fy);
+
+                    let ax = this.fx / this.mass;  
+                    let ay = gravityValue + (this.fy / this.mass);
+
+                    this.vx += ax * frameRate;
+                    this.vy += ay * frameRate;
+
+                    this.x += this.vx * frameRate * 100;
+                    this.y += this.vy * frameRate * 100;
                 }
 
                 wallCollisionCheck = () => {
-                    //FIXME: Check them - it sticks to left and right wall... probably because degrees
-                        // Wall collision check: 
-                        // Left wall
+                    // Left wall
                         if (this.x - this.r <= 200) {
-                            //  console.log("lw");
-                            //this.x = 0 + this.r;
-                            this.bouncer(90);
+                            this.bouncer(90,wallMass);
                         }
 
-                        // Right wall
+                    // Right wall
                         if (this.x + this.r >= 1000) {
-                            // console.log("rw");
-                            //this.x = 1000 - this.r;
-                            this.bouncer(90)
+                            this.bouncer(90,wallMass);
                         }
 
-                        // Ceiling
+                    // Ceiling
                         if (this.y - this.r <= 0) {
-                            // console.log("cl");
-                            //this.y = 0 + this.r;
-                            this.bouncer(0)
+                            this.bouncer(0,wallMass);
                         }
 
-                        // Floor
+                    // Floor
                         if (this.y + this.r >= 400) {
-                            // console.log("fl");
                             this.y = 400 - this.r;
-                            this.bouncer(0)
+                            this.bouncer(0,wallMass);
                         }
                 }
 
@@ -574,18 +550,18 @@ document.addEventListener('DOMContentLoaded',function(){
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
-                            // console.log("true");
                             this.bouncer(colidee.rotation,colidee.mass)
                         }
                     })
                 }
 
                 bouncer = (rotation,mass) => {
+                    //console.log(rotation,mass);
                     rotation = rotation * Math.PI/180;
 
-                    this.vx = (this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)))* ppm;
+                    this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
 
-                    this.vy = (this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)))* ppm;
+                    this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
 
                     // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy+this.vy);
                     // let b = this.vy/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
@@ -593,21 +569,21 @@ document.addEventListener('DOMContentLoaded',function(){
 
                     // let d = (b * Math.cos(rotation) - a * Math.sin(rotation));
 
-                    // // console.log(a,b,c,d);
+                    // //console.log(a,b,c,d,this.mass,mass);
 
-                    // this.vx = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + this.speed * d * Math.cos(rotation + Math.PI/2);
+                    // this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.cos(rotation + Math.PI/2);
 
-                    // this.vy = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + this.speed * d * Math.sin(rotation + Math.PI/2);
+                    // this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.sin(rotation + Math.PI/2);
                     
-                    // console.log(this.vx,this.vy);
+                    //console.log(this.vx,this.vy);
 
                     // this.speed = this.speed - this.speed*gravityValue;
                     // if (this.speed < 0) {
                     //     this.speed = 0;
                     // }
                     
-                    this.x = this.x + this.vx * dt;
-                    this.y = this.y + this.vy * dt;
+                    this.x = this.x + this.vx * frameRate;
+                    this.y = this.y + this.vy * frameRate;
                 }
             }
 

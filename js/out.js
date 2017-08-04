@@ -104,9 +104,6 @@ document.addEventListener('DOMContentLoaded', function () {
     //     document.querySelector(".resetButton").disabled = -----true;
     // }
 
-    //FIXME: collision checker must take rotation into consideration .
-
-
     //Variables section
 
     //Temporary dev variables
@@ -162,11 +159,11 @@ document.addEventListener('DOMContentLoaded', function () {
         level1: [{
             name: "aBall",
             position: { x: 860, y: 20 },
-            data: { mass: 0.6, r: 15, type: "kinetic", id: "basketball" },
-            motion: { speed: 1, vx: 0, vy: 0, direction: 135, isCollided: false }
+            data: { mass: 0.6 /*in kg*/, elasticity: -0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
+            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",
-            position: { x: 505, y: 250 },
+            position: { x: 605, y: 250 },
             data: { mass: 5, width: 170, height: 30, rotation: 15.5, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
@@ -201,13 +198,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var yMove = 0;
 
     //Time variables for physics functions
-    var dt = 0;
-    var previousTime = 0;
+    var frameRate = 1 / 40;
 
     //Physics variables
     var gravityValue = 9.81; // m/s^2
     var ppm = 100; //Pixels-per-meter - width: 800px - 1px = 1cm 800px = 800cm = 8m
     var wallMass = 5.9722 * Math.pow(10, 24); //mass of Earth
+    var rho = 1.22; // density of air kg/m3
 
     //Misc variables
     var objectBeingDragged = "";
@@ -323,9 +320,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (_this2.r !== undefined) {
                     //TODO: InnerRotation:
                     // playfieldContext.save();
-                    // playfieldContext.translate(this.x,this.y+);
+                    // playfieldContext.translate(this.x,this.y);
                     // playfieldContext.beginPath()
-                    // playfieldContext.rotate(this.rotationInRadians); 
+                    // playfieldContext.rotate(this.vx*Math.PI/180); 
                     playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
                     // playfieldContext.closePath()
                     // playfieldContext.restore();
@@ -517,11 +514,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             _this4.name = object.name;
             _this4.r = object.data.r;
-            _this4.speed = object.motion.speed;
+            _this4.f = object.motion.f;
+            _this4.fx = object.motion.fx;
+            _this4.fy = object.motion.fy;
             _this4.direction = object.motion.direction;
             _this4.vx = object.motion.vx;
             _this4.vy = object.motion.vy;
             _this4.isCollided = object.motion.isCollided;
+            _this4.cd = object.data.cd;
+            _this4.elasticity = object.data.elasticity;
             return _this4;
         }
 
@@ -551,79 +552,55 @@ document.addEventListener('DOMContentLoaded', function () {
         this.countInitialVectors = function () {
             // this.vx = Math.cos(this.direction*(Math.PI/180));
             // this.vy = Math.sin(this.direction*(Math.PI/180));
-            _this6.vx = Math.cos(_this6.direction * (Math.PI / 180)) * _this6.speed * ppm;
-            _this6.vy = Math.sin(_this6.direction * (Math.PI / 180)) * _this6.speed * ppm;
+            _this6.vx = Math.cos(_this6.direction * (Math.PI / 180)) * _this6.f;
+            _this6.vy = Math.sin(_this6.direction * (Math.PI / 180)) * _this6.f;
+            //this.vx = (this.fx/this.mass * frameRate);
+            //this.vy = (this.fy/this.mass * frameRate);
+            //console.log(this.fx,this.fy);
+            //throw new Error
             //console.log(this.vx,this.vy);
         };
 
         this.movement = function (time) {
-            //this.speed = this.speed - 0.001;
-            // if (this.speed < 0) {
-            //     this.speed = 0
-            // }
-            dt = (time - previousTime) / 1000;
-            if (time === undefined || dt > 1) {
-                dt = 0.015;
-            }
-            //console.log(time,previousTime,dt);
-            //console.log(dt);
-            var vg = gravityValue * dt;
 
-            var fy = _this6.vy / dt * _this6.mass / ppm;
-            var fg = gravityValue * _this6.mass;
-            var c = (fy + fg) / fy;
-            console.log(fy, fg, c);
-            //throw Error
-            _this6.vy *= c;
-            // this.vy += vg;
-            _this6.x += _this6.vx * dt;
-            _this6.y += _this6.vy * dt;
-            // if (dt !== 0) {
-            //     throw new Error
-            // }
+            var a = Math.PI * _this6.r * _this6.r / 10000;
 
-            //console.log(this.x,this.y);
-            //debugger
+            _this6.fx = -0.5 * _this6.cd * a * rho * _this6.vx * _this6.vx * _this6.vx / Math.abs(_this6.vx);
+            _this6.fy = -0.5 * _this6.cd * a * rho * _this6.vy * _this6.vy * _this6.vy / Math.abs(_this6.vy);
 
-            //this.vy = this.vy * this.speed;
-            //this.vy = this.vy + (gravityValue * dt)
-            //this.vx = this.vx * this.speed;
-            // this.y += this.vy * ppm * dt;
-            // this.x += this.vx * ppm * dt;
-            if (time !== undefined) {
-                previousTime = time;
-            }
+            _this6.fx = isNaN(_this6.fx) ? 0 : _this6.fx;
+            _this6.fy = isNaN(_this6.fy) ? 0 : _this6.fy;
+
+            var ax = _this6.fx / _this6.mass;
+            var ay = gravityValue + _this6.fy / _this6.mass;
+
+            _this6.vx += ax * frameRate;
+            _this6.vy += ay * frameRate;
+
+            _this6.x += _this6.vx * frameRate * 100;
+            _this6.y += _this6.vy * frameRate * 100;
         };
 
         this.wallCollisionCheck = function () {
-            //FIXME: Check them - it sticks to left and right wall... probably because degrees
-            // Wall collision check: 
             // Left wall
             if (_this6.x - _this6.r <= 200) {
-                //  console.log("lw");
-                //this.x = 0 + this.r;
-                _this6.bouncer(90);
+                _this6.bouncer(90, wallMass);
             }
 
             // Right wall
             if (_this6.x + _this6.r >= 1000) {
-                // console.log("rw");
-                //this.x = 1000 - this.r;
-                _this6.bouncer(90);
+                _this6.bouncer(90, wallMass);
             }
 
             // Ceiling
             if (_this6.y - _this6.r <= 0) {
-                // console.log("cl");
-                //this.y = 0 + this.r;
-                _this6.bouncer(0);
+                _this6.bouncer(0, wallMass);
             }
 
             // Floor
             if (_this6.y + _this6.r >= 400) {
-                // console.log("fl");
                 _this6.y = 400 - _this6.r;
-                _this6.bouncer(0);
+                _this6.bouncer(0, wallMass);
             }
         };
 
@@ -677,18 +654,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 var distance = Math.sqrt(dX * dX + dY * dY);
 
                 if (distance < _this6.r) {
-                    // console.log("true");
                     _this6.bouncer(colidee.rotation, colidee.mass);
                 }
             });
         };
 
         this.bouncer = function (rotation, mass) {
+            //console.log(rotation,mass);
             rotation = rotation * Math.PI / 180;
 
-            _this6.vx = (_this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2)) * ppm;
+            _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2);
 
-            _this6.vy = (_this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2)) * ppm;
+            _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2);
 
             // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy+this.vy);
             // let b = this.vy/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
@@ -696,21 +673,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // let d = (b * Math.cos(rotation) - a * Math.sin(rotation));
 
-            // // console.log(a,b,c,d);
+            // //console.log(a,b,c,d,this.mass,mass);
 
-            // this.vx = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + this.speed * d * Math.cos(rotation + Math.PI/2);
+            // this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.cos(rotation + Math.PI/2);
 
-            // this.vy = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + this.speed * d * Math.sin(rotation + Math.PI/2);
+            // this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.sin(rotation + Math.PI/2);
 
-            // console.log(this.vx,this.vy);
+            //console.log(this.vx,this.vy);
 
             // this.speed = this.speed - this.speed*gravityValue;
             // if (this.speed < 0) {
             //     this.speed = 0;
             // }
 
-            _this6.x = _this6.x + _this6.vx * dt;
-            _this6.y = _this6.y + _this6.vy * dt;
+            _this6.x = _this6.x + _this6.vx * frameRate;
+            _this6.y = _this6.y + _this6.vy * frameRate;
         };
     };
 

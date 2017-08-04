@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
         level1: [{
             name: "aBall",
             position: { x: 860, y: 20 },
-            data: { mass: 0.6, r: 14, type: "kinetic", id: "basketball" },
+            data: { mass: 0.6, r: 15, type: "kinetic", id: "basketball" },
             motion: { speed: 1, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",
@@ -201,12 +201,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var yMove = 0;
 
     //Time variables for physics functions
-    var difTime = 0;
+    var dt = 0;
     var previousTime = 0;
 
     //Physics variables
     var gravityValue = 9.81; // m/s^2
-    var ppm = 2; //Pixels-per-meter
+    var ppm = 100; //Pixels-per-meter - width: 800px - 1px = 1cm 800px = 800cm = 8m
     var wallMass = 5.9722 * Math.pow(10, 24); //mass of Earth
 
     //Misc variables
@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var tempObject = new CanvasMovingObject(object);
                 tempObject.createCanvasObject();
                 tempObject.countInitialVectors();
+                //debugger
                 _this.currentLevelObjects[object.name] = tempObject;
             });
         };
@@ -548,8 +549,10 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.countInitialVectors = function () {
-            _this6.vx = Math.cos(_this6.direction * (Math.PI / 180));
-            _this6.vy = Math.sin(_this6.direction * (Math.PI / 180));
+            // this.vx = Math.cos(this.direction*(Math.PI/180));
+            // this.vy = Math.sin(this.direction*(Math.PI/180));
+            _this6.vx = Math.cos(_this6.direction * (Math.PI / 180)) * _this6.speed * ppm;
+            _this6.vy = Math.sin(_this6.direction * (Math.PI / 180)) * _this6.speed * ppm;
             //console.log(this.vx,this.vy);
         };
 
@@ -558,18 +561,35 @@ document.addEventListener('DOMContentLoaded', function () {
             // if (this.speed < 0) {
             //     this.speed = 0
             // }
-            var dt = (time - previousTime) / 1000;
-            if (time === undefined) {
-                dt = 0;
+            dt = (time - previousTime) / 1000;
+            if (time === undefined || dt > 1) {
+                dt = 0.015;
             }
-            //this.vx = this.speed * Math.cos(this.direction*(Math.PI/180));
-            //this.vy = this.speed * Math.sin(this.direction*(Math.PI/180));
-            //console.log(gravityValue * dt);
-            _this6.vy = _this6.vy * _this6.speed;
-            _this6.vy = _this6.vy + gravityValue * dt;
-            _this6.vx = _this6.vx * _this6.speed;
-            _this6.y += _this6.vy * ppm * dt;
-            _this6.x += _this6.vx * ppm * dt;
+            //console.log(time,previousTime,dt);
+            //console.log(dt);
+            var vg = gravityValue * dt;
+
+            var fy = _this6.vy / dt * _this6.mass / ppm;
+            var fg = gravityValue * _this6.mass;
+            var c = (fy + fg) / fy;
+            console.log(fy, fg, c);
+            //throw Error
+            _this6.vy *= c;
+            // this.vy += vg;
+            _this6.x += _this6.vx * dt;
+            _this6.y += _this6.vy * dt;
+            // if (dt !== 0) {
+            //     throw new Error
+            // }
+
+            //console.log(this.x,this.y);
+            //debugger
+
+            //this.vy = this.vy * this.speed;
+            //this.vy = this.vy + (gravityValue * dt)
+            //this.vx = this.vx * this.speed;
+            // this.y += this.vy * ppm * dt;
+            // this.x += this.vx * ppm * dt;
             if (time !== undefined) {
                 previousTime = time;
             }
@@ -657,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var distance = Math.sqrt(dX * dX + dY * dY);
 
                 if (distance < _this6.r) {
-                    console.log("true");
+                    // console.log("true");
                     _this6.bouncer(colidee.rotation, colidee.mass);
                 }
             });
@@ -665,31 +685,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.bouncer = function (rotation, mass) {
             rotation = rotation * Math.PI / 180;
-            // this.vx = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2));
 
-            // this.vy = this.speed*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+this.speed*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2));
+            _this6.vx = (_this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2)) * ppm;
 
-            var a = _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy + _this6.vy);
-            var b = _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy);
-            var c = a * Math.cos(rotation) + b * Math.sin(rotation);
+            _this6.vy = (_this6.speed * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + _this6.speed * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2)) * ppm;
 
-            var d = b * Math.cos(rotation) - a * Math.sin(rotation);
+            // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy+this.vy);
+            // let b = this.vy/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
+            // let c = (a * Math.cos(rotation) + b * Math.sin(rotation));
 
-            console.log(a, b, c, d);
+            // let d = (b * Math.cos(rotation) - a * Math.sin(rotation));
 
-            _this6.vx = _this6.speed * c * ((_this6.mass - mass) / (_this6.mass + mass)) * Math.cos(rotation) + _this6.speed * d * Math.cos(rotation + Math.PI / 2);
+            // // console.log(a,b,c,d);
 
-            _this6.vy = _this6.speed * c * ((_this6.mass - mass) / (_this6.mass + mass)) * Math.sin(rotation) + _this6.speed * d * Math.sin(rotation + Math.PI / 2);
+            // this.vx = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + this.speed * d * Math.cos(rotation + Math.PI/2);
 
-            console.log(_this6.vx, _this6.vy);
+            // this.vy = this.speed * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + this.speed * d * Math.sin(rotation + Math.PI/2);
 
-            _this6.speed = _this6.speed - _this6.speed * gravityValue;
-            if (_this6.speed < 0) {
-                _this6.speed = 0;
-            }
-            //console.log(this.vx,this.vy, "bouncer");
-            _this6.x += _this6.vx;
-            _this6.y += _this6.vy;
+            // console.log(this.vx,this.vy);
+
+            // this.speed = this.speed - this.speed*gravityValue;
+            // if (this.speed < 0) {
+            //     this.speed = 0;
+            // }
+
+            _this6.x = _this6.x + _this6.vx * dt;
+            _this6.y = _this6.y + _this6.vy * dt;
         };
     };
 

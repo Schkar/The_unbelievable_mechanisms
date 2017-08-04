@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         name: "aBall",
                         position: {x: 860, y: 20},
                         data: {mass: 0.6, r: 14, type: "kinetic", id: "basketball"},
-                        motion: {speed: 10, vx: 0, vy: 0, direction: 135, isCollided: false}
+                        motion: {speed: 1, vx: 0, vy: 0, direction: 135, isCollided: false}
                     },
                     {
                         name: "staticObject1",
@@ -276,22 +276,16 @@ document.addEventListener('DOMContentLoaded',function(){
                     if (this.rotation !== 0) {
                         playfieldContext.save();
                         playfieldContext.translate(this.x+this.width/2,this.y+this.height/2);
-                        // playfieldContext.translate(this.x,this.y);
                         playfieldContext.beginPath()
                         playfieldContext.rotate(this.rotationInRadians);                        
                         if (this.isDragged) {
                             playfieldContext.strokeStyle="red";
                             playfieldContext.lineWidth = 4;
                             playfieldContext.strokeRect(-this.width/2,-this.height/2,this.width,this.height); 
-                            // playfieldContext.strokeRect(0,0,this.width,this.height); 
                         }
-                        playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height) //After translation it must be 00 if translation point is x,y
-                        // playfieldContext.drawImage(image,0,0,this.width,this.height)
+                        playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height) 
                         playfieldContext.closePath()
                         playfieldContext.restore();
-                        playfieldContext.strokeStyle="blue";
-                        playfieldContext.lineWidth = 2;
-                        playfieldContext.strokeRect(this.x,this.y,this.width,this.height); 
                         return;
                     }
                     if (this.isDragged) {
@@ -350,10 +344,6 @@ document.addEventListener('DOMContentLoaded',function(){
                     if (this.rotation !== 0 || this.rotation % 360 !== 0 || this.rotation % 90 !== 0) {
                         //This works. Thank you unknown guy on Stack
                         let originX = this.x + this.width/2, originY = this.y + this.height/2, r = this.rotationInRadians;
-                        playfieldContext.moveTo(0,0);
-                        playfieldContext.strokeStyle = "red"
-                        playfieldContext.lineTo(originX,originY);
-                        playfieldContext.stroke()
                         let dx = xClick - originX, dy = yClick - originY;
                         let h1 = Math.sqrt(dx*dx + dy*dy)
                         let currA = Math.atan2(dy,dx);
@@ -378,14 +368,8 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 dragger = () => {
-                    // if (this.rotation !== 0 || this.rotation % 360 !== 0 || this.rotation % 90 !== 0) {
-                    //     this.x = xMove - this.width/2 * Math.cos(this.rotationInRadians);
-                    //     this.y = yMove - this.height/2 + (this.width/2 * Math.sin(this.rotationInRadians));
-                    // }
-                    // else {
-                        this.x = xMove - this.width/2;
-                        this.y = yMove - this.height/2;
-                    // }
+                    this.x = xMove - this.width/2;
+                    this.y = yMove - this.height/2;
                     this.redrawCanvasObject()
                 }
                 
@@ -478,7 +462,8 @@ document.addEventListener('DOMContentLoaded',function(){
                     //this.vx = this.speed * Math.cos(this.direction*(Math.PI/180));
                     //this.vy = this.speed * Math.sin(this.direction*(Math.PI/180));
                     //console.log(gravityValue * dt);
-                    this.vy = this.vy * this.speed + (gravityValue * dt * ppm);
+                    this.vy = this.vy * this.speed;
+                    this.vy = this.vy + (gravityValue * dt)
                     this.vx = this.vx * this.speed;
                     this.y += this.vy * ppm * dt;
                     this.x += this.vx * ppm * dt;

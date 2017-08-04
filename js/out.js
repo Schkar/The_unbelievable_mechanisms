@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
             name: "aBall",
             position: { x: 860, y: 20 },
             data: { mass: 0.6, r: 14, type: "kinetic", id: "basketball" },
-            motion: { speed: 10, vx: 0, vy: 0, direction: 135, isCollided: false }
+            motion: { speed: 1, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",
             position: { x: 505, y: 250 },
@@ -333,22 +333,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (_this2.rotation !== 0) {
                     playfieldContext.save();
                     playfieldContext.translate(_this2.x + _this2.width / 2, _this2.y + _this2.height / 2);
-                    // playfieldContext.translate(this.x,this.y);
                     playfieldContext.beginPath();
                     playfieldContext.rotate(_this2.rotationInRadians);
                     if (_this2.isDragged) {
                         playfieldContext.strokeStyle = "red";
                         playfieldContext.lineWidth = 4;
                         playfieldContext.strokeRect(-_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
-                        // playfieldContext.strokeRect(0,0,this.width,this.height); 
                     }
-                    playfieldContext.drawImage(image, -_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height); //After translation it must be 00 if translation point is x,y
-                    // playfieldContext.drawImage(image,0,0,this.width,this.height)
+                    playfieldContext.drawImage(image, -_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
                     playfieldContext.closePath();
                     playfieldContext.restore();
-                    playfieldContext.strokeStyle = "blue";
-                    playfieldContext.lineWidth = 2;
-                    playfieldContext.strokeRect(_this2.x, _this2.y, _this2.width, _this2.height);
                     return;
                 }
                 if (_this2.isDragged) {
@@ -423,10 +417,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     var originX = _this3.x + _this3.width / 2,
                         originY = _this3.y + _this3.height / 2,
                         r = _this3.rotationInRadians;
-                    playfieldContext.moveTo(0, 0);
-                    playfieldContext.strokeStyle = "red";
-                    playfieldContext.lineTo(originX, originY);
-                    playfieldContext.stroke();
                     var dx = xClick - originX,
                         dy = yClick - originY;
                     var h1 = Math.sqrt(dx * dx + dy * dy);
@@ -451,14 +441,8 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             _this3.dragger = function () {
-                // if (this.rotation !== 0 || this.rotation % 360 !== 0 || this.rotation % 90 !== 0) {
-                //     this.x = xMove - this.width/2 * Math.cos(this.rotationInRadians);
-                //     this.y = yMove - this.height/2 + (this.width/2 * Math.sin(this.rotationInRadians));
-                // }
-                // else {
                 _this3.x = xMove - _this3.width / 2;
                 _this3.y = yMove - _this3.height / 2;
-                // }
                 _this3.redrawCanvasObject();
             };
 
@@ -581,7 +565,8 @@ document.addEventListener('DOMContentLoaded', function () {
             //this.vx = this.speed * Math.cos(this.direction*(Math.PI/180));
             //this.vy = this.speed * Math.sin(this.direction*(Math.PI/180));
             //console.log(gravityValue * dt);
-            _this6.vy = _this6.vy * _this6.speed + gravityValue * dt * ppm;
+            _this6.vy = _this6.vy * _this6.speed;
+            _this6.vy = _this6.vy + gravityValue * dt;
             _this6.vx = _this6.vx * _this6.speed;
             _this6.y += _this6.vy * ppm * dt;
             _this6.x += _this6.vx * ppm * dt;

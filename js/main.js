@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     {
                         name: "aBall",
                         position: {x: 860, y: 20},
-                        data: {mass: 0.6 /*in kg*/, elasticity: -0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
+                        data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
                         motion: {f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false}
                     },
                     {
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.vy = object.motion.vy
                     this.isCollided = object.motion.isCollided
                     this.cd = object.data.cd
-                    this.elasticity = object.data.elasticity
+                    this.cr = object.data.cr
                 }
 
                 checkIfWin = () => {
@@ -555,30 +555,33 @@ document.addEventListener('DOMContentLoaded',function(){
                             // }
                             //this.x = this.x - this.r;
                             //this.y = this.y - this.r;
+                            console.log(colidee.mass);
                             this.bouncer(colidee.rotation,colidee.mass)
                         }
                     })
                 }
 
                 bouncer = (rotation,mass) => {
-                    //console.log(rotation,mass);
+                    console.log(rotation,mass);
                     rotation = rotation * Math.PI/180;
+                    //debugger
 
-                    this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
+                    this.vx = this.cr * (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
 
-                    this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
-
-                    // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy+this.vy);
+                    this.vy = this.cr * (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
+                    //debugger
+                    //FIXME: Masses version doesn't work.
+                    // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
                     // let b = this.vy/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
                     // let c = (a * Math.cos(rotation) + b * Math.sin(rotation));
 
                     // let d = (b * Math.cos(rotation) - a * Math.sin(rotation));
 
-                    // //console.log(a,b,c,d,this.mass,mass);
+                    // // //console.log(a,b,c,d,this.mass,mass);
 
-                    // this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.cos(rotation + Math.PI/2);
+                    // this.vx = this.cr * Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.cos(rotation + Math.PI/2);
 
-                    // this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.sin(rotation + Math.PI/2);
+                    // this.vy = this.cr * Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.sin(rotation + Math.PI/2);
                     
                     //console.log(this.vx,this.vy);
 

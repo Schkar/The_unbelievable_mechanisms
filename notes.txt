@@ -1244,3 +1244,62 @@ I think the last part is wrong though... If your circle is close to your square,
 Edit: It should work if you test your circle for each normal of your box and with each axis binding the center of your circle with one vertex of your box. So SAT algorithm seems to be more expensive when using circles/spheres after all. ;p
 
     You are right, I also found this mistake and I correct it by tesing the distance from box center to circle center from each normal of the box.
+
+	
+https://stackoverflow.com/questions/573084/how-to-calculate-bounce-angle
+You might think that because your walls are aligned with the coordinate axes that it makes sense to write special case code (for a vertical wall, negate the x-coordinate of the velocity; for a horizontal wall, negate the y-coordinate of the velocity). However, once you've got the game working well with vertical and horizontal walls, probably the next thing you'll think is, "what about walls at arbitrary angles?" So it's worth thinking about the general case from the beginning.
+
+In the general case, suppose your missile has velocity v and hits a wall with surface normal n.
+
+Missile with vector v about to obliquely hit a wall with surface normal n.
+
+Split v into components u perpendicular to the wall and w parallel to it.
+
+Right-angled triangle with hypotenuse for v, short side u parallel to wall and long side w parallel to wall.
+
+Where:
+
+u = (v · n / n · n) n
+w = v − u
+
+Here, v · n is the dot product of the vectors v and n. See the link for an explanation of how to compute it. The dot product n · n evaluates to the square of the length of the normal vector; if you always keep your normals in the form of unit vectors then n · n = 1 and you can omit the division.
+
+After bouncing, the component of motion parallel to the wall is affected by friction f, and the component perpendicular to the wall is affected by elasticity, which can be given in the form of a coefficient of restitution r.
+
+So the velocity after the collision is v′ = f w − r u. In a perfectly elastic, frictionless collision, v′ = w − u; that is, the motion is reflected about the normal at the point of collision, as in the diagram given in Bill's answer.
+
+This approach works just the same in three dimensions too.
+
+(Obviously this is a very simplified notion of bouncing; it takes no account of angular momentum or deformation. But for many kinds of video games this kind of simplification is perfectly adequate.)
+shareimprove this answer
+	
+edited Feb 11 '15 at 14:32
+	
+answered Feb 21 '09 at 15:17
+Gareth Rees
+46.2k692128
+	
+1 	 
+	
+I agree that starting with the special-case coding for vertical and horizontal walls is the wrong way to go. It's not a stepping stone to the correct route, but is instead a dead-end path. – Adam Kane Sep 15 '09 at 18:00
+   	 
+	
+Hey guys, this is an awesome explanation, but I think it has a bug. Shouldn't it be u = -n ( v.n / n.n )? After all, u is in the reversed direction of n. – nullspace Mar 16 '11 at 23:51
+1 	 
+	
+Am i the only one getting confused with the usage of v.n, instead of using v·n ? When i read n.n, my brain just exploded; thinking a normal had an element called normal. (im used to c++ too much?). – Rookie Dec 14 '12 at 15:10
+   	 
+	
+To calculate surface normal n see this question: stackoverflow.com/questions/1243614/… – user5157912 Feb 4 '16 at 21:40
+   	 
+	
+Thank you soo much, this worked perfect. If anyone else is wondering, you can do ux = (dotproduct(v,n)) * n, uy, wx and wy. – Ajay Dec 4 '16 at 7:11
+   	 
+	
+excellent explanation. One query; When you hit a line it has two normal's....is there a good trick to knowing what one to use as n? (Visually its obvious, but I am thinking for code here) – darkflame Jan 8 at 16:05
+   	 
+	
+@darkflame: If you can tell that an object hit a wall, then you can also tell which side of the wall it hit. – Gareth Rees Jan 8 at 19:36
+   	 
+	
+I'm probably missing the obvious but I worked out where the hit happened with just a algorithm for detecting where two lines will cross. That just gave me the point on a (2d) line - no side involved there. In code my known information is start and end point of line hit, velocity of object moving and the point it hit on the line. I think the correct normal to pick is always the one with the opposite sign in x or y to the object moving. 

@@ -158,12 +158,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 860, y: 20 },
-            data: { mass: 0.6 /*in kg*/, cr: 0.8, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
-            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false }
+            position: { x: 790, y: 120 },
+            data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
+            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 140, isCollided: false }
         }, {
             name: "staticObject1",
-            position: { x: 605, y: 250 },
+            position: { x: 660, y: 270 },
             data: { mass: 5, width: 170, height: 30, rotation: 15.5, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
@@ -293,8 +293,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 _this.currentLevelObjects[object].movement(time);
+                _this.clearCanvas();
                 _this.currentLevelObjects[object].wallCollisionCheck();
+                _this.clearCanvas();
                 _this.currentLevelObjects[object].collisionCheck();
+                _this.clearCanvas();
                 _this.currentLevelObjects[object].checkIfWin();
             });
             _this.moveObject();
@@ -577,8 +580,24 @@ document.addEventListener('DOMContentLoaded', function () {
             _this6.vx += ax * frameRate;
             _this6.vy += ay * frameRate;
 
+            var check = Math.abs(_this6.vx) > Math.abs(_this6.vy) ? Math.abs(_this6.vx) : Math.abs(_this6.vy);
+            //console.log(check);
+            // for (let i = 0; i < check; i += check/10) {
+            //     this.x += this.vx/10 * frameRate * 100;
+            //     this.y += this.vy/10 * frameRate * 100;
+            //     //console.log(this.x,this.y);
+            //     if (this.collisionCheck()){
+            //         console.log("colcheck");
+            //         return;
+            //     }
+            //     //debugger
+            //     //currentLevel.clearCanvas()
+            // }
+            //debugger
             _this6.x += _this6.vx * frameRate * 100;
             _this6.y += _this6.vy * frameRate * 100;
+
+            //this.isCollided = false;
         };
 
         this.wallCollisionCheck = function () {
@@ -605,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.collisionCheck = function () {
-
+            //debugger
             Object.keys(currentLevel.currentLevelObjects).forEach(function (object) {
                 var colidee = currentLevel.currentLevelObjects[object];
                 if (colidee.name === "inventory" || colidee.name === _this6.name || colidee.name === "goal") {
@@ -654,24 +673,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (distance < _this6.r) {
                     // if (this.y > colidee.y && this.y < colidee.y + colidee.height) {
-
+                    // let tempX = this.x;
+                    // let tempY = this.y;
+                    // tempX += colidee.width * Math.cos(this.rotationInRadians);
+                    // tempY += colidee.height * Math.sin(this.rotationInRadians);    
                     // }
                     //this.x = this.x - this.r;
                     //this.y = this.y - this.r;
-                    console.log(colidee.mass);
+                    //console.log(colidee.mass);
+                    // if (this.y + this.r === rectCenterY - colidee.height/2 + 0.2) {
+                    //     console.log("dupa");
+                    //     return;
+                    // }
+                    // if (colidee.rotation === 0 || colidee.rotation === 180) {
+                    //     this.y = colidee.y - this.r;
+                    // }
+                    // else {
+                    //     this.y -= 0.5;
+                    // }
+                    //this.y -= Math.cos(colidee.rotationInRadians)*0.7;
+                    //debugger
                     _this6.bouncer(colidee.rotation, colidee.mass);
+                    //this.isCollided = true;
+                    return true;
                 }
             });
         };
 
         this.bouncer = function (rotation, mass) {
-            console.log(rotation, mass);
             rotation = rotation * Math.PI / 180;
-            //debugger
+            // debugger
 
-            _this6.vx = _this6.cr * (Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2));
+            // if (Math.abs(rotation - (Math.acos(this.vx/Math.sqrt(this.vx*this.vx + this.vy*this.vy)))) === 90 * Math.PI/180) {
+            //     this.vy = -this.vy
+            // }
+            // else{
+            _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2);
 
-            _this6.vy = _this6.cr * (Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2));
+            _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2);
+            // }
+
+
             //debugger
             //FIXME: Masses version doesn't work.
             // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
@@ -686,15 +728,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // this.vy = this.cr * Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.sin(rotation + Math.PI/2);
 
-            //console.log(this.vx,this.vy);
-
+            // debugger
+            // console.log(this.vx,this.vy);
+            // debugger
             // this.speed = this.speed - this.speed*gravityValue;
             // if (this.speed < 0) {
             //     this.speed = 0;
             // }
 
-            _this6.x = _this6.x + _this6.vx * frameRate;
-            _this6.y = _this6.y + _this6.vy * frameRate;
+            _this6.x += _this6.vx * frameRate;
+            _this6.y += _this6.vy * frameRate;
         };
     };
 

@@ -77,13 +77,13 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {
                         name: "aBall",
-                        position: {x: 860, y: 20},
-                        data: {mass: 0.6 /*in kg*/, cr: 0.8, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
-                        motion: {f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false}
+                        position: {x: 790, y: 120},
+                        data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
+                        motion: {f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 140, isCollided: false}
                     },
                     {
                         name: "staticObject1",
-                        position: {x:605, y:250}, 
+                        position: {x:660, y:270}, 
                         data: {mass: 5, width:170, height:30, rotation: 15.5, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
@@ -232,8 +232,11 @@ document.addEventListener('DOMContentLoaded',function(){
                            return; 
                         }
                         this.currentLevelObjects[object].movement(time)
+                        this.clearCanvas()
                         this.currentLevelObjects[object].wallCollisionCheck()
+                        this.clearCanvas()
                         this.currentLevelObjects[object].collisionCheck()
+                        this.clearCanvas()
                         this.currentLevelObjects[object].checkIfWin()
                     })
                     this.moveObject()
@@ -468,14 +471,30 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.fx = (isNaN(this.fx) ? 0 : this.fx);  
                     this.fy = (isNaN(this.fy) ? 0 : this.fy);
 
-                    let ax = this.fx / this.mass;  
+                    let ax = this.fx / this.mass;
                     let ay = gravityValue + (this.fy / this.mass);
 
                     this.vx += ax * frameRate;
                     this.vy += ay * frameRate;
 
+                    let check = Math.abs(this.vx) > Math.abs(this.vy) ? Math.abs(this.vx) : Math.abs(this.vy)
+                    //console.log(check);
+                    // for (let i = 0; i < check; i += check/10) {
+                    //     this.x += this.vx/10 * frameRate * 100;
+                    //     this.y += this.vy/10 * frameRate * 100;
+                    //     //console.log(this.x,this.y);
+                    //     if (this.collisionCheck()){
+                    //         console.log("colcheck");
+                    //         return;
+                    //     }
+                    //     //debugger
+                    //     //currentLevel.clearCanvas()
+                    // }
+                    //debugger
                     this.x += this.vx * frameRate * 100;
                     this.y += this.vy * frameRate * 100;
+
+                    //this.isCollided = false;
                 }
 
                 wallCollisionCheck = () => {
@@ -502,7 +521,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 collisionCheck = () => {
-                   
+                   //debugger
                     Object.keys(currentLevel.currentLevelObjects).forEach( (object) => {
                         let colidee = currentLevel.currentLevelObjects[object];
                         if (colidee.name === "inventory" || colidee.name === this.name || colidee.name === "goal"){
@@ -550,24 +569,47 @@ document.addEventListener('DOMContentLoaded',function(){
                         
                         if ( distance < this.r ) {
                             // if (this.y > colidee.y && this.y < colidee.y + colidee.height) {
-                                
+                            // let tempX = this.x;
+                            // let tempY = this.y;
+                            // tempX += colidee.width * Math.cos(this.rotationInRadians);
+                            // tempY += colidee.height * Math.sin(this.rotationInRadians);    
                             // }
                             //this.x = this.x - this.r;
                             //this.y = this.y - this.r;
-                            console.log(colidee.mass);
-                            this.bouncer(colidee.rotation,colidee.mass)
+                            //console.log(colidee.mass);
+                            // if (this.y + this.r === rectCenterY - colidee.height/2 + 0.2) {
+                            //     console.log("dupa");
+                            //     return;
+                            // }
+                            // if (colidee.rotation === 0 || colidee.rotation === 180) {
+                            //     this.y = colidee.y - this.r;
+                            // }
+                            // else {
+                            //     this.y -= 0.5;
+                            // }
+                            //this.y -= Math.cos(colidee.rotationInRadians)*0.7;
+                            //debugger
+                            this.bouncer(colidee.rotation,colidee.mass);
+                            //this.isCollided = true;
+                            return true;
                         }
                     })
                 }
 
                 bouncer = (rotation,mass) => {
-                    console.log(rotation,mass);
                     rotation = rotation * Math.PI/180;
-                    //debugger
+                    // debugger
+                    
+                    // if (Math.abs(rotation - (Math.acos(this.vx/Math.sqrt(this.vx*this.vx + this.vy*this.vy)))) === 90 * Math.PI/180) {
+                    //     this.vy = -this.vy
+                    // }
+                    // else{
+                    this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
 
-                    this.vx = this.cr * (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
+                    this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
+                    // }
 
-                    this.vy = this.cr * (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
+                    
                     //debugger
                     //FIXME: Masses version doesn't work.
                     // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
@@ -582,15 +624,16 @@ document.addEventListener('DOMContentLoaded',function(){
 
                     // this.vy = this.cr * Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.sin(rotation + Math.PI/2);
                     
-                    //console.log(this.vx,this.vy);
-
+                    // debugger
+                    // console.log(this.vx,this.vy);
+                    // debugger
                     // this.speed = this.speed - this.speed*gravityValue;
                     // if (this.speed < 0) {
                     //     this.speed = 0;
                     // }
                     
-                    this.x = this.x + this.vx * frameRate;
-                    this.y = this.y + this.vy * frameRate;
+                    this.x += this.vx * frameRate;
+                    this.y += this.vy * frameRate;
                 }
             }
 

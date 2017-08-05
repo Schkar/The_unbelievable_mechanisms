@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
         level1: [{
             name: "aBall",
             position: { x: 860, y: 20 },
-            data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
+            data: { mass: 0.6 /*in kg*/, cr: 0.8, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
             motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",

@@ -522,7 +522,6 @@ document.addEventListener('DOMContentLoaded',function(){
                         let unrotatedCircleX = Math.cos( -colidee.rotationInRadians ) * ( this.x - rectCenterX ) - Math.sin( -colidee.rotationInRadians ) * ( this.y - rectCenterY ) + rectCenterX;
                         let unrotatedCircleY = Math.sin( -colidee.rotationInRadians ) * ( this.x - rectCenterX ) + Math.cos( -colidee.rotationInRadians ) * ( this.y - rectCenterY ) + rectCenterY;
 
-                        // console.log(unrotatedCircleX,unrotatedCircleY);
                         // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
                         let closestX, closestY;
 

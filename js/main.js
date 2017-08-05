@@ -550,6 +550,11 @@ document.addEventListener('DOMContentLoaded',function(){
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
+                            // if (this.y > colidee.y && this.y < colidee.y + colidee.height) {
+                                
+                            // }
+                            //this.x = this.x - this.r;
+                            //this.y = this.y - this.r;
                             this.bouncer(colidee.rotation,colidee.mass)
                         }
                     })

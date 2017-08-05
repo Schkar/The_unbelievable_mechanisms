@@ -654,6 +654,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 var distance = Math.sqrt(dX * dX + dY * dY);
 
                 if (distance < _this6.r) {
+                    // if (this.y > colidee.y && this.y < colidee.y + colidee.height) {
+
+                    // }
+                    //this.x = this.x - this.r;
+                    //this.y = this.y - this.r;
                     _this6.bouncer(colidee.rotation, colidee.mass);
                 }
             });

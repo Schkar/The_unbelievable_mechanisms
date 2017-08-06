@@ -587,7 +587,12 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 bouncer = (rotation,mass,wall,whereX,whereY) => {
                     rotation = rotation * Math.PI/180;
+
                     let vxDirection, vyDirection;
+
+                    let newVXDir = 0;
+                    let newVYDir = 1;
+
                     if (this.vx > 0) {
                         vxDirection = 2;
                     }
@@ -861,7 +866,8 @@ document.addEventListener('DOMContentLoaded',function(){
                         this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
                     }
                     else {
-                        bounceResolver[whereX][whereY][vxDirection][vyDirection] * cos(rotation)
+                         this.vx = this.vx * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVXDir] * cos(rotacja - katpodejscia);
+                         this.vy = this.vy * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVYDir] * sin(rotacja - katpodejscia);
                     }
                     // debugger
                     

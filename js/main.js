@@ -77,14 +77,14 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {
                         name: "aBall",
-                        position: {x: 790, y: 120},
+                        position: {x: 790, y: 230},
                         data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
-                        motion: {f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 140, isCollided: false}
+                        motion: {f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 170, isCollided: false}
                     },
                     {
                         name: "staticObject1",
-                        position: {x:660, y:270}, 
-                        data: {mass: 5, width:170, height:30, rotation: 15.5, type:"static", isMovable: true, isDragged: false, id: "barrier"},
+                        position: {x:605, y:270}, 
+                        data: {mass: 5, width:170, height:30, rotation: 30, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
                     //     name: "staticObject2",
@@ -472,24 +472,24 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.fy = (isNaN(this.fy) ? 0 : this.fy);
 
                     let ax = this.fx / this.mass;
-                    let ay = gravityValue + (this.fy / this.mass);
+                    let ay = /*gravityValue + */(this.fy / this.mass);
 
                     this.vx += ax * frameRate;
                     this.vy += ay * frameRate;
 
                     let check = Math.abs(this.vx) > Math.abs(this.vy) ? Math.abs(this.vx) : Math.abs(this.vy)
                     //console.log(check);
-                    // for (let i = 0; i < check; i += check/10) {
-                    //     this.x += this.vx/10 * frameRate * 100;
-                    //     this.y += this.vy/10 * frameRate * 100;
-                    //     //console.log(this.x,this.y);
-                    //     if (this.collisionCheck()){
-                    //         console.log("colcheck");
-                    //         return;
-                    //     }
-                    //     //debugger
-                    //     //currentLevel.clearCanvas()
-                    // }
+                    for (let i = 0; i < check; i += check/10) {
+                        this.x += this.vx/10 * frameRate * 100;
+                        this.y += this.vy/10 * frameRate * 100;
+                        //console.log(this.x,this.y);
+                        if (this.collisionCheck()){
+                            //console.log("colcheck");
+                            return;
+                        }
+                        //debugger
+                        //currentLevel.clearCanvas()
+                    }
                     //debugger
                     this.x += this.vx * frameRate * 100;
                     this.y += this.vy * frameRate * 100;
@@ -568,6 +568,8 @@ document.addEventListener('DOMContentLoaded',function(){
                             closestY = unrotatedCircleY;
                             whereY = 1;
                         }
+
+                        
  
                         // Determine collision
                         let dX = Math.abs( unrotatedCircleX - closestX );
@@ -575,289 +577,89 @@ document.addEventListener('DOMContentLoaded',function(){
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
-                            if (cx < colidee.x) {
-                                
+                            if ( (colidee.rotation > 45 && colidee.rotation < 135) || (colidee.rotation > 225 && colidee.rotation < 315) ) {
+                                whereX++;
+                                whereY++;
+                            if (whereX > 2) {
+                                whereX = 0;
                             }
+                            if (whereY > 2) {
+                                whereY = 0
+                            }
+                        }
                             this.bouncer(colidee.rotation,colidee.mass,"notWall",whereX,whereY);
-                            //this.isCollided = true;
                             return true;
                         }
                     })
                 }
 
                 bouncer = (rotation,mass,wall,whereX,whereY) => {
+                    let checkRotation = rotation;
                     rotation = rotation * Math.PI/180;
+                    let bounceResolver = 
+                    [
+                        [//0
+                            [
+                                [-1,-1] //0
+                            ],
+                            [
+                                [-1,1] //1
+                            ],
+                            [
+                                [-1,-1] //2
+                            ]
+                        ],
+                        [//1
+                            [
+                                [1,-1] //0
+                            ],
+                            [
+                                [-1,-1] //1
+                            ],
+                            [
+                                [1,-1] //2
+                            ]
+                        ],
+                        [//2
+                            [
+                                [-1,-1] //0
+                            ],
+                            [
+                                [-1,1]//1
+                            ],
+                            [
+                                [-1,-1] //2
+                            ]
+                        ]
+                    ]
 
-                    let vxDirection, vyDirection;
-
-                    let newVXDir = 0;
-                    let newVYDir = 1;
+                    let curDirX, curDirY;
 
                     if (this.vx > 0) {
-                        vxDirection = 2;
+                        curDirX = 2;
                     }
                     else if (this.vx < 0) {
-                        vxDirection = 0;
+                        curDirX = 0;
                     }
                     else {
-                        vxDirection = 1;
+                        curDirX = 1;
                     }
 
                     if (this.vy > 0) {
-                        vyDirection = 2;
+                        curDirY = 2;
                     }
                     else if (this.vy < 0) {
-                        vyDirection = 0;
+                        curDirY = 0;
                     }
                     else {
-                        vyDirection = 1;
+                        curDirY = 1;
                     }
 
-                    let bounceResolver = 
-                    [
-                        [x1, 
-                            [y1,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                   [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            y2,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            y2,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            ]
-                        ],
-                        [x2, 
-                            [y1,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                   [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                   [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            y2,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            y2,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            ]
-                        ],
-                        [x3, 
-                            [y1,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                   [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            y2,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            y2,
-                                [vx1,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx2,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                vx3,
-                                    [vy1
-                                        [1,1]
-                                    ,vy2
-                                        [1,1]
-                                    ,vy3
-                                        [1,1]
-                                    ],
-                                ],
-                            ]
-                        ]
+                    let dir = [
+                        [],
+                        [],
+                        [],
+                        []
                     ]
 
                     if (wall !== "notWall") {
@@ -866,8 +668,32 @@ document.addEventListener('DOMContentLoaded',function(){
                         this.vy = this.cr * (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
                     }
                     else {
-                         this.vx = this.vx * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVXDir] * cos(rotacja - katpodejscia) * cr * masa;
-                         this.vy = this.vy * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVYDir] * sin(rotacja - katpodejscia) * cr * masa;
+                        //console.log(this.vx,this.vy);
+                        // let xmultiply = bounceResolver[0][whereX][whereY][0];
+                        // let ymultiply = bounceResolver[0][whereX][whereY][1];
+                        //console.log(xmultiply,ymultiply);
+                        //debugger
+                        // Vy = V * sin (kat padania - rotacja)
+                        // Vx = V * cos (kat padania - rotacja)
+                        //alfa - 2rot - 90
+                        if (checkRotation !== 0) {
+                            // this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.sin((this.direction - 2*checkRotation - 90)*Math.PI/180))// * Math.abs(Math.sin(rotation))// * this.cr * masa;
+                            // this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.cos((this.direction - 2*checkRotation - 90)*Math.PI/180)) * -1
+                            let sin = this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy))
+                            let beta = Math.asin(sin)
+                            let betaRot = beta + rotation;
+                            this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.sin(betaRot); // należy dodac zwrot z tablicy bounce resolver
+                            this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.cos(betaRot) * -1
+
+                           
+                        }
+                        else{
+                            this.vx = this.vx * 1// * this.cr * masa;
+                            this.vy = this.vy * -1// * this.cr * masa;
+                        }
+                        
+                        //console.log(this.vx,this.vy);
+                        //debugger
                     }
                     // debugger
                     

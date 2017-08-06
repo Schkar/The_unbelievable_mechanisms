@@ -158,13 +158,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 790, y: 120 },
+            position: { x: 790, y: 230 },
             data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
-            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 140, isCollided: false }
+            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 170, isCollided: false }
         }, {
             name: "staticObject1",
-            position: { x: 660, y: 270 },
-            data: { mass: 5, width: 170, height: 30, rotation: 15.5, type: "static", isMovable: true, isDragged: false, id: "barrier" }
+            position: { x: 605, y: 270 },
+            data: { mass: 5, width: 170, height: 30, rotation: 30, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
         level3: [],
@@ -575,24 +575,24 @@ document.addEventListener('DOMContentLoaded', function () {
             _this6.fy = isNaN(_this6.fy) ? 0 : _this6.fy;
 
             var ax = _this6.fx / _this6.mass;
-            var ay = gravityValue + _this6.fy / _this6.mass;
+            var ay = /*gravityValue + */_this6.fy / _this6.mass;
 
             _this6.vx += ax * frameRate;
             _this6.vy += ay * frameRate;
 
             var check = Math.abs(_this6.vx) > Math.abs(_this6.vy) ? Math.abs(_this6.vx) : Math.abs(_this6.vy);
             //console.log(check);
-            // for (let i = 0; i < check; i += check/10) {
-            //     this.x += this.vx/10 * frameRate * 100;
-            //     this.y += this.vy/10 * frameRate * 100;
-            //     //console.log(this.x,this.y);
-            //     if (this.collisionCheck()){
-            //         console.log("colcheck");
-            //         return;
-            //     }
-            //     //debugger
-            //     //currentLevel.clearCanvas()
-            // }
+            for (var i = 0; i < check; i += check / 10) {
+                _this6.x += _this6.vx / 10 * frameRate * 100;
+                _this6.y += _this6.vy / 10 * frameRate * 100;
+                //console.log(this.x,this.y);
+                if (_this6.collisionCheck()) {
+                    //console.log("colcheck");
+                    return;
+                }
+                //debugger
+                //currentLevel.clearCanvas()
+            }
             //debugger
             _this6.x += _this6.vx * frameRate * 100;
             _this6.y += _this6.vy * frameRate * 100;
@@ -603,23 +603,23 @@ document.addEventListener('DOMContentLoaded', function () {
         this.wallCollisionCheck = function () {
             // Left wall
             if (_this6.x - _this6.r <= 200) {
-                _this6.bouncer(90, wallMass);
+                _this6.bouncer(90, wallMass, "leftWall");
             }
 
             // Right wall
             if (_this6.x + _this6.r >= 1000) {
-                _this6.bouncer(90, wallMass);
+                _this6.bouncer(90, wallMass, "rightWall");
             }
 
             // Ceiling
             if (_this6.y - _this6.r <= 0) {
-                _this6.bouncer(0, wallMass);
+                _this6.bouncer(0, wallMass, "ceiling");
             }
 
             // Floor
             if (_this6.y + _this6.r >= 400) {
                 _this6.y = 400 - _this6.r;
-                _this6.bouncer(0, wallMass);
+                _this6.bouncer(0, wallMass, "floor");
             }
         };
 
@@ -647,23 +647,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
                 var closestX = void 0,
                     closestY = void 0;
+                var whereX = void 0,
+                    whereY = void 0;
 
                 // Find the unrotated closest x point from center of unrotated circle
                 if (unrotatedCircleX < rectReferenceX) {
                     closestX = rectReferenceX;
+                    whereX = 0;
                 } else if (unrotatedCircleX > rectReferenceX + colidee.width) {
                     closestX = rectReferenceX + colidee.width;
+                    whereX = 2;
                 } else {
                     closestX = unrotatedCircleX;
+                    whereX = 1;
                 }
 
                 // Find the unrotated closest y point from center of unrotated circle
                 if (unrotatedCircleY < rectReferenceY) {
                     closestY = rectReferenceY;
+                    whereY = 0;
                 } else if (unrotatedCircleY > rectReferenceY + colidee.height) {
                     closestY = rectReferenceY + colidee.height;
+                    whereY = 2;
                 } else {
                     closestY = unrotatedCircleY;
+                    whereY = 1;
                 }
 
                 // Determine collision
@@ -672,45 +680,98 @@ document.addEventListener('DOMContentLoaded', function () {
                 var distance = Math.sqrt(dX * dX + dY * dY);
 
                 if (distance < _this6.r) {
-                    // if (this.y > colidee.y && this.y < colidee.y + colidee.height) {
-                    // let tempX = this.x;
-                    // let tempY = this.y;
-                    // tempX += colidee.width * Math.cos(this.rotationInRadians);
-                    // tempY += colidee.height * Math.sin(this.rotationInRadians);    
-                    // }
-                    //this.x = this.x - this.r;
-                    //this.y = this.y - this.r;
-                    //console.log(colidee.mass);
-                    // if (this.y + this.r === rectCenterY - colidee.height/2 + 0.2) {
-                    //     console.log("dupa");
-                    //     return;
-                    // }
-                    // if (colidee.rotation === 0 || colidee.rotation === 180) {
-                    //     this.y = colidee.y - this.r;
-                    // }
-                    // else {
-                    //     this.y -= 0.5;
-                    // }
-                    //this.y -= Math.cos(colidee.rotationInRadians)*0.7;
-                    //debugger
-                    _this6.bouncer(colidee.rotation, colidee.mass);
-                    //this.isCollided = true;
+                    if (colidee.rotation > 45 && colidee.rotation < 135 || colidee.rotation > 225 && colidee.rotation < 315) {
+                        whereX++;
+                        whereY++;
+                        if (whereX > 2) {
+                            whereX = 0;
+                        }
+                        if (whereY > 2) {
+                            whereY = 0;
+                        }
+                    }
+                    _this6.bouncer(colidee.rotation, colidee.mass, "notWall", whereX, whereY);
                     return true;
                 }
             });
         };
 
-        this.bouncer = function (rotation, mass) {
+        this.bouncer = function (rotation, mass, wall, whereX, whereY) {
+            var checkRotation = rotation;
             rotation = rotation * Math.PI / 180;
+            var bounceResolver = [[//0
+            [[-1, -1] //0
+            ], [[-1, 1] //1
+            ], [[-1, -1] //2
+            ]], [//1
+            [[1, -1] //0
+            ], [[-1, -1] //1
+            ], [[1, -1] //2
+            ]], [//2
+            [[-1, -1] //0
+            ], [[-1, 1] //1
+            ], [[-1, -1] //2
+            ]]];
+
+            var curDirX = void 0,
+                curDirY = void 0;
+
+            if (_this6.vx > 0) {
+                curDirX = 2;
+            } else if (_this6.vx < 0) {
+                curDirX = 0;
+            } else {
+                curDirX = 1;
+            }
+
+            if (_this6.vy > 0) {
+                curDirY = 2;
+            } else if (_this6.vy < 0) {
+                curDirY = 0;
+            } else {
+                curDirY = 1;
+            }
+
+            var dir = [[], [], [], []];
+
+            if (wall !== "notWall") {
+                _this6.vx = _this6.cr * (Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2));
+
+                _this6.vy = _this6.cr * (Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2));
+            } else {
+                //console.log(this.vx,this.vy);
+                // let xmultiply = bounceResolver[0][whereX][whereY][0];
+                // let ymultiply = bounceResolver[0][whereX][whereY][1];
+                //console.log(xmultiply,ymultiply);
+                //debugger
+                // Vy = V * sin (kat padania - rotacja)
+                // Vx = V * cos (kat padania - rotacja)
+                //alfa - 2rot - 90
+                if (checkRotation !== 0) {
+                    // this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.sin((this.direction - 2*checkRotation - 90)*Math.PI/180))// * Math.abs(Math.sin(rotation))// * this.cr * masa;
+                    // this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.cos((this.direction - 2*checkRotation - 90)*Math.PI/180)) * -1
+                    var sin = _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy);
+                    var beta = Math.asin(sin);
+                    var betaRot = beta + rotation;
+                    _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(betaRot); // należy dodac zwrot z tablicy bounce resolver
+                    _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(betaRot) * -1;
+                } else {
+                    _this6.vx = _this6.vx * 1; // * this.cr * masa;
+                    _this6.vy = _this6.vy * -1; // * this.cr * masa;
+                }
+
+                //console.log(this.vx,this.vy);
+                //debugger
+            }
             // debugger
 
             // if (Math.abs(rotation - (Math.acos(this.vx/Math.sqrt(this.vx*this.vx + this.vy*this.vy)))) === 90 * Math.PI/180) {
             //     this.vy = -this.vy
             // }
             // else{
-            _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2);
+            // this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
 
-            _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2);
+            // this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
             // }
 
 

@@ -500,23 +500,23 @@ document.addEventListener('DOMContentLoaded',function(){
                 wallCollisionCheck = () => {
                     // Left wall
                         if (this.x - this.r <= 200) {
-                            this.bouncer(90,wallMass);
+                            this.bouncer(90,wallMass,"leftWall");
                         }
 
                     // Right wall
                         if (this.x + this.r >= 1000) {
-                            this.bouncer(90,wallMass);
+                            this.bouncer(90,wallMass,"rightWall");
                         }
 
                     // Ceiling
                         if (this.y - this.r <= 0) {
-                            this.bouncer(0,wallMass);
+                            this.bouncer(0,wallMass,"ceiling");
                         }
 
                     // Floor
                         if (this.y + this.r >= 400) {
                             this.y = 400 - this.r;
-                            this.bouncer(0,wallMass);
+                            this.bouncer(0,wallMass,"floor");
                         }
                 }
 
@@ -543,23 +543,30 @@ document.addEventListener('DOMContentLoaded',function(){
 
                         // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
                         let closestX, closestY;
+                        let whereX,whereY;
 
                         // Find the unrotated closest x point from center of unrotated circle
                         if ( unrotatedCircleX < rectReferenceX ) {
                             closestX = rectReferenceX;
+                            whereX = 0;
                         } else if ( unrotatedCircleX > rectReferenceX + colidee.width ) {
                             closestX = rectReferenceX + colidee.width;
+                            whereX = 2;
                         } else {
                             closestX = unrotatedCircleX;
+                            whereX = 1;
                         }
  
                         // Find the unrotated closest y point from center of unrotated circle
                         if ( unrotatedCircleY < rectReferenceY ) {
                             closestY = rectReferenceY;
+                            whereY = 0;
                         } else if ( unrotatedCircleY > rectReferenceY + colidee.height ) {
                             closestY = rectReferenceY + colidee.height;
+                            whereY = 2;
                         } else {
                             closestY = unrotatedCircleY;
+                            whereY = 1;
                         }
  
                         // Determine collision
@@ -568,45 +575,303 @@ document.addEventListener('DOMContentLoaded',function(){
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
-                            // if (this.y > colidee.y && this.y < colidee.y + colidee.height) {
-                            // let tempX = this.x;
-                            // let tempY = this.y;
-                            // tempX += colidee.width * Math.cos(this.rotationInRadians);
-                            // tempY += colidee.height * Math.sin(this.rotationInRadians);    
-                            // }
-                            //this.x = this.x - this.r;
-                            //this.y = this.y - this.r;
-                            //console.log(colidee.mass);
-                            // if (this.y + this.r === rectCenterY - colidee.height/2 + 0.2) {
-                            //     console.log("dupa");
-                            //     return;
-                            // }
-                            // if (colidee.rotation === 0 || colidee.rotation === 180) {
-                            //     this.y = colidee.y - this.r;
-                            // }
-                            // else {
-                            //     this.y -= 0.5;
-                            // }
-                            //this.y -= Math.cos(colidee.rotationInRadians)*0.7;
-                            //debugger
-                            this.bouncer(colidee.rotation,colidee.mass);
+                            if (cx < colidee.x) {
+                                
+                            }
+                            this.bouncer(colidee.rotation,colidee.mass,"notWall",whereX,whereY);
                             //this.isCollided = true;
                             return true;
                         }
                     })
                 }
 
-                bouncer = (rotation,mass) => {
+                bouncer = (rotation,mass,wall,whereX,whereY) => {
                     rotation = rotation * Math.PI/180;
+                    let vxDirection, vyDirection;
+                    if (this.vx > 0) {
+                        vxDirection = 2;
+                    }
+                    else if (this.vx < 0) {
+                        vxDirection = 0;
+                    }
+                    else {
+                        vxDirection = 1;
+                    }
+
+                    if (this.vy > 0) {
+                        vyDirection = 2;
+                    }
+                    else if (this.vy < 0) {
+                        vyDirection = 0;
+                    }
+                    else {
+                        vyDirection = 1;
+                    }
+
+                    let bounceResolver = 
+                    [
+                        [x1, 
+                            [y1,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                   [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            y2,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            y2,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            ]
+                        ],
+                        [x2, 
+                            [y1,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                   [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                   [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            y2,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            y2,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            ]
+                        ],
+                        [x3, 
+                            [y1,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                   [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            y2,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            y2,
+                                [vx1,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx2,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                vx3,
+                                    [vy1
+                                        [1,1]
+                                    ,vy2
+                                        [1,1]
+                                    ,vy3
+                                        [1,1]
+                                    ],
+                                ],
+                            ]
+                        ]
+                    ]
+
+                    if (wall !== "notWall") {
+                        this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
+
+                        this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
+                    }
+                    else {
+                        bounceResolver[whereX][whereY][vxDirection][vyDirection] * cos(rotation)
+                    }
                     // debugger
                     
                     // if (Math.abs(rotation - (Math.acos(this.vx/Math.sqrt(this.vx*this.vx + this.vy*this.vy)))) === 90 * Math.PI/180) {
                     //     this.vy = -this.vy
                     // }
                     // else{
-                    this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
+                    // this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
 
-                    this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
+                    // this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
                     // }
 
                     

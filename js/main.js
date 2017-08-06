@@ -861,13 +861,13 @@ document.addEventListener('DOMContentLoaded',function(){
                     ]
 
                     if (wall !== "notWall") {
-                        this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
+                        this.vx = this.cr * (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
 
-                        this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
+                        this.vy = this.cr * (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
                     }
                     else {
-                         this.vx = this.vx * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVXDir] * cos(rotacja - katpodejscia);
-                         this.vy = this.vy * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVYDir] * sin(rotacja - katpodejscia);
+                         this.vx = this.vx * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVXDir] * cos(rotacja - katpodejscia) * cr * masa;
+                         this.vy = this.vy * bounceResolver[whereX][whereY][vxDirection][vyDirection][newVYDir] * sin(rotacja - katpodejscia) * cr * masa;
                     }
                     // debugger
                     

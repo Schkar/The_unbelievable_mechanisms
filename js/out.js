@@ -158,12 +158,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 790, y: 230 },
+            position: { x: 690, y: 230 },
             data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
-            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 170, isCollided: false }
+            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 315, isCollided: false }
         }, {
             name: "staticObject1",
-            position: { x: 605, y: 270 },
+            position: { x: 605, y: 120 },
             data: { mass: 5, width: 170, height: 30, rotation: 30, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
@@ -581,10 +581,12 @@ document.addEventListener('DOMContentLoaded', function () {
             _this6.vy += ay * frameRate;
 
             var check = Math.abs(_this6.vx) > Math.abs(_this6.vy) ? Math.abs(_this6.vx) : Math.abs(_this6.vy);
+
             //console.log(check);
             for (var i = 0; i < check; i += check / 10) {
                 _this6.x += _this6.vx / 10 * frameRate * 100;
                 _this6.y += _this6.vy / 10 * frameRate * 100;
+
                 //console.log(this.x,this.y);
                 if (_this6.collisionCheck()) {
                     //console.log("colcheck");
@@ -594,8 +596,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 //currentLevel.clearCanvas()
             }
             //debugger
-            _this6.x += _this6.vx * frameRate * 100;
-            _this6.y += _this6.vy * frameRate * 100;
+
+            //this.x += this.vx * frameRate * 100;
+            //this.y += this.vy * frameRate * 100;
 
             //this.isCollided = false;
         };
@@ -700,18 +703,19 @@ document.addEventListener('DOMContentLoaded', function () {
             var checkRotation = rotation;
             rotation = rotation * Math.PI / 180;
             var bounceResolver = [[//0
-            [[-1, -1] //0
-            ], [[-1, 1] //1
-            ], [[-1, -1] //2
-            ]], [//1
-            [[1, -1] //0
-            ], [[-1, -1] //1
-            ], [[1, -1] //2
-            ]], [//2
-            [[-1, -1] //0
-            ], [[-1, 1] //1
-            ], [[-1, -1] //2
-            ]]];
+            [-1, -1], //0
+            [-1, 1], //1
+            [-1, -1] //2
+            ], [//1
+            [1, -1], //0
+            [-1, -1], //1
+            [1, -1] //2
+            ], [//2
+            [-1, -1], //0
+            [-1, 1], //1
+            [-1, -1] //2
+            ]];
+            //console.log(bounceResolver[whereX][whereY][0]);
 
             var curDirX = void 0,
                 curDirY = void 0;
@@ -753,11 +757,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     var sin = _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy);
                     var beta = Math.asin(sin);
                     var betaRot = beta + rotation;
-                    _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(betaRot); // należy dodac zwrot z tablicy bounce resolver
-                    _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(betaRot) * -1;
+
+                    //console.log(whereX,bounceResolver[whereX][whereY][0],whereY,bounceResolver[0][whereX][whereY][1]);
+                    //debugger
+                    console.log("VX:" + _this6.vx, "VY:" + _this6.vy, "Wherex:" + whereX, "brX:" + bounceResolver[whereX][whereY][0], "sinBetarot:" + Math.sin(betaRot), "whereY:" + whereY, "brY:" + bounceResolver[whereX][whereY][1], "cosBetarot:" + Math.cos(betaRot), "pierw:" + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy));
+                    _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(betaRot) * bounceResolver[whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
+
+                    _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(betaRot) * bounceResolver[whereX][whereY][1];
+                    console.log("VX:" + _this6.vx, "VY:" + _this6.vy);
+                    debugger;
                 } else {
-                    _this6.vx = _this6.vx * 1; // * this.cr * masa;
-                    _this6.vy = _this6.vy * -1; // * this.cr * masa;
+                    _this6.vx = _this6.vx * 1; // bounceResolver[0][whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
+                    _this6.vy = _this6.vy * -1; // bounceResolver[0][whereX][whereY][1];// * this.cr * masa;
+                    //this.vy = this.vy * -1// * this.cr * masa;
                 }
 
                 //console.log(this.vx,this.vy);

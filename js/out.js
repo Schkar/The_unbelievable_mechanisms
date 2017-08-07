@@ -761,9 +761,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     //console.log(whereX,bounceResolver[whereX][whereY][0],whereY,bounceResolver[0][whereX][whereY][1]);
                     //debugger
                     console.log("VX:" + _this6.vx, "VY:" + _this6.vy, "Wherex:" + whereX, "brX:" + bounceResolver[whereX][whereY][0], "sinBetarot:" + Math.sin(betaRot), "whereY:" + whereY, "brY:" + bounceResolver[whereX][whereY][1], "cosBetarot:" + Math.cos(betaRot), "pierw:" + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy));
-                    _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(betaRot) * bounceResolver[whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
+                    _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.abs(Math.sin(betaRot)) * bounceResolver[whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
 
-                    _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(betaRot) * bounceResolver[whereX][whereY][1];
+                    _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.abs(Math.cos(betaRot)) * bounceResolver[whereX][whereY][1];
                     console.log("VX:" + _this6.vx, "VY:" + _this6.vy);
                     debugger;
                 } else {

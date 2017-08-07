@@ -672,9 +672,9 @@ document.addEventListener('DOMContentLoaded',function(){
                             //console.log(whereX,bounceResolver[whereX][whereY][0],whereY,bounceResolver[0][whereX][whereY][1]);
                             //debugger
                             console.log("VX:" + this.vx,"VY:" + this.vy,"Wherex:" + whereX, "brX:" + bounceResolver[whereX][whereY][0], "sinBetarot:" + Math.sin(betaRot), "whereY:" + whereY, "brY:" + bounceResolver[whereX][whereY][1],"cosBetarot:" + Math.cos(betaRot),"pierw:" + Math.sqrt(this.vx*this.vx+this.vy*this.vy));
-                            this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.sin(betaRot) * bounceResolver[whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
+                            this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.sin(betaRot)) * bounceResolver[whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
                             
-                            this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.cos(betaRot) * bounceResolver[whereX][whereY][1];
+                            this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.cos(betaRot)) * bounceResolver[whereX][whereY][1];
                             console.log("VX:" + this.vx,"VY:"+this.vy);
                             debugger
 

@@ -77,9 +77,9 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {
                         name: "aBall",
-                        position: {x: 300, y: 300},
+                        position: {x: 700, y: 200},
                         data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
-                        motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 315, isCollided: false}
+                        motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 220, isCollided: false}
                     },
                     {
                         name: "staticObject1",
@@ -449,15 +449,8 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
 
                 countInitialVectors = () => {
-                    // this.vx = Math.cos(this.direction*(Math.PI/180));
-                    // this.vy = Math.sin(this.direction*(Math.PI/180));
                     this.vx = Math.cos(this.direction*(Math.PI/180)) * this.f;
                     this.vy = Math.sin(this.direction*(Math.PI/180)) * this.f;
-                    //this.vx = (this.fx/this.mass * frameRate);
-                    //this.vy = (this.fy/this.mass * frameRate);
-                    //console.log(this.fx,this.fy);
-                    //throw new Error
-                    //console.log(this.vx,this.vy);
                 }
 
                 movement = () => {
@@ -587,12 +580,18 @@ document.addEventListener('DOMContentLoaded',function(){
                 bouncer = (rotation,mass,wall,whereX,whereY) => {
                     let rotationInDegrees = rotation;
                     rotation = rotation * Math.PI/180;
-                    let angle =  Math.asin(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)));
+
+                    let angle =  rotation - Math.asin(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)));
+                    let angle2 =  Math.asin(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy))) - rotation
                     let angleInDegrees = Math.round(angle * 180/Math.PI);
-                    let angleCheck = angleInDegrees
+                    let angleInDegrees2 = Math.round(angle2 * 180/Math.PI);
+                    console.log(angleInDegrees, angleInDegrees2);
+                    angleInDegrees = angleInDegrees < 0 ? 90 + angleInDegrees : angleInDegrees
+                    console.log(angleInDegrees);
+                    let angleCheck = angleInDegrees;
                     let angleRotCheck = this.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
-                    angleInDegrees = this.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
-                    let angleRot = this.vy < 0 ? angle - rotation : angle + rotation;
+                    //angleInDegrees = this.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
+                    let angleRot = Math.abs(angle) + Math.abs(rotation);
                     let angleValue;
 
                     //Właściwy kąt odbicia to Rotacja - beta (angle) w przypadku nalotu od prawej na górę,
@@ -660,14 +659,14 @@ document.addEventListener('DOMContentLoaded',function(){
                     if ((angleInDegrees > 0) && (angleInDegrees < rotationInDegrees)) {
                         angleValue = 2;
                     }
-                    else if ((angleInDegrees > 90) && (angleInDegrees < 90 + rotationInDegrees)) {
+                    else if ((angleInDegrees + rotationInDegrees >= 90) && (angleInDegrees < 90 + rotationInDegrees)) {
                         angleValue = 0;
                     }
                     else {
                         angleValue = 1;
                     }
 
-                    //console.log("VX pocz: " + this.vx,"VY pocz: " + this.vy);
+                    console.log("VX pocz: " + this.vx,"VY pocz: " + this.vy);
                     if (wall !== "notWall") {
                         if (wall === "ceiling" || wall === "floor") {
                             this.vy = -this.vy
@@ -690,8 +689,6 @@ document.addEventListener('DOMContentLoaded',function(){
                     console.log("Kąt + rotacja: " + angleRotCheck,"Nieprzetworzony kąt uderzenia: " + angleCheck,"Kąt uderzenia: " + angleInDegrees,"Rotacja: " + rotationInDegrees,"whereX: " + whereX,"whereY: " + whereY,"angleValue: " + angleValue,"Zwrot X: "+bounceResolver[whereX][whereY][angleValue][0],"Zwrot Y:" + bounceResolver[whereX][whereY][angleValue][1], "VX: " + this.vx,"VY: " + this.vy);
                     debugger
                     
-                    // console.log(this.vx,this.vy);
-                    //debugger
                     this.x += this.vx * frameRate * ppm;
                     this.y += this.vy * frameRate * ppm;
                 }

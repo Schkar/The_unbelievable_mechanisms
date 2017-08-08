@@ -158,9 +158,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 300, y: 300 },
+            position: { x: 700, y: 200 },
             data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
-            motion: { f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 315, isCollided: false }
+            motion: { f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 220, isCollided: false }
         }, {
             name: "staticObject1",
             position: { x: 500, y: 100 },
@@ -552,15 +552,8 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.countInitialVectors = function () {
-            // this.vx = Math.cos(this.direction*(Math.PI/180));
-            // this.vy = Math.sin(this.direction*(Math.PI/180));
             _this6.vx = Math.cos(_this6.direction * (Math.PI / 180)) * _this6.f;
             _this6.vy = Math.sin(_this6.direction * (Math.PI / 180)) * _this6.f;
-            //this.vx = (this.fx/this.mass * frameRate);
-            //this.vy = (this.fy/this.mass * frameRate);
-            //console.log(this.fx,this.fy);
-            //throw new Error
-            //console.log(this.vx,this.vy);
         };
 
         this.movement = function () {
@@ -690,12 +683,18 @@ document.addEventListener('DOMContentLoaded', function () {
         this.bouncer = function (rotation, mass, wall, whereX, whereY) {
             var rotationInDegrees = rotation;
             rotation = rotation * Math.PI / 180;
-            var angle = Math.asin(_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy));
+
+            var angle = rotation - Math.asin(_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy));
+            var angle2 = Math.asin(_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy)) - rotation;
             var angleInDegrees = Math.round(angle * 180 / Math.PI);
+            var angleInDegrees2 = Math.round(angle2 * 180 / Math.PI);
+            console.log(angleInDegrees, angleInDegrees2);
+            angleInDegrees = angleInDegrees < 0 ? 90 + angleInDegrees : angleInDegrees;
+            console.log(angleInDegrees);
             var angleCheck = angleInDegrees;
             var angleRotCheck = _this6.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
-            angleInDegrees = _this6.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
-            var angleRot = _this6.vy < 0 ? angle - rotation : angle + rotation;
+            //angleInDegrees = this.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
+            var angleRot = Math.abs(angle) + Math.abs(rotation);
             var angleValue = void 0;
 
             //Właściwy kąt odbicia to Rotacja - beta (angle) w przypadku nalotu od prawej na górę,
@@ -749,13 +748,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (angleInDegrees > 0 && angleInDegrees < rotationInDegrees) {
                 angleValue = 2;
-            } else if (angleInDegrees > 90 && angleInDegrees < 90 + rotationInDegrees) {
+            } else if (angleInDegrees + rotationInDegrees >= 90 && angleInDegrees < 90 + rotationInDegrees) {
                 angleValue = 0;
             } else {
                 angleValue = 1;
             }
 
-            //console.log("VX pocz: " + this.vx,"VY pocz: " + this.vy);
+            console.log("VX pocz: " + _this6.vx, "VY pocz: " + _this6.vy);
             if (wall !== "notWall") {
                 if (wall === "ceiling" || wall === "floor") {
                     _this6.vy = -_this6.vy;
@@ -774,8 +773,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Kąt + rotacja: " + angleRotCheck, "Nieprzetworzony kąt uderzenia: " + angleCheck, "Kąt uderzenia: " + angleInDegrees, "Rotacja: " + rotationInDegrees, "whereX: " + whereX, "whereY: " + whereY, "angleValue: " + angleValue, "Zwrot X: " + bounceResolver[whereX][whereY][angleValue][0], "Zwrot Y:" + bounceResolver[whereX][whereY][angleValue][1], "VX: " + _this6.vx, "VY: " + _this6.vy);
             debugger;
 
-            // console.log(this.vx,this.vy);
-            //debugger
             _this6.x += _this6.vx * frameRate * ppm;
             _this6.y += _this6.vy * frameRate * ppm;
         };

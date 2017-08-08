@@ -158,13 +158,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 690, y: 230 },
+            position: { x: 800, y: 270 },
             data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
-            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 315, isCollided: false }
+            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false }
         }, {
             name: "staticObject1",
-            position: { x: 605, y: 120 },
-            data: { mass: 5, width: 170, height: 30, rotation: 30, type: "static", isMovable: true, isDragged: false, id: "barrier" }
+            position: { x: 600, y: 200 },
+            data: { mass: 5, width: 200, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
         level3: [],
@@ -210,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var objectBeingDragged = "";
     var levelWon = false;
     var levelNumber = 10;
-    //TODO: Uncomment this for final version
     var currentLevel = null;
 
     //Canvas functions
@@ -283,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(_this.currentLevelObjects);
         };
 
-        this.physicsEngineRun = function (time) {
+        this.physicsEngineRun = function () {
             if (levelWon) {
                 return;
             }
@@ -292,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (_this.currentLevelObjects[object].type === "static") {
                     return;
                 }
-                _this.currentLevelObjects[object].movement(time);
+                _this.currentLevelObjects[object].movement();
                 _this.clearCanvas();
                 _this.currentLevelObjects[object].wallCollisionCheck();
                 _this.clearCanvas();
@@ -564,9 +563,9 @@ document.addEventListener('DOMContentLoaded', function () {
             //console.log(this.vx,this.vy);
         };
 
-        this.movement = function (time) {
+        this.movement = function () {
 
-            var a = Math.PI * _this6.r * _this6.r / 10000;
+            var a = Math.PI * _this6.r * _this6.r / 10000; //the last number (10000) changes units, otherwise this number is huge;
 
             _this6.fx = -0.5 * _this6.cd * a * rho * _this6.vx * _this6.vx * _this6.vx / Math.abs(_this6.vx);
             _this6.fy = -0.5 * _this6.cd * a * rho * _this6.vy * _this6.vy * _this6.vy / Math.abs(_this6.vy);
@@ -582,47 +581,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var check = Math.abs(_this6.vx) > Math.abs(_this6.vy) ? Math.abs(_this6.vx) : Math.abs(_this6.vy);
 
-            //console.log(check);
             for (var i = 0; i < check; i += check / 10) {
-                _this6.x += _this6.vx / 10 * frameRate * 100;
-                _this6.y += _this6.vy / 10 * frameRate * 100;
+                _this6.x += _this6.vx / 10 * frameRate * ppm;
+                _this6.y += _this6.vy / 10 * frameRate * ppm;
 
-                //console.log(this.x,this.y);
                 if (_this6.collisionCheck()) {
-                    //console.log("colcheck");
                     return;
                 }
-                //debugger
-                //currentLevel.clearCanvas()
             }
-            //debugger
-
-            //this.x += this.vx * frameRate * 100;
-            //this.y += this.vy * frameRate * 100;
-
-            //this.isCollided = false;
         };
 
         this.wallCollisionCheck = function () {
             // Left wall
             if (_this6.x - _this6.r <= 200) {
-                _this6.bouncer(90, wallMass, "leftWall");
+                _this6.bouncer(90, wallMass, "leftWall", 0, 0);
             }
 
             // Right wall
             if (_this6.x + _this6.r >= 1000) {
-                _this6.bouncer(90, wallMass, "rightWall");
+                _this6.bouncer(90, wallMass, "rightWall", 0, 0);
             }
 
             // Ceiling
             if (_this6.y - _this6.r <= 0) {
-                _this6.bouncer(0, wallMass, "ceiling");
+                _this6.bouncer(0, wallMass, "ceiling", 0, 0);
             }
 
             // Floor
             if (_this6.y + _this6.r >= 400) {
                 _this6.y = 400 - _this6.r;
-                _this6.bouncer(0, wallMass, "floor");
+                _this6.bouncer(0, wallMass, "floor", 0, 0);
             }
         };
 
@@ -700,117 +688,101 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         this.bouncer = function (rotation, mass, wall, whereX, whereY) {
-            var checkRotation = rotation;
+            var rotationInDegrees = rotation;
             rotation = rotation * Math.PI / 180;
-            var bounceResolver = [[//0
-            [-1, -1], //0
-            [-1, 1], //1
-            [-1, -1] //2
-            ], [//1
-            [1, -1], //0
-            [-1, -1], //1
-            [1, -1] //2
-            ], [//2
-            [-1, -1], //0
-            [-1, 1], //1
-            [-1, -1] //2
-            ]];
-            //console.log(bounceResolver[whereX][whereY][0]);
+            var angle = Math.asin(_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy));
+            var angleInDegrees = Math.round(angle * 180 / Math.PI);
+            var angleCheck = angleInDegrees;
+            var angleRotCheck = _this6.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
+            angleInDegrees = _this6.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
+            var angleRot = _this6.vy < 0 ? angle - rotation : angle + rotation;
+            var angleValue = void 0;
 
-            var curDirX = void 0,
-                curDirY = void 0;
+            var bounceResolver = [//X
+            [//0Y
+            [//00Angle
+            [-1, -1], //000
+            [-1, -1], //001
+            [-1, -1] //002
+            ], [//01Angle
+            [-1, -1], //010
+            [-1, 1], //011
+            [-1, -1] //012
+            ], [//02Angle
+            [-1, -1], //020
+            [-1, -1], //021
+            [-1, -1] //022
+            ]], [//1Y
+            [//10Angle
+            [-1, -1], //100
+            [1, -1], //101
+            [1, 1] //102
+            ], [//11Angle
+            [-1, -1], //110
+            [-1, -1], //111
+            [-1, -1] //112
+            ], [//12Angle
+            [-1, -1], //120
+            [1, -1], //121
+            [1, 1] //122
+            ]], [//2Y
+            [//20Angle
+            [-1, -1], //200
+            [-1, -1], //201
+            [-1, -1] //202
+            ], [//21Angle
+            [-1, -1], //210
+            [-1, 1], //211
+            [1, 1] //212
+            ], [//22Angle
+            [-1, -1], //220
+            [-1, -1], //221
+            [-1, -1] //222
+            ]]];
 
-            if (_this6.vx > 0) {
-                curDirX = 2;
-            } else if (_this6.vx < 0) {
-                curDirX = 0;
+            if (angleInDegrees > 0 && angleInDegrees < rotationInDegrees) {
+                angleValue = 2;
+            } else if (angleInDegrees > 90 && angleInDegrees < 90 + rotationInDegrees) {
+                angleValue = 0;
             } else {
-                curDirX = 1;
+                angleValue = 1;
             }
 
-            if (_this6.vy > 0) {
-                curDirY = 2;
-            } else if (_this6.vy < 0) {
-                curDirY = 0;
-            } else {
-                curDirY = 1;
-            }
-
-            var dir = [[], [], [], []];
-
+            //console.log("VX pocz: " + this.vx,"VY pocz: " + this.vy);
             if (wall !== "notWall") {
-                _this6.vx = _this6.cr * (Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.cos(rotation - Math.PI / 2));
-
-                _this6.vy = _this6.cr * (Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) + _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation) + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * (_this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(rotation) - _this6.vx / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(rotation)) * Math.sin(rotation - Math.PI / 2));
-            } else {
-                //console.log(this.vx,this.vy);
-                // let xmultiply = bounceResolver[0][whereX][whereY][0];
-                // let ymultiply = bounceResolver[0][whereX][whereY][1];
-                //console.log(xmultiply,ymultiply);
-                //debugger
-                // Vy = V * sin (kat padania - rotacja)
-                // Vx = V * cos (kat padania - rotacja)
-                //alfa - 2rot - 90
-                if (checkRotation !== 0) {
-                    // this.vx = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.sin((this.direction - 2*checkRotation - 90)*Math.PI/180))// * Math.abs(Math.sin(rotation))// * this.cr * masa;
-                    // this.vy = Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.abs(Math.cos((this.direction - 2*checkRotation - 90)*Math.PI/180)) * -1
-                    var sin = _this6.vy / Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy);
-                    var beta = Math.asin(sin);
-                    var betaRot = beta + rotation;
-
-                    //console.log(whereX,bounceResolver[whereX][whereY][0],whereY,bounceResolver[0][whereX][whereY][1]);
-                    //debugger
-                    console.log("VX:" + _this6.vx, "VY:" + _this6.vy, "Wherex:" + whereX, "brX:" + bounceResolver[whereX][whereY][0], "sinBetarot:" + Math.sin(betaRot), "whereY:" + whereY, "brY:" + bounceResolver[whereX][whereY][1], "cosBetarot:" + Math.cos(betaRot), "pierw:" + Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy));
-                    _this6.vx = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.abs(Math.sin(betaRot)) * bounceResolver[whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
-
-                    _this6.vy = Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.abs(Math.cos(betaRot)) * bounceResolver[whereX][whereY][1];
-                    console.log("VX:" + _this6.vx, "VY:" + _this6.vy);
-                    debugger;
+                if (wall === "ceiling" || wall === "floor") {
+                    _this6.vy = -_this6.vy;
                 } else {
-                    _this6.vx = _this6.vx * 1; // bounceResolver[0][whereX][whereY][0]; // należy dodac zwrot z tablicy bounce resolver
-                    _this6.vy = _this6.vy * -1; // bounceResolver[0][whereX][whereY][1];// * this.cr * masa;
-                    //this.vy = this.vy * -1// * this.cr * masa;
+                    _this6.vx = -_this6.vx;
                 }
-
-                //console.log(this.vx,this.vy);
-                //debugger
+            } else if (_this6.vx === 0 && rotationInDegrees === 0) {
+                _this6.vx = -_this6.vx;
+            } else if (_this6.vy === 0 && rotationInDegrees === 0) {
+                _this6.vy = -_this6.vy;
+            } else {
+                _this6.vx = Math.abs(Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.sin(angleRot)) * bounceResolver[whereX][whereY][angleValue][0] * _this6.vx / Math.abs(_this6.vx);
+                _this6.vy = Math.abs(Math.sqrt(_this6.vx * _this6.vx + _this6.vy * _this6.vy) * Math.cos(angleRot)) * bounceResolver[whereX][whereY][angleValue][1] * _this6.vy / Math.abs(_this6.vy);
             }
-            // debugger
 
-            // if (Math.abs(rotation - (Math.acos(this.vx/Math.sqrt(this.vx*this.vx + this.vy*this.vy)))) === 90 * Math.PI/180) {
-            //     this.vy = -this.vy
-            // }
-            // else{
-            // this.vx = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.cos(rotation-Math.PI/2)));
+            console.log("Kąt + rotacja: " + angleRotCheck, "Nieprzetworzony kąt uderzenia: " + angleCheck, "Kąt uderzenia: " + angleInDegrees, "Rotacja: " + rotationInDegrees, "whereX: " + whereX, "whereY: " + whereY, "angleValue: " + angleValue, "Zwrot X: " + bounceResolver[whereX][whereY][angleValue][0], "Zwrot Y:" + bounceResolver[whereX][whereY][angleValue][1], "VX: " + _this6.vx, "VY: " + _this6.vy);
+            debugger;
+            // let a = Math.PI * this.r * this.r / (10000) //the last number (10000) changes units, otherwise this number is huge;
 
-            // this.vy = (Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))+(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation))+Math.sqrt(this.vx*this.vx+this.vy*this.vy)*((this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.cos(rotation))-(this.vx/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)))*(Math.sin(rotation)))*(Math.sin(rotation-Math.PI/2)));
-            // }
+            // this.fx = 0.5 * this.cd * a * rho * this.vx * this.vx * this.vx / Math.abs(this.vx);  
+            // this.fy = 0.5 * this.cd * a * rho * this.vy * this.vy * this.vy / Math.abs(this.vy);
 
+            // this.fx = (isNaN(this.fx) ? 0 : this.fx);  
+            // this.fy = (isNaN(this.fy) ? 0 : this.fy);
 
-            //debugger
-            //FIXME: Masses version doesn't work.
-            // let a = this.vx/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
-            // let b = this.vy/Math.sqrt(this.vx*this.vx+this.vy*this.vy);
-            // let c = (a * Math.cos(rotation) + b * Math.sin(rotation));
+            // let ax = this.fx / this.mass;
+            // let ay = this.fy / this.mass;
 
-            // let d = (b * Math.cos(rotation) - a * Math.sin(rotation));
-
-            // // //console.log(a,b,c,d,this.mass,mass);
-
-            // this.vx = this.cr * Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.cos(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.cos(rotation + Math.PI/2);
-
-            // this.vy = this.cr * Math.sqrt(this.vx*this.vx+this.vy*this.vy) * c * ((this.mass - mass) / (this.mass + mass)) * Math.sin(rotation) + Math.sqrt(this.vx*this.vx+this.vy*this.vy) * d * Math.sin(rotation + Math.PI/2);
-
-            // debugger
+            // this.vx += ax * frameRate;
+            // this.vy += ay * frameRate;
             // console.log(this.vx,this.vy);
-            // debugger
-            // this.speed = this.speed - this.speed*gravityValue;
-            // if (this.speed < 0) {
-            //     this.speed = 0;
-            // }
-
-            _this6.x += _this6.vx * frameRate;
-            _this6.y += _this6.vy * frameRate;
+            //debugger
+            _this6.x += _this6.vx * frameRate * ppm;
+            _this6.y += _this6.vy * frameRate * ppm;
         };
     };
 

@@ -158,12 +158,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 800, y: 270 },
+            position: { x: 300, y: 300 },
             data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
-            motion: { f: 1, fx: 0, fy: 0, vx: 0, vy: 0, direction: 135, isCollided: false }
+            motion: { f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 315, isCollided: false }
         }, {
             name: "staticObject1",
-            position: { x: 600, y: 200 },
+            position: { x: 500, y: 100 },
             data: { mass: 5, width: 200, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }],
         level2: [],
@@ -698,6 +698,13 @@ document.addEventListener('DOMContentLoaded', function () {
             var angleRot = _this6.vy < 0 ? angle - rotation : angle + rotation;
             var angleValue = void 0;
 
+            //Właściwy kąt odbicia to Rotacja - beta (angle) w przypadku nalotu od prawej na górę,
+            //a w przypadku nalotu od lewej na górę, to beta (angle) - rotacja
+            /*
+            [[X0Y0][X1Y0][X2Y0]]
+            [[X0Y1][X1Y1][X2Y1]]
+            [[X0Y2][X1Y2][X2Y2]]
+            */
             var bounceResolver = [//X
             [//0Y
             [//00Angle
@@ -766,19 +773,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             console.log("Kąt + rotacja: " + angleRotCheck, "Nieprzetworzony kąt uderzenia: " + angleCheck, "Kąt uderzenia: " + angleInDegrees, "Rotacja: " + rotationInDegrees, "whereX: " + whereX, "whereY: " + whereY, "angleValue: " + angleValue, "Zwrot X: " + bounceResolver[whereX][whereY][angleValue][0], "Zwrot Y:" + bounceResolver[whereX][whereY][angleValue][1], "VX: " + _this6.vx, "VY: " + _this6.vy);
             debugger;
-            // let a = Math.PI * this.r * this.r / (10000) //the last number (10000) changes units, otherwise this number is huge;
 
-            // this.fx = 0.5 * this.cd * a * rho * this.vx * this.vx * this.vx / Math.abs(this.vx);  
-            // this.fy = 0.5 * this.cd * a * rho * this.vy * this.vy * this.vy / Math.abs(this.vy);
-
-            // this.fx = (isNaN(this.fx) ? 0 : this.fx);  
-            // this.fy = (isNaN(this.fy) ? 0 : this.fy);
-
-            // let ax = this.fx / this.mass;
-            // let ay = this.fy / this.mass;
-
-            // this.vx += ax * frameRate;
-            // this.vy += ay * frameRate;
             // console.log(this.vx,this.vy);
             //debugger
             _this6.x += _this6.vx * frameRate * ppm;

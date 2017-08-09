@@ -120,29 +120,29 @@ document.addEventListener('DOMContentLoaded',function(){
                 level2: [
                     {
                         name: "aBall",
-                        position: {x: 900, y: 50},
+                        position: {x: 900, y: 20},
                         data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
                         motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0, isCollided: false}
                     },
                     {
                         name: "staticObject1",
-                        position: {x:790, y:200}, 
+                        position: {x:800, y:90}, 
                         data: {mass: 5, width:200, height:30, rotation: 10, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     {
                         name: "staticObject2",
-                        position: {x:225, y:100}, 
-                        data: {mass: 600, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "plank1"},
+                        position: {x:660, y:265}, 
+                        data: {mass: 600, width:170, height:30, rotation: 25, type:"static", isMovable: true, isDragged: false, id: "plank1"},
                     },
                     {
                         name: "staticObject3",
-                        position: {x:425, y:300}, 
-                        data: {mass: 800, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank2"},
+                        position: {x:860, y:190}, 
+                        data: {mass: 800, width:220, height:30, rotation: 170, type:"static", isMovable: true, isDragged: false, id: "plank2"},
                     },
                     {
                         name: "goal",
-                        position: {x:800, y:290},
-                        data: {mass: 3000, width: 200, height: 100, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
+                        position: {x:900, y:350},
+                        data: {mass: 3000, width: 100, height: 50, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
                     }
                 ],
                 level3: [],
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
             //Physics variables
                 const gravityValue = 9.81; // m/s^2
-                const ppm = 100; //Pixels-per-meter - width: 800px - 1px = 1cm 800px = 800cm = 8m
+                const ppm = 10; //Pixels-per-meter - width: 800px - 1px = 1cm 800px = 800cm = 8m
                 const wallMass = 5.9722 * Math.pow(10, 24) //mass of Earth
                 const rho = 1.22 // density of air kg/m3;
                 let innerRotation = 4;
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded',function(){
             //Misc variables
                 let objectBeingDragged = "";
                 let levelWon = false;
-                let levelNumber = 10;
+                let levelNumber = 1;
                 let currentLevel = null;
 
 
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 checkIfWin = () => {
                     //console.log(engineID);
-                    return
+                    //return
                     let temp = currentLevel.currentLevelObjects["goal"];
                     let goalX = currentLevel.currentLevelObjects["goal"].x + currentLevel.currentLevelObjects["goal"].width/3
                     let goalY = currentLevel.currentLevelObjects["goal"].y + currentLevel.currentLevelObjects["goal"].height/3
@@ -503,6 +503,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         levelWon = true;
                         window.cancelAnimationFrame(engineID);
                         document.querySelector(".winScreen").style.display = "block";
+                        document.querySelector(".winScreen").style.opacity = 1;
                         playfieldContext.clearRect(0,0,playfieldWidth,playfieldHeight);
                     }
                 }
@@ -630,7 +631,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         
                         if ( distance < this.r ) {
                             if (colidee.isFan) {
-                                this.vx += 1;
+                                this.vx += 2;
                                 return;
                             }
                             this.bouncer(colidee.rotation,whereX,whereY,spring);
@@ -649,9 +650,9 @@ document.addEventListener('DOMContentLoaded',function(){
                     let bounceResolver = 
                     [//X
                         [//Y
-                            [-1,-1],//00
+                            [1,1],//00
                             [-1,1],//01
-                            [-1,-1]//02
+                            [1,1]//02
                         ],
                         [
                             [1,-1],//10
@@ -659,18 +660,18 @@ document.addEventListener('DOMContentLoaded',function(){
                             [1,-1]//12
                         ],
                         [
-                            [-1,-1],//20
+                            [1,1],//20
                             [-1,1],//21
-                            [-1,-1]//22
+                            [1,1]//22
                         ]
                     ]
+
                     let springYModifier = 1;
                     let springXModifier = 1;
-                    let fanModifier = 1;
 
                     if (spring && whereX === 1 && whereY === 0) {
-                        springYModifier = 3;
-                        springXModifier = 1.2
+                        springYModifier = 5;
+                        springXModifier = 2;
                     }
 
 
@@ -731,13 +732,14 @@ document.addEventListener('DOMContentLoaded',function(){
                 e.preventDefault();
                 document.querySelector(".winScreen").style.opacity = 0;
                 levelNumber++
-                if (levelNumber > 10) {
+                if (levelNumber > 2) {
                     document.querySelector(".noMoreLevels").style.display = "block";
                     document.querySelector(".noMoreLevels").style.opacity = 1;
                     return;
                 }
                 setTimeout(()=>{
                     document.querySelector(".winScreen").style.display = "none";
+                    
                     currentLevel = new Playfield(levelNumber)
                     currentLevel.createObjects(levelsInfo)
                 },1000)

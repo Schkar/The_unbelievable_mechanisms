@@ -2,7 +2,7 @@
     margin-top: 5px;
     text-align: center;
     .welcomeTextWrapper{
-        display: none;
+        display: block;
         position: absolute;
         text-align: center;
         left: 50%;
@@ -34,7 +34,7 @@
         text-align: center;
         left: 50%;
         transform: translate(-50%,0);
-        top: 22vh;
+        top: 16vh;
         width: 1000px;
         height: 600px;
         font-size: 2em;

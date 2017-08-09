@@ -204,7 +204,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var gravityValue = 9.81; // m/s^2
     var ppm = 100; //Pixels-per-meter - width: 800px - 1px = 1cm 800px = 800cm = 8m
     var wallMass = 5.9722 * Math.pow(10, 24); //mass of Earth
-    var rho = 1.22; // density of air kg/m3
+    var rho = 1.22; // density of air kg/m3;
+    var innerRotation = 4;
+    var innerRotationChange = 0.8;
 
     //Misc variables
     var objectBeingDragged = "";
@@ -321,13 +323,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 var image = document.getElementById(_this2.id);
                 if (_this2.r !== undefined) {
                     //TODO: InnerRotation:
-                    // playfieldContext.save();
-                    // playfieldContext.translate(this.x,this.y);
-                    // playfieldContext.beginPath()
-                    // playfieldContext.rotate(this.vx*Math.PI/180); 
-                    playfieldContext.drawImage(image, _this2.x - _this2.r, _this2.y - _this2.r, 2 * _this2.r, 2 * _this2.r);
-                    // playfieldContext.closePath()
-                    // playfieldContext.restore();
+                    playfieldContext.save();
+                    playfieldContext.translate(_this2.x, _this2.y);
+                    playfieldContext.rotate(innerRotation * Math.PI / 180);
+                    playfieldContext.drawImage(image, -_this2.r, -_this2.r, 2 * _this2.r, 2 * _this2.r);
+                    //playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                    playfieldContext.restore();
+                    innerRotation += innerRotationChange;
                     return;
                 }
                 if (_this2.rotation !== 0) {

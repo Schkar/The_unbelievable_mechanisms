@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 level9: [],
                 level10: [],
             };
+
             
         //Game variables
 
@@ -140,7 +141,9 @@ document.addEventListener('DOMContentLoaded',function(){
                 const gravityValue = 9.81; // m/s^2
                 const ppm = 100; //Pixels-per-meter - width: 800px - 1px = 1cm 800px = 800cm = 8m
                 const wallMass = 5.9722 * Math.pow(10, 24) //mass of Earth
-                const rho = 1.22 // density of air kg/m3
+                const rho = 1.22 // density of air kg/m3;
+                let innerRotation = 4;
+                let innerRotationChange = 0.8;
 
             //Misc variables
                 let objectBeingDragged = "";
@@ -264,13 +267,13 @@ document.addEventListener('DOMContentLoaded',function(){
                     let image = document.getElementById(this.id);
                     if (this.r !== undefined) {
                         //TODO: InnerRotation:
-                        // playfieldContext.save();
-                        // playfieldContext.translate(this.x,this.y);
-                        // playfieldContext.beginPath()
-                        // playfieldContext.rotate(this.vx*Math.PI/180); 
-                        playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
-                        // playfieldContext.closePath()
-                        // playfieldContext.restore();
+                        playfieldContext.save();
+                        playfieldContext.translate(this.x,this.y)
+                        playfieldContext.rotate(innerRotation*Math.PI/180);
+                        playfieldContext.drawImage(image,-this.r,-this.r,2*this.r,2*this.r)
+                        //playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
+                        playfieldContext.restore();
+                        innerRotation += innerRotationChange;
                         return;
                     }
                     if (this.rotation !== 0) {

@@ -77,14 +77,14 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {
                         name: "aBall",
-                        position: {x: 700, y: 200},
+                        position: {x: 700, y: 50},
                         data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
-                        motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 220, isCollided: false}
+                        motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0, isCollided: false}
                     },
                     {
                         name: "staticObject1",
-                        position: {x:500, y:100}, 
-                        data: {mass: 5, width:200, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "barrier"},
+                        position: {x:500, y:200}, 
+                        data: {mass: 5, width:200, height:30, rotation: 10, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
                     // {
                     //     name: "staticObject2",
@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.fy = (isNaN(this.fy) ? 0 : this.fy);
 
                     let ax = this.fx / this.mass;
-                    let ay = /*gravityValue + */(this.fy / this.mass);
+                    let ay = gravityValue + (this.fy / this.mass);
 
                     this.vx += ax * frameRate;
                     this.vy += ay * frameRate;
@@ -484,23 +484,22 @@ document.addEventListener('DOMContentLoaded',function(){
                 wallCollisionCheck = () => {
                     // Left wall
                         if (this.x - this.r <= 200) {
-                            this.bouncer(90,wallMass,"leftWall",0,0);
+                            this.bouncer(0,0,1);
                         }
 
                     // Right wall
                         if (this.x + this.r >= 1000) {
-                            this.bouncer(90,wallMass,"rightWall",0,0);
+                            this.bouncer(0,2,1);
                         }
 
                     // Ceiling
                         if (this.y - this.r <= 0) {
-                            this.bouncer(0,wallMass,"ceiling",0,0);
+                            this.bouncer(0,1,2);
                         }
 
                     // Floor
                         if (this.y + this.r >= 400) {
-                            this.y = 400 - this.r;
-                            this.bouncer(0,wallMass,"floor",0,0);
+                            this.bouncer(0,1,0);
                         }
                 }
 
@@ -561,136 +560,50 @@ document.addEventListener('DOMContentLoaded',function(){
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
-                            if ( (colidee.rotation > 45 && colidee.rotation < 135) || (colidee.rotation > 225 && colidee.rotation < 315) ) {
-                                whereX++;
-                                whereY++;
-                            if (whereX > 2) {
-                                whereX = 0;
-                            }
-                            if (whereY > 2) {
-                                whereY = 0
-                            }
-                        }
-                            this.bouncer(colidee.rotation,colidee.mass,"notWall",whereX,whereY);
+                            this.bouncer(colidee.rotation,whereX,whereY);
                             return true;
                         }
                     })
                 }
 
-                bouncer = (rotation,mass,wall,whereX,whereY) => {
-                    let rotationInDegrees = rotation;
-                    rotation = rotation * Math.PI/180;
+                bouncer = (rotation,whereX,whereY) => {
+                    let rotCos = Math.cos(rotation * Math.PI/180);
+                    let rotSin = Math.sin(rotation * Math.PI/180);
 
-                    let angle =  rotation - Math.asin(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy)));
-                    let angle2 =  Math.asin(this.vy/(Math.sqrt(this.vx*this.vx+this.vy*this.vy))) - rotation
-                    let angleInDegrees = Math.round(angle * 180/Math.PI);
-                    let angleInDegrees2 = Math.round(angle2 * 180/Math.PI);
-                    console.log(angleInDegrees, angleInDegrees2);
-                    angleInDegrees = angleInDegrees < 0 ? 90 + angleInDegrees : angleInDegrees
-                    console.log(angleInDegrees);
-                    let angleCheck = angleInDegrees;
-                    let angleRotCheck = this.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
-                    //angleInDegrees = this.vy < 0 ? Math.abs(angleInDegrees - rotationInDegrees) : angleInDegrees + rotationInDegrees;
-                    let angleRot = Math.abs(angle) + Math.abs(rotation);
-                    let angleValue;
-
-                    //Właściwy kąt odbicia to Rotacja - beta (angle) w przypadku nalotu od prawej na górę,
-                    //a w przypadku nalotu od lewej na górę, to beta (angle) - rotacja
-                    /*
-                    [[X0Y0][X1Y0][X2Y0]]
-                    [[X0Y1][X1Y1][X2Y1]]
-                    [[X0Y2][X1Y2][X2Y2]]
-                    */
+                    let tempVX = this.vx * rotCos + this.vy * rotSin; 
+                    let tempVY = this.vy * rotCos - this.vx * rotSin; 
+                
                     let bounceResolver = 
                     [//X
-                        [//0Y
-                            [//00Angle
-                                [-1,-1],//000
-                                [-1,-1],//001
-                                [-1,-1]//002
-                            ],
-                            [//01Angle
-                                [-1,-1],//010
-                                [-1,1],//011
-                                [-1,-1]//012
-                            ],
-                            [//02Angle
-                                [-1,-1],//020
-                                [-1,-1],//021
-                                [-1,-1]//022
-                            ]
+                        [//Y
+                            [-1,-1],//00
+                            [-1,1],//01
+                            [-1,-1]//02
                         ],
-                        [//1Y
-                            [//10Angle
-                                [-1,-1],//100
-                                [1,-1],//101
-                                [1,1]//102
-                            ],
-                            [//11Angle
-                                [-1,-1],//110
-                                [-1,-1],//111
-                                [-1,-1]//112
-                            ],
-                            [//12Angle
-                                [-1,-1],//120
-                                [1,-1],//121
-                                [1,1]//122
-                            ]
+                        [
+                            [1,-1],//10
+                            [-1,-1],//11
+                            [1,-1]//12
                         ],
-                        [//2Y
-                            [//20Angle
-                                [-1,-1],//200
-                                [-1,-1],//201
-                                [-1,-1]//202
-                            ],
-                            [//21Angle
-                                [-1,-1],//210
-                                [-1,1],//211
-                                [1,1]//212
-                            ],
-                            [//22Angle
-                                [-1,-1],//220
-                                [-1,-1],//221
-                                [-1,-1]//222
-                            ]
+                        [
+                            [-1,-1],//20
+                            [-1,1],//21
+                            [-1,-1]//22
                         ]
                     ]
 
-                    if ((angleInDegrees > 0) && (angleInDegrees < rotationInDegrees)) {
-                        angleValue = 2;
-                    }
-                    else if ((angleInDegrees + rotationInDegrees >= 90) && (angleInDegrees < 90 + rotationInDegrees)) {
-                        angleValue = 0;
-                    }
-                    else {
-                        angleValue = 1;
+                    if (whereX === 1 && whereY === 0) {
+                        this.y -= this.r
                     }
 
-                    console.log("VX pocz: " + this.vx,"VY pocz: " + this.vy);
-                    if (wall !== "notWall") {
-                        if (wall === "ceiling" || wall === "floor") {
-                            this.vy = -this.vy
-                        }
-                        else {
-                            this.vx = -this.vx
-                        }
-                    }
-                    else if (this.vx === 0 && rotationInDegrees === 0) {
-                        this.vx = -this.vx
-                    }
-                    else if (this.vy === 0 && rotationInDegrees === 0) {
-                        this.vy = -this.vy
-                    }
-                    else {
-                        this.vx = Math.abs(Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.sin(angleRot)) * bounceResolver[whereX][whereY][angleValue][0] * this.vx/Math.abs(this.vx);
-                        this.vy = Math.abs(Math.sqrt(this.vx*this.vx+this.vy*this.vy) * Math.cos(angleRot)) * bounceResolver[whereX][whereY][angleValue][1] * this.vy/Math.abs(this.vy);
-                    }
-                    
-                    console.log("Kąt + rotacja: " + angleRotCheck,"Nieprzetworzony kąt uderzenia: " + angleCheck,"Kąt uderzenia: " + angleInDegrees,"Rotacja: " + rotationInDegrees,"whereX: " + whereX,"whereY: " + whereY,"angleValue: " + angleValue,"Zwrot X: "+bounceResolver[whereX][whereY][angleValue][0],"Zwrot Y:" + bounceResolver[whereX][whereY][angleValue][1], "VX: " + this.vx,"VY: " + this.vy);
-                    debugger
-                    
+                    tempVX = tempVX * this.cr * bounceResolver[whereX][whereY][0];
+                    tempVY = tempVY * this.cr * bounceResolver[whereX][whereY][1];
+
+                    this.vx = tempVX * rotCos - tempVY * rotSin; 
+                    this.vy = tempVY * rotCos + tempVX * rotSin;
+
                     this.x += this.vx * frameRate * ppm;
-                    this.y += this.vy * frameRate * ppm;
+                    this.y += this.vy * frameRate * ppm;             
                 }
             }
 

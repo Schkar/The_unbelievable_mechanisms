@@ -107,19 +107,20 @@ document.addEventListener('DOMContentLoaded', function () {
     //Variables section
 
     //Temporary dev variables
-    var creationButton = document.querySelector(".temporaryGodlyCreationButton");
+    //const creationButton = document.querySelector(".temporaryGodlyCreationButton");
     // let currentLevel = null;
 
     //Temporary dev functions
 
-    creationButton.addEventListener("click", function (e) {
-        e.preventDefault();
+    // creationButton.addEventListener("click",function(e){
+    //     e.preventDefault()
 
-        currentLevel = new Playfield();
-        currentLevel.createObjects(levelsInfo);
-        currentLevel.physicsEngineRun();
-        //currentLevel.logCurrentLevelObjects()
-    });
+
+    //     currentLevel = new Playfield()
+    //     currentLevel.createObjects(levelsInfo);
+    //     currentLevel.physicsEngineRun()
+    //     //currentLevel.logCurrentLevelObjects()
+    // })
 
     //Buttons variables
     var resetButton = document.querySelector(".resetButton");
@@ -158,15 +159,60 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelsInfo = {
         level1: [{
             name: "aBall",
-            position: { x: 700, y: 50 },
+            position: { x: 270, y: 50 },
+            data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
+            motion: { f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0 }
+        }, {
+            name: "staticObject1",
+            position: { x: 120, y: 100 },
+            data: { mass: 2, width: 200, height: 30, rotation: 90, type: "static", isMovable: true, isDragged: false, id: "plank2" }
+        }, {
+            name: "staticObject2",
+            position: { x: 220, y: 100 },
+            data: { mass: 2, width: 170, height: 30, rotation: 90, type: "static", isMovable: true, isDragged: false, id: "plank2" }
+        }, {
+            name: "staticObject3",
+            position: { x: 380, y: 140 },
+            data: { mass: 2, width: 170, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "plank1" }
+        }, {
+            name: "staticObject4",
+            position: { x: 525, y: 360 },
+            data: { mass: 2, width: 170, height: 30, rotation: 175, type: "static", isMovable: true, isDragged: false, id: "plank1" }
+        }, {
+            name: "spring",
+            position: { x: 180, y: 295 },
+            data: { mass: 2, width: 100, height: 80, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "spring", isSpring: true }
+        }, {
+            name: "fan",
+            position: { x: 440, y: 295 },
+            data: { mass: 2, width: 50, height: 50, rotation: 0, type: "static", isMovable: true, isDragged: false, id: "fan", isFan: true }
+        }, {
+            name: "goal",
+            position: { x: 800, y: 290 },
+            data: { mass: 3000, width: 200, height: 100, rotation: 0, type: "static", isMovable: false, id: "wheelbarrow" }
+        }],
+        level2: [{
+            name: "aBall",
+            position: { x: 900, y: 50 },
             data: { mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball" },
             motion: { f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0, isCollided: false }
         }, {
             name: "staticObject1",
-            position: { x: 500, y: 200 },
+            position: { x: 790, y: 200 },
             data: { mass: 5, width: 200, height: 30, rotation: 10, type: "static", isMovable: true, isDragged: false, id: "barrier" }
+        }, {
+            name: "staticObject2",
+            position: { x: 225, y: 100 },
+            data: { mass: 600, width: 170, height: 30, rotation: 45, type: "static", isMovable: true, isDragged: false, id: "plank1" }
+        }, {
+            name: "staticObject3",
+            position: { x: 425, y: 300 },
+            data: { mass: 800, width: 170, height: 30, rotation: 0, type: "static", isMovable: true, isDragged: false, id: "plank2" }
+        }, {
+            name: "goal",
+            position: { x: 800, y: 290 },
+            data: { mass: 3000, width: 200, height: 100, rotation: 0, type: "static", isMovable: false, id: "wheelbarrow" }
         }],
-        level2: [],
         level3: [],
         level4: [],
         level5: [],
@@ -260,6 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
             playfieldContext.clearRect(0, 0, playfieldWidth, playfieldHeight);
             Object.keys(_this.currentLevelObjects).forEach(function (object) {
                 _this.currentLevelObjects[object].redrawCanvasObject();
+                //this.currentLevelObjects[object].logMe()
             });
         };
 
@@ -318,6 +365,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             _classCallCheck(this, CanvasObject);
 
+            this.logMe = function () {
+                console.log(_this2);
+            };
+
             this.createCanvasObject = function () {
 
                 var image = document.getElementById(_this2.id);
@@ -325,11 +376,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     //TODO: InnerRotation:
                     playfieldContext.save();
                     playfieldContext.translate(_this2.x, _this2.y);
-                    playfieldContext.rotate(innerRotation * Math.PI / 180);
+                    playfieldContext.rotate(innerRotation * _this2.vx * Math.PI / 180);
                     playfieldContext.drawImage(image, -_this2.r, -_this2.r, 2 * _this2.r, 2 * _this2.r);
                     //playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
                     playfieldContext.restore();
                     innerRotation += innerRotationChange;
+                    return;
+                }
+                if (_this2.isFan) {
+                    playfieldContext.save();
+                    playfieldContext.translate(_this2.x + _this2.width / 2, _this2.y + _this2.height / 2);
+                    playfieldContext.beginPath();
+                    playfieldContext.rotate(_this2.rotation * Math.PI / 180);
+                    playfieldContext.drawImage(image, -_this2.width / 2, -_this2.height / 2, _this2.width, _this2.height);
+                    playfieldContext.closePath();
+                    playfieldContext.restore();
+                    _this2.rotation += 5;
                     return;
                 }
                 if (_this2.rotation !== 0) {
@@ -486,15 +548,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 //         prevyMove = yMove;
             };
 
-            _this3.innerRotation = function () {//Only for fan objects!
-
-            };
-
             _this3.width = object.data.width;
             _this3.height = object.data.height;
             _this3.rotation = object.data.rotation;
             _this3.isMovable = object.data.isMovable;
             _this3.isDragged = object.data.isDragged;
+            _this3.isSpring = object.data.isSpring;
+            _this3.isFan = object.data.isFan;
             // this.isBeingRotated = object.data.isBeingRotated
             return _this3;
         }
@@ -589,22 +649,25 @@ document.addEventListener('DOMContentLoaded', function () {
         this.wallCollisionCheck = function () {
             // Left wall
             if (_this6.x - _this6.r <= 200) {
-                _this6.bouncer(0, 0, 1);
+                _this6.x = 200 + _this6.r;
+                _this6.bouncer(0, 0, 1, false);
             }
 
             // Right wall
             if (_this6.x + _this6.r >= 1000) {
-                _this6.bouncer(0, 2, 1);
+                _this6.x = 1000 - _this6.r;
+                _this6.bouncer(0, 2, 1, false);
             }
 
             // Ceiling
             if (_this6.y - _this6.r <= 0) {
-                _this6.bouncer(0, 1, 2);
+                _this6.bouncer(0, 1, 2, false);
             }
 
             // Floor
             if (_this6.y + _this6.r >= 400) {
-                _this6.bouncer(0, 1, 0);
+                _this6.y = 400 - _this6.r;
+                _this6.bouncer(0, 1, 0, false);
             }
         };
 
@@ -659,19 +722,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     whereY = 1;
                 }
 
+                var spring = false;
+                if (colidee.isSpring) {
+                    spring = true;
+                }
+
                 // Determine collision
                 var dX = Math.abs(unrotatedCircleX - closestX);
                 var dY = Math.abs(unrotatedCircleY - closestY);
                 var distance = Math.sqrt(dX * dX + dY * dY);
 
                 if (distance < _this6.r) {
-                    _this6.bouncer(colidee.rotation, whereX, whereY);
+                    if (colidee.isFan) {
+                        _this6.vx += 1;
+                        return;
+                    }
+                    _this6.bouncer(colidee.rotation, whereX, whereY, spring);
                     return true;
                 }
             });
         };
 
-        this.bouncer = function (rotation, whereX, whereY) {
+        this.bouncer = function (rotation, whereX, whereY, spring) {
             var rotCos = Math.cos(rotation * Math.PI / 180);
             var rotSin = Math.sin(rotation * Math.PI / 180);
 
@@ -690,13 +762,17 @@ document.addEventListener('DOMContentLoaded', function () {
             [-1, 1], //21
             [-1, -1] //22
             ]];
+            var springYModifier = 1;
+            var springXModifier = 1;
+            var fanModifier = 1;
 
-            if (whereX === 1 && whereY === 0) {
-                _this6.y -= _this6.r;
+            if (spring && whereX === 1 && whereY === 0) {
+                springYModifier = 3;
+                springXModifier = 1.2;
             }
 
-            tempVX = tempVX * _this6.cr * bounceResolver[whereX][whereY][0];
-            tempVY = tempVY * _this6.cr * bounceResolver[whereX][whereY][1];
+            tempVX = tempVX * _this6.cr * bounceResolver[whereX][whereY][0] * springXModifier;
+            tempVY = tempVY * _this6.cr * bounceResolver[whereX][whereY][1] * springYModifier;
 
             _this6.vx = tempVX * rotCos - tempVY * rotSin;
             _this6.vy = tempVY * rotCos + tempVX * rotSin;

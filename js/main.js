@@ -24,20 +24,20 @@ document.addEventListener('DOMContentLoaded',function(){
     //Variables section
 
         //Temporary dev variables
-            const creationButton = document.querySelector(".temporaryGodlyCreationButton");
+            //const creationButton = document.querySelector(".temporaryGodlyCreationButton");
             // let currentLevel = null;
             
         //Temporary dev functions
 
-            creationButton.addEventListener("click",function(e){
-                e.preventDefault()
+            // creationButton.addEventListener("click",function(e){
+            //     e.preventDefault()
 
                 
-                currentLevel = new Playfield()
-                currentLevel.createObjects(levelsInfo);
-                currentLevel.physicsEngineRun()
-                //currentLevel.logCurrentLevelObjects()
-            })
+            //     currentLevel = new Playfield()
+            //     currentLevel.createObjects(levelsInfo);
+            //     currentLevel.physicsEngineRun()
+            //     //currentLevel.logCurrentLevelObjects()
+            // })
 
         //Buttons variables
             const resetButton = document.querySelector(".resetButton");
@@ -77,32 +77,74 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {
                         name: "aBall",
-                        position: {x: 700, y: 50},
+                        position: {x: 270, y: 50},
+                        data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
+                        motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0}
+                    },
+                    {
+                        name: "staticObject1",
+                        position: {x:120, y:100}, 
+                        data: {mass: 2, width:200, height:30, rotation: 90, type:"static", isMovable: true, isDragged: false, id: "plank2"},
+                    },
+                    {
+                        name: "staticObject2",
+                        position: {x:220, y:100}, 
+                        data: {mass: 2, width:170, height:30, rotation: 90, type:"static", isMovable: true, isDragged: false, id: "plank2"},
+                    },
+                    {
+                        name: "staticObject3",
+                        position: {x:380, y:140}, 
+                        data: {mass: 2, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "plank1"},
+                    },
+                    {
+                        name: "staticObject4",
+                        position: {x:525, y:360}, 
+                        data: {mass: 2, width:170, height:30, rotation: 175, type:"static", isMovable: true, isDragged: false, id: "plank1"},
+                    },
+                    {
+                        name: "spring",
+                        position: {x:180, y:295}, 
+                        data: {mass: 2, width:100, height:80, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "spring", isSpring: true},
+                    },
+                    {
+                        name: "fan",
+                        position: {x:440, y:295}, 
+                        data: {mass: 2, width:50, height:50, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "fan", isFan: true},
+                    },
+                    {
+                        name: "goal",
+                        position: {x:800, y:290},
+                        data: {mass: 3000, width: 200, height: 100, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
+                    }
+                ],
+                level2: [
+                    {
+                        name: "aBall",
+                        position: {x: 900, y: 50},
                         data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
                         motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0, isCollided: false}
                     },
                     {
                         name: "staticObject1",
-                        position: {x:500, y:200}, 
+                        position: {x:790, y:200}, 
                         data: {mass: 5, width:200, height:30, rotation: 10, type:"static", isMovable: true, isDragged: false, id: "barrier"},
                     },
-                    // {
-                    //     name: "staticObject2",
-                    //     position: {x:225, y:100}, 
-                    //     data: {mass: 600, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank1"},
-                    // },
-                    // {
-                    //     name: "staticObject3",
-                    //     position: {x:425, y:300}, 
-                    //     data: {mass: 800, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank2"},
-                    // },
-                    // {
-                    //     name: "goal",
-                    //     position: {x:800, y:290},
-                    //     data: {mass: 3000, width: 200, height: 100, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
-                    // }
+                    {
+                        name: "staticObject2",
+                        position: {x:225, y:100}, 
+                        data: {mass: 600, width:170, height:30, rotation: 45, type:"static", isMovable: true, isDragged: false, id: "plank1"},
+                    },
+                    {
+                        name: "staticObject3",
+                        position: {x:425, y:300}, 
+                        data: {mass: 800, width:170, height:30, rotation: 0, type:"static", isMovable: true, isDragged: false, id: "plank2"},
+                    },
+                    {
+                        name: "goal",
+                        position: {x:800, y:290},
+                        data: {mass: 3000, width: 200, height: 100, rotation: 0, type:"static", isMovable: false, id: "wheelbarrow"}
+                    }
                 ],
-                level2: [],
                 level3: [],
                 level4: [],
                 level5: [],
@@ -112,7 +154,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 level9: [],
                 level10: [],
             };
-
+            
             
         //Game variables
 
@@ -200,6 +242,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     playfieldContext.clearRect(0,0,playfieldWidth,playfieldHeight);
                     Object.keys(this.currentLevelObjects).forEach( (object) => {
                         this.currentLevelObjects[object].redrawCanvasObject()
+                        //this.currentLevelObjects[object].logMe()
                     });
                 }
 
@@ -258,6 +301,10 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.mass = object.data.mass
                 }
 
+                logMe = () => {
+                    console.log(this);
+                }
+
                 get rotationInRadians() {
                     return this.rotation * Math.PI/180;
                 }
@@ -269,11 +316,22 @@ document.addEventListener('DOMContentLoaded',function(){
                         //TODO: InnerRotation:
                         playfieldContext.save();
                         playfieldContext.translate(this.x,this.y)
-                        playfieldContext.rotate(innerRotation*Math.PI/180);
+                        playfieldContext.rotate(innerRotation*this.vx*Math.PI/180);
                         playfieldContext.drawImage(image,-this.r,-this.r,2*this.r,2*this.r)
                         //playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
                         playfieldContext.restore();
                         innerRotation += innerRotationChange;
+                        return;
+                    }
+                    if (this.isFan) {
+                        playfieldContext.save();
+                        playfieldContext.translate(this.x+this.width/2,this.y+this.height/2);
+                        playfieldContext.beginPath()
+                        playfieldContext.rotate(this.rotation * Math.PI/180);
+                        playfieldContext.drawImage(image,-this.width/2,-this.height/2,this.width,this.height) 
+                        playfieldContext.closePath()
+                        playfieldContext.restore();
+                        this.rotation += 5;
                         return;
                     }
                     if (this.rotation !== 0) {
@@ -321,6 +379,8 @@ document.addEventListener('DOMContentLoaded',function(){
                     this.rotation = object.data.rotation 
                     this.isMovable = object.data.isMovable
                     this.isDragged = object.data.isDragged
+                    this.isSpring = object.data.isSpring
+                    this.isFan = object.data.isFan
                     // this.isBeingRotated = object.data.isBeingRotated
                 }
 
@@ -415,10 +475,6 @@ document.addEventListener('DOMContentLoaded',function(){
                     //         //playfieldContext.restore();
                     //         prevyMove = yMove;
                 }
-
-                innerRotation = () => { //Only for fan objects!
-                    
-                }
             }
             
             class CanvasMovingObject extends CanvasObject {
@@ -487,22 +543,25 @@ document.addEventListener('DOMContentLoaded',function(){
                 wallCollisionCheck = () => {
                     // Left wall
                         if (this.x - this.r <= 200) {
-                            this.bouncer(0,0,1);
+                            this.x = 200 + this.r
+                            this.bouncer(0,0,1,false);
                         }
 
                     // Right wall
                         if (this.x + this.r >= 1000) {
-                            this.bouncer(0,2,1);
+                            this.x = 1000 - this.r
+                            this.bouncer(0,2,1,false);
                         }
 
                     // Ceiling
                         if (this.y - this.r <= 0) {
-                            this.bouncer(0,1,2);
+                            this.bouncer(0,1,2,false);
                         }
 
                     // Floor
                         if (this.y + this.r >= 400) {
-                            this.bouncer(0,1,0);
+                            this.y = 400 - this.r
+                            this.bouncer(0,1,0,false);
                         }
                 }
 
@@ -555,6 +614,13 @@ document.addEventListener('DOMContentLoaded',function(){
                             whereY = 1;
                         }
 
+                        let spring = false;
+                        if (colidee.isSpring) {
+                            spring = true;
+                        }
+
+                        
+
                         
  
                         // Determine collision
@@ -563,13 +629,17 @@ document.addEventListener('DOMContentLoaded',function(){
                         let distance = Math.sqrt( ( dX * dX ) + ( dY * dY ) );
                         
                         if ( distance < this.r ) {
-                            this.bouncer(colidee.rotation,whereX,whereY);
+                            if (colidee.isFan) {
+                                this.vx += 1;
+                                return;
+                            }
+                            this.bouncer(colidee.rotation,whereX,whereY,spring);
                             return true;
                         }
                     })
                 }
 
-                bouncer = (rotation,whereX,whereY) => {
+                bouncer = (rotation,whereX,whereY,spring) => {
                     let rotCos = Math.cos(rotation * Math.PI/180);
                     let rotSin = Math.sin(rotation * Math.PI/180);
 
@@ -594,13 +664,18 @@ document.addEventListener('DOMContentLoaded',function(){
                             [-1,-1]//22
                         ]
                     ]
+                    let springYModifier = 1;
+                    let springXModifier = 1;
+                    let fanModifier = 1;
 
-                    if (whereX === 1 && whereY === 0) {
-                        this.y -= this.r
+                    if (spring && whereX === 1 && whereY === 0) {
+                        springYModifier = 3;
+                        springXModifier = 1.2
                     }
 
-                    tempVX = tempVX * this.cr * bounceResolver[whereX][whereY][0];
-                    tempVY = tempVY * this.cr * bounceResolver[whereX][whereY][1];
+
+                    tempVX = tempVX * this.cr * bounceResolver[whereX][whereY][0] * springXModifier;
+                    tempVY = tempVY * this.cr * bounceResolver[whereX][whereY][1] * springYModifier;
 
                     this.vx = tempVX * rotCos - tempVY * rotSin; 
                     this.vy = tempVY * rotCos + tempVX * rotSin;

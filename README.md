@@ -5,18 +5,22 @@ Simple "The incredible machines"-like game made entirely in HTML (Canvas) with J
 
 Whole application is written by me, including physics engine (no external libraries used!)
 
-Project in moderate stage of development (v.0.9.5). 
+Project finished as in terms of basic functionalities. Still more development is needed. (v.1.0). 
 <br>
-<!-- <br>https://schkar.github.io/The_unbelievable_mechanisms/ -->
+<br>https://schkar.github.io/The_unbelievable_mechanisms/ 
 
-<br>There is only one playable "level" with basic functionalities. More to come:
+<br>There is only one playable "level" with main functionalities. More to come:
 <br>
 <ul>
     <li>rotated objects</li><strong>DONE</strong>
     <li>collisions with rotated objects</li><strong>DONE</strong>
     <li>better gravity</li><strong>DONE</strong>
     <li>mass and force</li><strong>DONE</strong>
-    <li>more object types</li>
+    <li>more object types</li><strong>DONE</strong>
+    <li>better interactions</li>
+    <li>bigger levels</li>
+    <li>inventory</li>
+    <li>actually playable levels instead of just a show-off </li>
 </ul>
 <h2>About the project</h2>
 Game visuals are written in HTML with a slight touch of SASS. 
@@ -32,11 +36,13 @@ JS is responsible, beside timer and button functions, for:
 </ul>
 
 <h2>Physics engine </h2>
-Physics engine was written by carefully reading and trying to apply many tutorials for physics in games development. 
+Physics engine was written by carefully reading and trying to apply many tutorials for physics in games development. Most of them didn't work for my case, which I have learned the hard way (after trying to implement them for a couple of days...)
 <strong>There is no external physics library used.</strong>
 <br> It was amazingly hard for a person without any physical or mathematical background, but, thanks to a couple of readings, I have finally got it working.
 
 Whole development needed a lot of work and, many times, a change of way of thinking, a change of assumptions and, finally, a change of the way how a whole programm is behaving (commits like: "Gravity works!" followed by "Gravity doesn't work" aren't rare).
+
+
 
 <!-- <h2>Credits</h2>
 

@@ -202,11 +202,11 @@ document.addEventListener('DOMContentLoaded', function () {
             data: { mass: 5, width: 200, height: 30, rotation: 10, type: "static", isMovable: true, isDragged: false, id: "barrier" }
         }, {
             name: "staticObject2",
-            position: { x: 660, y: 265 },
+            position: { x: 690, y: 295 },
             data: { mass: 600, width: 170, height: 30, rotation: 25, type: "static", isMovable: true, isDragged: false, id: "plank1" }
         }, {
             name: "staticObject3",
-            position: { x: 860, y: 190 },
+            position: { x: 830, y: 220 },
             data: { mass: 800, width: 220, height: 30, rotation: 170, type: "static", isMovable: true, isDragged: false, id: "plank2" }
         }, {
             name: "goal",
@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [//Y
             [1, 1], //00
             [-1, 1], //01
-            [1, 1] //02
+            [1.1, 1.1] //02
             ], [[1, -1], //10
             [-1, -1], //11
             [1, -1] //12

@@ -83,13 +83,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    //TODO: 
-    //Left-right-object collision
-    //Gravity!
-    //rotated collisions
-    //Inventory
-    //More objects
-
     console.log("DOM loaded. Script is working");
     // //No mobile function
     // let checkMobile = false;
@@ -263,14 +256,14 @@ document.addEventListener('DOMContentLoaded', function () {
     //Canvas functions
 
     playfield.addEventListener("mousedown", function (e) {
-        xClick = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2) * 10) / 10; //Formula for canvas click coords - works well
-        yClick = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2) * 10) / 10;
+        xClick = Math.round((e.clientX - playfield.getBoundingClientRect().left - 2) * 10) / 10; //Formula for canvas click coords - works well
+        yClick = Math.round((e.clientY - playfield.getBoundingClientRect().top - 2) * 10) / 10;
         currentLevel.moveObject(e);
     });
 
     playfield.addEventListener("mousemove", function (e) {
-        xMove = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2) * 10) / 10;
-        yMove = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2) * 10) / 10;
+        xMove = Math.round((e.clientX - playfield.getBoundingClientRect().left - 2) * 10) / 10;
+        yMove = Math.round((e.clientY - playfield.getBoundingClientRect().top - 2) * 10) / 10;
     });
 
     //Playfield objects classes
@@ -297,7 +290,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 var tempObject = new CanvasMovingObject(object);
                 tempObject.createCanvasObject();
                 tempObject.countInitialVectors();
-                //debugger
                 _this.currentLevelObjects[object.name] = tempObject;
             });
         };
@@ -306,7 +298,6 @@ document.addEventListener('DOMContentLoaded', function () {
             playfieldContext.clearRect(0, 0, playfieldWidth, playfieldHeight);
             Object.keys(_this.currentLevelObjects).forEach(function (object) {
                 _this.currentLevelObjects[object].redrawCanvasObject();
-                //this.currentLevelObjects[object].logMe()
             });
         };
 
@@ -373,12 +364,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 var image = document.getElementById(_this2.id);
                 if (_this2.r !== undefined) {
-                    //TODO: InnerRotation:
                     playfieldContext.save();
                     playfieldContext.translate(_this2.x, _this2.y);
                     playfieldContext.rotate(innerRotation * _this2.vx * Math.PI / 180);
                     playfieldContext.drawImage(image, -_this2.r, -_this2.r, 2 * _this2.r, 2 * _this2.r);
-                    //playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
                     playfieldContext.restore();
                     innerRotation += innerRotationChange;
                     return;
@@ -831,9 +820,40 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         resetConfirmScreen.style.display = "block";
     });
+    resetButton.addEventListener("touch", function (e) {
+        e.preventDefault();
+        resetConfirmScreen.style.display = "block";
+    });
 
     //Next Level Button functionality
     nextLevelButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        document.querySelector(".winScreen").style.opacity = 0;
+        levelNumber++;
+        if (levelNumber > 2) {
+            document.querySelector(".noMoreLevels").style.display = "block";
+            document.querySelector(".noMoreLevels").style.opacity = 1;
+            return;
+        }
+        setTimeout(function () {
+            document.querySelector(".winScreen").style.display = "none";
+
+            currentLevel = new Playfield(levelNumber);
+            currentLevel.createObjects(levelsInfo);
+        }, 1000);
+        setTimeout(function () {
+            document.querySelector(".level").innerText = "Level: " + levelNumber;
+            levelWon = false;
+            start = true;
+            seconds = 0;
+            minutes = 0;
+            hours = 0;
+            currentLevel.physicsEngineRun();
+            engineID = requestAnimationFrame(currentLevel.physicsEngineRun);
+        }, 1500);
+    });
+
+    nextLevelButton.addEventListener("touch", function (e) {
         e.preventDefault();
         document.querySelector(".winScreen").style.opacity = 0;
         levelNumber++;
@@ -901,6 +921,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     });
 
+    startLevelButton.addEventListener("touch", function (e) {
+        e.preventDefault();
+        welcomeScreen.style.opacity = 0;
+        setTimeout(function () {
+            welcomeScreen.classList.add("goodLuck");
+            welcomeScreen.innerText = "Good Luck!";
+            welcomeScreen.style.opacity = 1;
+        }, 700);
+        setTimeout(function () {
+            welcomeScreen.style.opacity = 0;
+            start = true;
+            currentLevel = new Playfield(levelNumber);
+            currentLevel.createObjects(levelsInfo);
+        }, 4000);
+        setTimeout(function () {
+            welcomeScreen.style.display = "none";
+            currentLevel.physicsEngineRun();
+            engineID = requestAnimationFrame(currentLevel.physicsEngineRun);
+        }, 5000);
+    });
+
     //Reset screen functionality
     resetConfirmButton.addEventListener("click", function (e) {
         e.preventDefault();
@@ -908,7 +949,18 @@ document.addEventListener('DOMContentLoaded', function () {
         currentLevel.resetCurrentLevel(currentLevel.currentLevelNumber);
     });
 
+    resetConfirmButton.addEventListener("touch", function (e) {
+        e.preventDefault();
+        resetConfirmScreen.style.display = "none";
+        currentLevel.resetCurrentLevel(currentLevel.currentLevelNumber);
+    });
+
     resetDeclineButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        resetConfirmScreen.style.display = "none";
+    });
+
+    resetDeclineButton.addEventListener("touch", function (e) {
         e.preventDefault();
         resetConfirmScreen.style.display = "none";
     });

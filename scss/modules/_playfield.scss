@@ -7,7 +7,7 @@
         text-align: center;
         left: 50%;
         transform: translate(-50%,0);
-        top: 20%;
+        top: 170px;
         width: 1000px;
         height: 600px;
         font-size: 2em;
@@ -15,7 +15,7 @@
         padding: 0;
         &.goodLuck{
             transition: opacity 1s;
-            padding-top: 150px;
+            padding-top: 120px;
             font-size: 4em;
             color: darkgreen;
         }
@@ -34,7 +34,7 @@
         text-align: center;
         left: 50%;
         transform: translate(-50%,0);
-        top: 16vh;
+        top: 160px;
         width: 1000px;
         height: 600px;
         font-size: 2em;
@@ -69,7 +69,7 @@
         text-align: center;
         left: 50%;
         transform: translate(-50%,0);
-        top: 10vh;
+        top: 100px;
         width: 1000px;
         height: 600px;
         font-size: 3em;

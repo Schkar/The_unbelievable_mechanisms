@@ -1,12 +1,5 @@
 document.addEventListener('DOMContentLoaded',function(){
 
-    //TODO: 
-    //Left-right-object collision
-    //Gravity!
-    //rotated collisions
-    //Inventory
-    //More objects
-
     console.log("DOM loaded. Script is working");
     // //No mobile function
     // let checkMobile = false;
@@ -197,14 +190,14 @@ document.addEventListener('DOMContentLoaded',function(){
         //Canvas functions
             
             playfield.addEventListener("mousedown",(e) => {
-                xClick = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2)*10)/10; //Formula for canvas click coords - works well
-                yClick = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
+                xClick = Math.round((e.clientX - playfield.getBoundingClientRect().left - 2)*10)/10; //Formula for canvas click coords - works well
+                yClick = Math.round((e.clientY - playfield.getBoundingClientRect().top - 2)*10)/10;
                 currentLevel.moveObject(e)
             })
 
             playfield.addEventListener("mousemove",(e) => {
-                xMove = Math.round((e.clientX - playfield.getBoundingClientRect().x - 2)*10)/10;
-                yMove = Math.round((e.clientY - playfield.getBoundingClientRect().y - 2)*10)/10;
+                xMove = Math.round((e.clientX - playfield.getBoundingClientRect().left - 2)*10)/10;
+                yMove = Math.round((e.clientY - playfield.getBoundingClientRect().top - 2)*10)/10;
             })
 
 
@@ -233,7 +226,6 @@ document.addEventListener('DOMContentLoaded',function(){
                         let tempObject = new CanvasMovingObject(object);
                         tempObject.createCanvasObject()
                         tempObject.countInitialVectors()
-                        //debugger
                         this.currentLevelObjects[object.name] = tempObject;
                     }); 
                 }
@@ -242,7 +234,6 @@ document.addEventListener('DOMContentLoaded',function(){
                     playfieldContext.clearRect(0,0,playfieldWidth,playfieldHeight);
                     Object.keys(this.currentLevelObjects).forEach( (object) => {
                         this.currentLevelObjects[object].redrawCanvasObject()
-                        //this.currentLevelObjects[object].logMe()
                     });
                 }
 
@@ -313,12 +304,10 @@ document.addEventListener('DOMContentLoaded',function(){
                     
                     let image = document.getElementById(this.id);
                     if (this.r !== undefined) {
-                        //TODO: InnerRotation:
                         playfieldContext.save();
                         playfieldContext.translate(this.x,this.y)
                         playfieldContext.rotate(innerRotation*this.vx*Math.PI/180);
                         playfieldContext.drawImage(image,-this.r,-this.r,2*this.r,2*this.r)
-                        //playfieldContext.drawImage(image,this.x-this.r,this.y-this.r,2*this.r,2*this.r)
                         playfieldContext.restore();
                         innerRotation += innerRotationChange;
                         return;
@@ -726,9 +715,40 @@ document.addEventListener('DOMContentLoaded',function(){
                 e.preventDefault();
                 resetConfirmScreen.style.display = "block";
             });
+            resetButton.addEventListener("touch", (e) => {
+                e.preventDefault();
+                resetConfirmScreen.style.display = "block";
+            });
 
         //Next Level Button functionality
             nextLevelButton.addEventListener("click", (e) => {
+                e.preventDefault();
+                document.querySelector(".winScreen").style.opacity = 0;
+                levelNumber++
+                if (levelNumber > 2) {
+                    document.querySelector(".noMoreLevels").style.display = "block";
+                    document.querySelector(".noMoreLevels").style.opacity = 1;
+                    return;
+                }
+                setTimeout(()=>{
+                    document.querySelector(".winScreen").style.display = "none";
+                    
+                    currentLevel = new Playfield(levelNumber)
+                    currentLevel.createObjects(levelsInfo)
+                },1000)
+                setTimeout(()=>{
+                    document.querySelector(".level").innerText = "Level: " + levelNumber;
+                    levelWon = false
+                    start = true;
+                    seconds = 0;
+                    minutes = 0;
+                    hours = 0;
+                    currentLevel.physicsEngineRun();
+                    engineID = requestAnimationFrame(currentLevel.physicsEngineRun)
+                },1500)
+            })
+
+            nextLevelButton.addEventListener("touch", (e) => {
                 e.preventDefault();
                 document.querySelector(".winScreen").style.opacity = 0;
                 levelNumber++
@@ -798,8 +818,36 @@ document.addEventListener('DOMContentLoaded',function(){
                
             })
 
+            startLevelButton.addEventListener("touch",(e) => {
+                e.preventDefault();
+                welcomeScreen.style.opacity = 0;
+                setTimeout(() => {
+                    welcomeScreen.classList.add("goodLuck");
+                    welcomeScreen.innerText = "Good Luck!"
+                    welcomeScreen.style.opacity = 1;
+                },700)
+                setTimeout(()=>{
+                    welcomeScreen.style.opacity = 0;
+                    start = true;
+                    currentLevel = new Playfield(levelNumber)
+                    currentLevel.createObjects(levelsInfo)
+                },4000)
+                setTimeout(()=>{
+                    welcomeScreen.style.display = "none";
+                    currentLevel.physicsEngineRun();
+                    engineID = requestAnimationFrame(currentLevel.physicsEngineRun)
+                },5000)
+               
+            })
+
         //Reset screen functionality
             resetConfirmButton.addEventListener("click",(e) => {
+                e.preventDefault();
+                resetConfirmScreen.style.display = "none";
+                currentLevel.resetCurrentLevel(currentLevel.currentLevelNumber)
+            });
+
+            resetConfirmButton.addEventListener("touch",(e) => {
                 e.preventDefault();
                 resetConfirmScreen.style.display = "none";
                 currentLevel.resetCurrentLevel(currentLevel.currentLevelNumber)
@@ -808,5 +856,10 @@ document.addEventListener('DOMContentLoaded',function(){
             resetDeclineButton.addEventListener("click",(e) => {
                 e.preventDefault();
                 resetConfirmScreen.style.display = "none";
-            });        
+            });
+            
+            resetDeclineButton.addEventListener("touch",(e) => {
+                e.preventDefault();
+                resetConfirmScreen.style.display = "none";
+            }); 
 });

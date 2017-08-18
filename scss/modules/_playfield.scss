@@ -92,7 +92,18 @@
         color: red;
     }
     .playfield{
-       background: white;
-       border: 2px solid black;
+        background: white;
+        border: 2px solid black;
     }
+    .playPauseButton{
+            display: none;
+            position: absolute;
+            top: 23%;
+            left: 24%;
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
 }

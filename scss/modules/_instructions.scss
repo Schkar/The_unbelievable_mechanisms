@@ -1,0 +1,29 @@
+.instructionsWrapper{
+    position: absolute;
+    background-color: white;
+    border: 2px solid black;
+    width: 200px;
+    height: 400px;
+    left: -205px;
+    transition: left 1s;
+    z-index: 1000;
+    &.open{
+        left: 0px;
+        transition: left 1s;
+    }
+    .instructionsTitle{
+        color: white;
+        background-color: blue;
+        padding: 10px 10px;
+        position: absolute;
+        top: 165px;
+        left: 137px;
+        transform: rotate(90deg);
+        letter-spacing: 4px;
+    }
+    .instructionsText{
+        color: blue;
+        font-size: 1.2em;
+        padding: 10px;
+    }
+}

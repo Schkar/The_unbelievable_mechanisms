@@ -39,10 +39,14 @@ document.addEventListener('DOMContentLoaded',function(){
             const startLevelButton = document.querySelector(".startLevelButton");
             const nextLevelButton = document.querySelector(".nextLevelButton");
             const playPauseButton = document.querySelector(".playPauseButton");
+        
+        //Instructions variable
+            const instructionsTitle = document.querySelector(".instructionsTitle");
+            const instructionsWrapper = document.querySelector(".instructionsWrapper");
 
         //Welcome screen variable
             
-            const welcomeScreen = document.querySelector(".welcomeTextWrapper")
+            const welcomeScreen = document.querySelector(".welcomeTextWrapper");
 
         //Reset screen variable
 
@@ -719,7 +723,12 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
             }
         
-    //Background functions    
+    //Background functions
+        //Instructions functionality
+            instructionsTitle.addEventListener("click",function(){
+                instructionsWrapper.classList.toggle("open");
+            });
+    
         //Reset button functionality
             resetButton.addEventListener("click", (e) => {
                 e.preventDefault();

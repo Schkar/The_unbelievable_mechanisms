@@ -123,6 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var nextLevelButton = document.querySelector(".nextLevelButton");
     var playPauseButton = document.querySelector(".playPauseButton");
 
+    //Instructions variable
+    var instructionsTitle = document.querySelector(".instructionsTitle");
+    var instructionsWrapper = document.querySelector(".instructionsWrapper");
+
     //Welcome screen variable
 
     var welcomeScreen = document.querySelector(".welcomeTextWrapper");
@@ -822,10 +826,15 @@ document.addEventListener('DOMContentLoaded', function () {
         return ItemInventory;
     }(CanvasStaticObject);
 
-    //Background functions    
+    //Background functions
+    //Instructions functionality
+
+
+    instructionsTitle.addEventListener("click", function () {
+        instructionsWrapper.classList.toggle("open");
+    });
+
     //Reset button functionality
-
-
     resetButton.addEventListener("click", function (e) {
         e.preventDefault();
         resetConfirmScreen.style.display = "block";

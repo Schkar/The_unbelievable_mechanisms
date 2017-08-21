@@ -98,12 +98,18 @@
     .playPauseButton{
             display: none;
             position: absolute;
-            top: 23%;
-            left: 24%;
+            top: 150px;
+            left: 20px;
             padding: 10px;
             width: 40px;
             height: 40px;
             background-size: contain;
             background-repeat: no-repeat;
-        }
+            @media (min-width: 1025px) {
+                left: 150px;
+            }
+            @media (min-width: 1600px) {
+                left: 25%;
+            }
+    }
 }

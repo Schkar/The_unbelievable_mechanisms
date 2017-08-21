@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 level1: [
                     {
                         name: "aBall",
-                        position: {x: 270, y: 50},
+                        position: {x: 250, ix: 250, y: 50, iy: 50},
                         data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
                         motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0, isStopped: true}
                     },
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 level2: [
                     {
                         name: "aBall",
-                        position: {x: 900, y: 20},
+                        position: {x: 900, ix: 900, y: 20, iy: 20},
                         data: {mass: 0.6 /*in kg*/, cr: 0.7, cd: 0.47, r: 15, type: "kinetic", id: "basketball"},
                         motion: {f: 0.2, fx: 0, fy: 0, vx: 0, vy: 0, direction: 0, isStopped: true}
                     },
@@ -290,7 +290,9 @@ document.addEventListener('DOMContentLoaded',function(){
                 constructor(object) {
                     this.object = object
                     this.x = object.position.x
+                    this.ix = object.position.ix
                     this.y = object.position.y
+                    this.iy = object.position.iy
                     this.type = object.data.type
                     this.name = object.name
                     this.id = object.data.id
@@ -309,18 +311,20 @@ document.addEventListener('DOMContentLoaded',function(){
                     
                     let image = document.getElementById(this.id);
                     if (this.r !== undefined) {
-                        // console.log(this.isStopped);
-                        // if (this.isStopped) {
-                        //     console.log(currentLevel.currentLevelObjects);
-                        //     //TODO: Change the way start button works - play needs to reset the ball, but leave the bars in place
-                        //     let currR = currentLevel.currentLevelObjects[this.name].r
-                        //     console.log(currR);
-                        //     playfieldContext.drawImage(image,-currR,-currR,2*currR,2*currR);
-                        //     return;
-                        // }
+                        if (this.isStopped) {
+                            playfieldContext.drawImage(image,this.ix,this.iy,2*this.r,2*this.r);
+                            this.x = this.ix;
+                            this.y = this.iy;
+                            this.vx = 0;
+                            this.vy = 0;
+                            this.fx = 0;
+                            this.fy = 0;
+                            return;
+                        }
                         playfieldContext.save();
                         playfieldContext.translate(this.x,this.y)
                         playfieldContext.rotate(innerRotation*this.vx*Math.PI/180);
+                        //TODO: Repair "moving" ball - its all about translation.
                         playfieldContext.drawImage(image,-this.r,-this.r,2*this.r,2*this.r)
                         playfieldContext.restore();
                         innerRotation += innerRotationChange;
@@ -508,6 +512,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         document.querySelector(".winScreen").style.opacity = 1;
                         playfieldContext.clearRect(0,0,playfieldWidth,playfieldHeight);
                         playPauseButton.style.display = "none";
+                        playPauseButton.setAttribute("src", "images/play.png");
                     }
                 }
 
@@ -764,7 +769,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     currentLevel.physicsEngineRun();
                     engineID = requestAnimationFrame(currentLevel.physicsEngineRun);
                     //TODO: Uncomment line below
-                    //playPauseButton.style.display = "block";
+                    playPauseButton.style.display = "block";
                 },1500)
             })
 
@@ -793,7 +798,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     currentLevel.physicsEngineRun();
                     engineID = requestAnimationFrame(currentLevel.physicsEngineRun);
                     //TODO: Uncomment line below
-                    //playPauseButton.style.display = "block";
+                    playPauseButton.style.display = "block";
                 },1500)
             })
         
@@ -837,7 +842,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     currentLevel.physicsEngineRun();
                     engineID = requestAnimationFrame(currentLevel.physicsEngineRun)
                     //TODO: Uncomment line below
-                    //playPauseButton.style.display = "block";
+                    playPauseButton.style.display = "block";
                 },5000)
                
             })
@@ -861,7 +866,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     currentLevel.physicsEngineRun();
                     engineID = requestAnimationFrame(currentLevel.physicsEngineRun)
                     //TODO: Uncomment line below
-                    //playPauseButton.style.display = "block";
+                    playPauseButton.style.display = "block";
                 },5000)
                
             })
@@ -892,12 +897,12 @@ document.addEventListener('DOMContentLoaded',function(){
 
         //Play-pause Button
             playPauseButton.addEventListener("click", function(){
-                if (this.getAttribute("src") === "images/play.png") {
-                    this.setAttribute("src", "images/pause.png");
+                if (this.getAttribute("src") === "images/pause.png") {
+                    this.setAttribute("src", "images/play.png");
                     currentLevel.currentLevelObjects["aBall"].isStopped = true;
                     return;
                 }
-                this.setAttribute("src", "images/play.png")
+                this.setAttribute("src", "images/pause.png")
                 currentLevel.currentLevelObjects["aBall"].isStopped = false;
             });
 });

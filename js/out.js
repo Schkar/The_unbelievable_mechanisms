@@ -370,13 +370,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 var image = document.getElementById(_this2.id);
                 if (_this2.r !== undefined) {
                     if (_this2.isStopped) {
-                        playfieldContext.drawImage(image, _this2.ix, _this2.iy, 2 * _this2.r, 2 * _this2.r);
+                        playfieldContext.drawImage(image, _this2.ix - _this2.r, _this2.iy - _this2.r, 2 * _this2.r, 2 * _this2.r);
                         _this2.x = _this2.ix;
                         _this2.y = _this2.iy;
-                        _this2.vx = 0;
-                        _this2.vy = 0;
-                        _this2.fx = 0;
-                        _this2.fy = 0;
+                        //this.vx = 0;
+                        //this.vy = 0;
+                        //this.fx = 0;
+                        //this.fy = 0;
                         return;
                     }
                     playfieldContext.save();

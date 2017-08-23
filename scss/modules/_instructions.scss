@@ -7,6 +7,7 @@
     left: -205px;
     transition: left 1s;
     z-index: 1000;
+    text-align: justify;
     &.open{
         left: 0px;
         transition: left 1s;

@@ -312,13 +312,13 @@ document.addEventListener('DOMContentLoaded',function(){
                     let image = document.getElementById(this.id);
                     if (this.r !== undefined) {
                         if (this.isStopped) {
-                            playfieldContext.drawImage(image,this.ix,this.iy,2*this.r,2*this.r);
+                            playfieldContext.drawImage(image,this.ix-this.r,this.iy-this.r,2*this.r,2*this.r);
                             this.x = this.ix;
                             this.y = this.iy;
-                            this.vx = 0;
-                            this.vy = 0;
-                            this.fx = 0;
-                            this.fy = 0;
+                            //this.vx = 0;
+                            //this.vy = 0;
+                            //this.fx = 0;
+                            //this.fy = 0;
                             return;
                         }
                         playfieldContext.save();

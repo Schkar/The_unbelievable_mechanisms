@@ -1,7 +1,7 @@
 <!-- # The-unbelievable-mechanisms -->
 <h1>The-unbelievable-mechanisms</h1>
 <h2>Final project for Coder's lab course.</h2><br>
-Simple "The incredible machines"-like game made entirely in HTML (Canvas) with JS and CSS (SASS) <br>
+Simple "The incredible machines"-like game made entirely in HTML (Canvas) with JS and CSS (SCSS) <br>
 
 Whole application is written by me, including physics engine (no external libraries used!)
 

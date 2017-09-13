@@ -23,7 +23,7 @@ Project finished as in terms of basic functionalities. Still more development is
     <li>actually playable levels instead of just a show-off </li>
 </ul>
 <h2>About the project</h2>
-Game visuals are written in HTML with a slight touch of SASS. 
+Game visuals are written in HTML with a slight touch of SCSS. 
 <br>
 The whole magic of bouncing, gravity, drawing is done in JavaScript. 
 <br>
